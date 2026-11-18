@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Build and validate the approved RESTAURATION-T5 complete audio master.
+"""Build and validate a RESTAURATION-T5 complete audio master.
 
-The existing T5 visual renderer remains silent and continues to pass its own
-21/21 QC. This post-process verifies the owner-approved Afrofire source and
-four voice-11 clips, builds a timed 30-second voice stem, ducks the music under
-speech, masters the mix, and muxes AAC while copying the H.264 video bitstream.
-The full Pixabay source is an ephemeral input and is never copied to outputs.
+The visual renderer remains silent and passes its own 21/21 QC. This
+post-process verifies the exact 30-second instrumental selected by the strict
+four-track RenderJob, binds its official-source provenance, mixes the four
+voice-11 clips, and muxes AAC while copying the H.264 video bitstream. Original
+full Pixabay tracks are never required, bundled, or copied to outputs.
 """
 from __future__ import annotations
 
@@ -238,7 +238,8 @@ def speech_metrics(
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--silent-video", type=Path, required=True)
-    parser.add_argument("--music-source", type=Path, required=True)
+    parser.add_argument("--render-job", type=Path, required=True)
+    parser.add_argument("--music-source", type=Path, required=True, help="Selected bundled 30-second instrumental")
     parser.add_argument(
         "--config", type=Path, default=ROOT / "config/T5_AUDIO_MIX_V1_0_0.json"
     )
@@ -246,11 +247,12 @@ def main() -> int:
     args = parser.parse_args()
 
     config = json.loads(args.config.read_text(encoding="utf-8"))
+    job = json.loads(args.render_job.read_text(encoding="utf-8"))
     require(config["template_id"] == "RESTAURATION-T5", "Unexpected template")
     require(config["duration_s"] == TOTAL_S, "T5 duration must remain 30 seconds")
     require(config["sample_rate_hz"] == SR, "T5 audio must remain 48 kHz")
     require(args.silent_video.is_file(), f"Missing silent visual: {args.silent_video}")
-    require(args.music_source.is_file(), f"Missing ephemeral music source: {args.music_source}")
+    require(args.music_source.is_file(), f"Missing selected music program: {args.music_source}")
 
     output_dir = args.output_dir
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -259,13 +261,24 @@ def main() -> int:
     report_path = output_dir / config["output"]["report_filename"]
     voice_stem_path = output_dir / "T5_VOICE_B_STEM_30S.wav"
 
+    audio_job = job["audio"]
+    selected_music = audio_job["music"]
     music_config = config["music"]
-    require(music_config["pixabay_id"] == 300338, "Final music must be Afrofire")
-    require(music_config["selection_choice"] == "4", "Final music must be choice 4")
-    require(music_config["owner_approved"] is True, "Music approval missing")
-    require(music_config["source_bundled"] is False, "Full music source must not be bundled")
-    require(sha256(args.music_source) == music_config["source_sha256"], "Afrofire SHA-256 mismatch")
-    require(args.music_source.stat().st_size == music_config["source_bytes"], "Afrofire byte size mismatch")
+    pack_path = ROOT / music_config["pack"]
+    pack = json.loads(pack_path.read_text(encoding="utf-8"))
+    pack_track = next((track for track in pack["tracks"] if track["id"] == selected_music["selected_music_id"]), None)
+    require(pack_track is not None, "Selected music ID is absent from the approved T5 pack")
+    require(audio_job["mode"] == "owner_approved_music_rotation_voice_b_complete", "Unexpected audio mode")
+    require(job["render"]["audio_mode"] == audio_job["mode"], "Render audio mode mismatch")
+    require(audio_job["contract_sha256"] == sha256(args.config), "Audio contract SHA-256 mismatch")
+    require(audio_job["music_pack_sha256"] == sha256(pack_path), "Music pack SHA-256 mismatch")
+    require(selected_music["file"] == pack_track["file"], "Selected music path diverges from pack")
+    require(selected_music["sha256"] == pack_track["sha256"], "Selected music hash diverges from pack")
+    require(selected_music["source_sha256"] == pack_track["source_sha256"], "Selected source provenance diverges from pack")
+    require(selected_music["contains_voice"] is False, "Selected program must be instrumental")
+    require(selected_music["full_source_bundled"] is False, "Full music sources must not be bundled")
+    require(sha256(args.music_source) == selected_music["sha256"], "Selected music program SHA-256 mismatch")
+    require(args.music_source.stat().st_size == selected_music["bytes"], "Selected music program byte size mismatch")
 
     voice_config = config["voice"]
     require(voice_config["voice_id"] == "voice-11", "Final voice must be voice-11")
@@ -332,26 +345,21 @@ def main() -> int:
         write_wav(voice_stem_path, voice_stem)
 
         music = decode(args.music_source, 2)
-        require(len(music) >= TOTAL_SAMPLES, "Afrofire source is shorter than 30 seconds")
-        music = music[:TOTAL_SAMPLES]
-        fade_in = int(round(float(music_config["fade_in_s"]) * SR))
-        fade_out = int(round(float(music_config["fade_out_s"]) * SR))
-        if fade_in:
-            music[:fade_in] *= np.linspace(0.0, 1.0, fade_in, endpoint=False)[:, None]
-        if fade_out:
-            music[-fade_out:] *= np.linspace(1.0, 0.0, fade_out, endpoint=True)[:, None]
-        music_trim = temp / "afrofire_first_30s_faded.wav"
-        music_program = temp / "afrofire_program_normalized.wav"
-        write_wav(music_trim, music, codec="pcm_f32le")
-        music_before, music_after = normalize(
-            music_trim,
-            music_program,
+        require(len(music) == TOTAL_SAMPLES, "Selected T5 instrumental must decode to exactly 30.000 seconds")
+        music_before = loudness(
+            args.music_source,
             float(music_config["program_target_lufs"]),
             float(music_config["program_true_peak_dbtp_max"]),
-            channels=2,
-            duration_s=TOTAL_S,
         )
-        music = exact_length(decode(music_program, 2), TOTAL_SAMPLES)
+        music_after = music_before
+        require(
+            abs(float(music_after["input_i"]) - float(pack_track["integrated_lufs"])) <= 0.15,
+            "Selected music loudness diverges from the approved pack measurement",
+        )
+        require(
+            float(music_after["input_tp"]) <= float(music_config["program_true_peak_dbtp_max"]),
+            "Selected music true peak exceeds the approved program ceiling",
+        )
 
         mix = config["mix_contract"]
         envelope = duck_envelope(
@@ -403,8 +411,8 @@ def main() -> int:
     gates = config["quality_gates"]
 
     checks = {
-        "music_choice_4_is_Afrofire": music_config["pixabay_id"] == 300338 and music_config["selection_choice"] == "4",
-        "official_music_source_integrity": sha256(args.music_source) == music_config["source_sha256"],
+        "selected_music_is_approved_pack_member": pack_track["id"] == selected_music["selected_music_id"],
+        "selected_music_program_integrity": sha256(args.music_source) == selected_music["sha256"],
         "full_music_source_not_in_output": not any(output_dir.glob("*.mp3")),
         "voice_B_is_voice_11": voice_config["voice_id"] == "voice-11" and voice_config["selected_option"] == "B_masculine",
         "four_voice_sources_verified": len(voice_reports) == 4,
@@ -435,7 +443,7 @@ def main() -> int:
         "schema_version": "1.0.0",
         "template_id": "RESTAURATION-T5",
         "status": status,
-        "purpose": "complete_owner_approved_Afrofire_plus_voice_B_render",
+        "purpose": "complete_owner_approved_strict_rotation_music_plus_voice_B_render",
         "rendered_on": "github_actions" if os.environ.get("GITHUB_ACTIONS") == "true" else "local_preflight",
         "github": {
             "repository": os.environ.get("GITHUB_REPOSITORY"),
@@ -446,17 +454,21 @@ def main() -> int:
         "contract": str(args.config),
         "approval": config["approval"],
         "music": {
-            "choice": music_config["selection_choice"],
-            "pixabay_id": music_config["pixabay_id"],
-            "title": music_config["title"],
-            "artist": music_config["artist"],
-            "official_page": music_config["official_page"],
-            "source_sha256": music_config["source_sha256"],
-            "source_bytes": music_config["source_bytes"],
-            "source_start_s": music_config["source_start_s"],
+            "selected_music_id": selected_music["selected_music_id"],
+            "choice": selected_music["selected_choice"],
+            "pixabay_id": selected_music["pixabay_id"],
+            "title": selected_music["title"],
+            "artist": selected_music["artist"],
+            "official_page": selected_music["source_page"],
+            "source_sha256": selected_music["source_sha256"],
+            "source_bytes": selected_music["source_bytes"],
+            "source_start_s": selected_music["source_start_s"],
+            "program_file": selected_music["file"],
+            "program_sha256": selected_music["sha256"],
+            "program_bytes": selected_music["bytes"],
             "full_source_bundled": False,
-            "program_normalization_before": music_before,
-            "program_normalization_after": music_after,
+            "program_measurement_before": music_before,
+            "program_measurement_after": music_after,
         },
         "voice": {
             "voice_id": voice_config["voice_id"],

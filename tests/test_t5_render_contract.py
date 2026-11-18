@@ -59,10 +59,11 @@ def test_demo_answers_build_the_checked_runtime_job() -> None:
     assert rebuilt["render"]["runtime_capture_manifest_required"] is True
     assert rebuilt["render"]["render_business_text"] is True
     assert rebuilt["render"]["production_render_plane"] == "github_actions"
-    assert rebuilt["render"]["audio_mode"] == "owner_approved_afrofire_voice_b_complete"
-    assert rebuilt["audio"]["music"]["selected_choice"] == "4"
+    assert rebuilt["render"]["audio_mode"] == "owner_approved_music_rotation_voice_b_complete"
+    assert rebuilt["audio"]["music"]["selected_music_id"] == "t5_music_300338"
+    assert rebuilt["audio"]["music"]["selected_choice"] == "1"
     assert rebuilt["audio"]["music"]["title"] == "Afrofire"
-    assert rebuilt["audio"]["music"]["source_bundled"] is False
+    assert rebuilt["audio"]["music"]["full_source_bundled"] is False
     assert rebuilt["audio"]["voice"]["selected_option"] == "B_masculine"
     assert rebuilt["audio"]["voice"]["voice_id"] == "voice-11"
     assert rebuilt["audio"]["state_update_policy"] == "after_completed_audio_qc_pass_only"

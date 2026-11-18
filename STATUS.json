@@ -1,65 +1,81 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.0",
   "template": "T5_FORMULE_COMBO_OFFRE",
-  "state": "VALIDATED_NOT_DEPLOYED",
-  "status_as_of": "2026-11-20T17:30:29Z",
+  "state": "LOCAL_ROTATION_VALIDATED_NOT_DEPLOYED",
+  "status_as_of": "2026-11-18",
   "repository": "vitrinevideo0-bot/vitrine-video-t5-formule-combo-offre",
   "branch": "main",
-  "validated_commit": "34886de7581bdd6ee1e959fd647338746b7097e6",
+  "validated_commit": null,
+  "validation_scope": "local_worktree_before_remote_commit",
   "architecture": {
     "control_plane": "cloudflare_worker_r2_to_github_actions",
     "render_plane": "github_actions",
     "render_job_audio_bound": true,
+    "music_selection": "strict_success_cycle",
+    "music_cycle": [
+      "t5_music_300338",
+      "t5_music_324016",
+      "t5_music_292156",
+      "t5_music_345669"
+    ],
+    "music_state_update": "after_completed_audio_qc_pass_only",
+    "failed_render_state_policy": "unchanged",
+    "idempotent_success_callback": true,
     "intermediate_result": "VISUAL_COMPLETED",
     "terminal_result": "COMPLETED",
     "terminal_profile": "T5_GITHUB_ACTIONS_COMPLETE_V1",
-    "output": "30s portrait MP4 with complete owner-approved audio"
+    "output": "30s portrait MP4 with selected owner-approved instrumental and voice B",
+    "explicit_selection_policy": "exact_successor_only",
+    "idempotency_ledger_key": "successful_render_jobs",
+    "old_success_replay_after_full_cycle": "idempotent_without_mutation"
   },
   "audio": {
-    "music_id": "afrofire-300338",
-    "music_title": "Afrofire",
-    "music_artist": "DPStudioMusic",
-    "music_source_sha256": "24e9606e14e4708e8c8ffa3a6a97429dbfc95049d388481392d72b971e932c61",
+    "music_pack": "config/T5_MUSIC_PACK_V1_0_0.json",
+    "music_pack_sha256": "428d5826e96a87bcddb1d585104968a1aa5ee29483ac00da60c50f85747a6c54",
+    "music_program_sha256": {
+      "t5_music_300338": "41ab3ce4be5a50d7ce451f7ada9b74dbe53d176a7822ad8d6d61573d9ecd1fd4",
+      "t5_music_324016": "c4b0aef58e38e6fc69bf5a558df83355365d805bfaaf291ed1bb0aea108f023a",
+      "t5_music_292156": "565aca293ea38c330e1dbc27cbb7524cddf339eaf5299af92755be9e63668949",
+      "t5_music_345669": "b458c78386617c0527250e850ec648999ea25b8ed6ddb43bb01ce8ccb70c8348"
+    },
     "voice_id": "voice-11",
     "voice_option": "B_masculine",
-    "contract_sha256": "ac1a5f7fe4da4d9f31156b3be2ec62c122bb3ab6f7055d943416f3537b629294",
+    "contract": "config/T5_AUDIO_MIX_V1_0_0.json",
+    "contract_sha256": "c648217196738c35d5833b9a0eefa0f99fb6eba71808deb06aa6e87453c802ea",
     "voice_manifest_sha256": "a69b3fc92897e9270817c07d5d639a63a661fe5c691820779cdd96f299a88914"
   },
   "validation": {
     "local_tests": {
-      "passed": 48,
+      "passed": 59,
       "failed": 0
     },
-    "main_ci": {
-      "run_id": 44783481812,
-      "conclusion": "success",
-      "url": "https://github.com/vitrinevideo0-bot/vitrine-video-t5-formule-combo-offre/actions/runs/44783481812"
+    "typescript": "PASS",
+    "wrangler_dry_build": "PASS_WITH_NODE_24",
+    "cloudflare_control_plane_integration": {
+      "status": "PASS",
+      "observed_success_cycle": [
+        "t5_music_300338",
+        "t5_music_324016",
+        "t5_music_292156",
+        "t5_music_345669",
+        "t5_music_300338"
+      ],
+      "failed_render_did_not_mutate_state": true,
+      "out_of_cycle_explicit_selection_rejected": true,
+      "success_replay_idempotent": true,
+      "old_success_replay_after_full_cycle": true
     },
-    "cloudflare_control_plane_ci": {
-      "run_id": 44783482195,
-      "conclusion": "success",
-      "deployment_job": "skipped",
-      "url": "https://github.com/vitrinevideo0-bot/vitrine-video-t5-formule-combo-offre/actions/runs/44783482195"
+    "visual_render": "21/21 PASS",
+    "audio_render_by_music_id": {
+      "t5_music_300338": "26/26 PASS",
+      "t5_music_324016": "26/26 PASS",
+      "t5_music_292156": "26/26 PASS",
+      "t5_music_345669": "26/26 PASS"
     },
-    "complete_render": {
-      "run_id": 44783491714,
-      "conclusion": "success",
-      "job_id": "t5-runtime-github-44783491714-1",
-      "visual_qc": "21/21 PASS",
-      "audio_qc": "26/26 PASS",
-      "url": "https://github.com/vitrinevideo0-bot/vitrine-video-t5-formule-combo-offre/actions/runs/44783491714"
-    }
-  },
-  "release_candidate": {
-    "tag": "t5-full-frame-v3-candidate-10",
-    "prerelease": true,
-    "asset_count": 28,
-    "checksums_verified": true,
-    "url": "https://github.com/vitrinevideo0-bot/vitrine-video-t5-formule-combo-offre/releases/tag/t5-full-frame-v3-candidate-10",
-    "video": {
-      "file": "VIDEO_T5_FORMULE_PLEIN_ECRAN_V3_A_VALIDER.mp4",
-      "sha256": "9cc8b63cea41d221ceb2bfb02ca959400b53244609e04c585d57d218b3785425",
-      "bytes": 11828634,
+    "first_rotation_render": {
+      "music_id": "t5_music_300338",
+      "video_sha256": "d65d821e24c2363c7acd24451f380f10d539d2aec901a283c72979064c740adb",
+      "bytes": 11837226,
       "duration_s": 30.0,
       "width": 720,
       "height": 1280,
@@ -67,15 +83,18 @@
       "video_codec": "h264",
       "audio_codec": "aac",
       "audio_sample_rate_hz": 48000,
-      "audio_channels": 2,
-      "integrated_lufs": -16.13,
-      "true_peak_dbtp": -1.89
+      "audio_channels": 2
     }
+  },
+  "historical_fixed_music_baseline": {
+    "commit": "34886de7581bdd6ee1e959fd647338746b7097e6",
+    "release": "t5-full-frame-v3-candidate-10",
+    "status": "superseded_for_music_selection_only"
   },
   "deployment": {
     "cloudflare_production_deployed": false,
-    "reason": "No production deployment job was authorized; validation and Wrangler dry-build only.",
-    "next_gate": "Provide or authorize production Cloudflare credentials/secrets, then run the manual deploy workflow."
+    "reason": "No production deployment was authorized; validation and Wrangler dry-build only.",
+    "next_gate": "Commit and push the rotation, pass remote CI, then authorize production deployment with the required secrets."
   },
   "known_scope_limit": "The approved voice clips are fixed to the Burger Atelier Kandi demonstration copy; dynamic speech synthesis for arbitrary merchant answers is not implemented."
 }

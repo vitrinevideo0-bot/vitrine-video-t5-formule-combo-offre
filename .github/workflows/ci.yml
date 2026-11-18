@@ -44,6 +44,7 @@ jobs:
           python -m compileall -q adapter engine tools audio/scripts tests
           pytest -q
           (cd audio/voice/t5-voice-v1 && sha256sum --check --strict SHA256SUMS.txt)
+          (cd audio/music/t5-afrobeat-v1 && sha256sum --check --strict SHA256SUMS.txt)
 
       - name: Prouver le RenderJob formulaire → quatre captures
         run: |

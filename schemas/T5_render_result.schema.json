@@ -149,7 +149,13 @@
         "audio_contract_sha256": {
           "$ref": "#/$defs/sha256"
         },
+        "music_pack_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
         "music_source_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "music_program_sha256": {
           "$ref": "#/$defs/sha256"
         },
         "voice_manifest_sha256": {
@@ -250,39 +256,166 @@
       ],
       "properties": {
         "mode": {
-          "const": "owner_approved_afrofire_voice_b_complete"
+          "const": "owner_approved_music_rotation_voice_b_complete"
         },
         "music": {
           "type": "object",
           "additionalProperties": false,
           "required": [
+            "selected_music_id",
             "selected_choice",
             "pixabay_id",
             "title",
             "artist",
+            "program_sha256",
             "source_sha256",
-            "source_bundled"
+            "full_source_bundled"
           ],
           "properties": {
+            "selected_music_id": {
+              "enum": [
+                "t5_music_300338",
+                "t5_music_324016",
+                "t5_music_292156",
+                "t5_music_345669"
+              ]
+            },
             "selected_choice": {
-              "const": "4"
+              "enum": [
+                "1",
+                "2",
+                "3",
+                "4"
+              ]
             },
             "pixabay_id": {
-              "const": 300338
+              "enum": [
+                300338,
+                324016,
+                292156,
+                345669
+              ]
             },
             "title": {
-              "const": "Afrofire"
+              "type": "string",
+              "minLength": 1
             },
             "artist": {
-              "const": "DPStudioMusic"
+              "type": "string",
+              "minLength": 1
+            },
+            "program_sha256": {
+              "$ref": "#/$defs/sha256"
             },
             "source_sha256": {
               "$ref": "#/$defs/sha256"
             },
-            "source_bundled": {
+            "full_source_bundled": {
               "const": false
             }
-          }
+          },
+          "oneOf": [
+            {
+              "properties": {
+                "selected_music_id": {
+                  "const": "t5_music_300338"
+                },
+                "selected_choice": {
+                  "const": "1"
+                },
+                "pixabay_id": {
+                  "const": 300338
+                },
+                "title": {
+                  "const": "Afrofire"
+                },
+                "artist": {
+                  "const": "DPStudioMusic"
+                },
+                "program_sha256": {
+                  "const": "41ab3ce4be5a50d7ce451f7ada9b74dbe53d176a7822ad8d6d61573d9ecd1fd4"
+                },
+                "source_sha256": {
+                  "const": "24e9606e14e4708e8c8ffa3a6a97429dbfc95049d388481392d72b971e932c61"
+                }
+              }
+            },
+            {
+              "properties": {
+                "selected_music_id": {
+                  "const": "t5_music_324016"
+                },
+                "selected_choice": {
+                  "const": "2"
+                },
+                "pixabay_id": {
+                  "const": 324016
+                },
+                "title": {
+                  "const": "Afro 10"
+                },
+                "artist": {
+                  "const": "DasDrum"
+                },
+                "program_sha256": {
+                  "const": "c4b0aef58e38e6fc69bf5a558df83355365d805bfaaf291ed1bb0aea108f023a"
+                },
+                "source_sha256": {
+                  "const": "bef6c0a83ea63e3b24d86ea8576030b8b6e5a57d2d619dcdabd900ad1922ba78"
+                }
+              }
+            },
+            {
+              "properties": {
+                "selected_music_id": {
+                  "const": "t5_music_292156"
+                },
+                "selected_choice": {
+                  "const": "3"
+                },
+                "pixabay_id": {
+                  "const": 292156
+                },
+                "title": {
+                  "const": "Afro Trap x Football x Sport (Snitch)"
+                },
+                "artist": {
+                  "const": "47643651"
+                },
+                "program_sha256": {
+                  "const": "565aca293ea38c330e1dbc27cbb7524cddf339eaf5299af92755be9e63668949"
+                },
+                "source_sha256": {
+                  "const": "7145b1d50e1f7cdfea30eceef4b3706823c48f041fcc4040ee0913173f63ca10"
+                }
+              }
+            },
+            {
+              "properties": {
+                "selected_music_id": {
+                  "const": "t5_music_345669"
+                },
+                "selected_choice": {
+                  "const": "4"
+                },
+                "pixabay_id": {
+                  "const": 345669
+                },
+                "title": {
+                  "const": "Dance Fever Dreams — Afrobeats"
+                },
+                "artist": {
+                  "const": "musicofthefuture_MOF"
+                },
+                "program_sha256": {
+                  "const": "b458c78386617c0527250e850ec648999ea25b8ed6ddb43bb01ce8ccb70c8348"
+                },
+                "source_sha256": {
+                  "const": "8f53bae5fa7d04ad113a7af772eb45a31c5074dc7612f826d97ea9aea690c80a"
+                }
+              }
+            }
+          ]
         },
         "voice": {
           "type": "object",
@@ -535,7 +668,9 @@
               "runtime_manifest_sha256",
               "resolved_text_sha256",
               "audio_contract_sha256",
+              "music_pack_sha256",
               "music_source_sha256",
+              "music_program_sha256",
               "voice_manifest_sha256",
               "voice_clip_source_sha256"
             ]

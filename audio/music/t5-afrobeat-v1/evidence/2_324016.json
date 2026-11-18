@@ -1,0 +1,20 @@
+{
+  "id": "t5_music_324016",
+  "choice": "2",
+  "pixabay_id": 324016,
+  "title": "Afro 10",
+  "artist": "DasDrum",
+  "source_sha256": "bef6c0a83ea63e3b24d86ea8576030b8b6e5a57d2d619dcdabd900ad1922ba78",
+  "source_bytes": 7680768,
+  "source_duration_s": 240.024,
+  "source_start_s": 0.0,
+  "source_page_checked_on": "2026-11-18",
+  "content_id_status": "not_displayed_on_source_page",
+  "ai_generated_badge": "displayed",
+  "owner_approved": true,
+  "production_eligible": true,
+  "schema_version": "1.0.0",
+  "official_page": "https://pixabay.com/music/afrobeat-afro-10-324016/",
+  "official_content_url": "https://cdn.pixabay.com/download/audio/2025/04/07/audio_d9e6d8ba72.mp3?filename=dasdrum-afro-10-324016.mp3",
+  "license": "https://pixabay.com/service/license-summary/"
+}

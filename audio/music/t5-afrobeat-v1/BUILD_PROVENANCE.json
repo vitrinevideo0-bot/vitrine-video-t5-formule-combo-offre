@@ -1,0 +1,63 @@
+{
+  "schema_version": "1.0.0",
+  "template_id": "RESTAURATION-T5",
+  "generated_on": "2026-11-18",
+  "status": "PASS",
+  "track_count": 4,
+  "source_full_tracks_committed": false,
+  "voice_or_audition_audio_in_derivatives": false,
+  "derivatives": [
+    {
+      "id": "t5_music_300338",
+      "pixabay_id": 300338,
+      "file": "audio/music/t5-afrobeat-v1/t5_300338_afrofire_30s.mp3",
+      "sha256": "41ab3ce4be5a50d7ce451f7ada9b74dbe53d176a7822ad8d6d61573d9ecd1fd4",
+      "bytes": 721196,
+      "decoded_duration_s": 30.0,
+      "integrated_lufs": -17.27,
+      "true_peak_dbtp": -4.81,
+      "contains_voice": false,
+      "status": "PASS"
+    },
+    {
+      "id": "t5_music_324016",
+      "pixabay_id": 324016,
+      "file": "audio/music/t5-afrobeat-v1/t5_324016_afro_10_30s.mp3",
+      "sha256": "c4b0aef58e38e6fc69bf5a558df83355365d805bfaaf291ed1bb0aea108f023a",
+      "bytes": 721196,
+      "decoded_duration_s": 30.0,
+      "integrated_lufs": -17.24,
+      "true_peak_dbtp": -2.93,
+      "contains_voice": false,
+      "status": "PASS"
+    },
+    {
+      "id": "t5_music_292156",
+      "pixabay_id": 292156,
+      "file": "audio/music/t5-afrobeat-v1/t5_292156_snitch_30s.mp3",
+      "sha256": "565aca293ea38c330e1dbc27cbb7524cddf339eaf5299af92755be9e63668949",
+      "bytes": 721196,
+      "decoded_duration_s": 30.0,
+      "integrated_lufs": -16.98,
+      "true_peak_dbtp": -2.23,
+      "contains_voice": false,
+      "status": "PASS"
+    },
+    {
+      "id": "t5_music_345669",
+      "pixabay_id": 345669,
+      "file": "audio/music/t5-afrobeat-v1/t5_345669_dance_fever_dreams_30s.mp3",
+      "sha256": "b458c78386617c0527250e850ec648999ea25b8ed6ddb43bb01ce8ccb70c8348",
+      "bytes": 721196,
+      "decoded_duration_s": 30.0,
+      "integrated_lufs": -17.05,
+      "true_peak_dbtp": -2.67,
+      "contains_voice": false,
+      "status": "PASS"
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0
+  }
+}

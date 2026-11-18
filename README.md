@@ -31,21 +31,29 @@ Le moteur V3 remplace entièrement l’ancien montage à cartes :
 
 Le contrat complet est `montage/T5_MONTAGE_COMPLET_V3_0_0.json`. Les liaisons exécutables sont dans `config/T5_RUNTIME_CONTRACT_V3_0_0.json` et la mise en forme stable active est pilotée par `config/T5_TEXT_MOTION_V4_0_0.json`.
 
-## Audio approuvé : Afrofire + voix B
+## Audio approuvé : rotation stricte de quatre instrumentales + voix B
 
-Après validation séparée de la musique puis de la voix, la livraison complète utilise :
+La livraison complète sélectionne exactement une instrumentale selon le cycle immuable suivant :
 
-- **4 — Afrofire / DPStudioMusic**, Pixabay ID `300338`, depuis le début du morceau ;
+| Tour | ID T5 | Pixabay | Titre — artiste |
+|---:|---|---:|---|
+| 1 | `t5_music_300338` | `300338` | Afrofire — DPStudioMusic |
+| 2 | `t5_music_324016` | `324016` | Afro 10 — DasDrum |
+| 3 | `t5_music_292156` | `292156` | Afro Trap x Football x Sport (Snitch) — 47643651 |
+| 4 | `t5_music_345669` | `345669` | Dance Fever Dreams — Afrobeats — musicofthefuture_MOF |
+
+L’état initial choisit la piste 1. Après un rendu `COMPLETED` dont le QC audio est `PASS`, l’état avance vers son successeur exact : **1→2→3→4→1**. Un échec ne modifie jamais l’état ; un choix explicite ne peut que confirmer le successeur attendu et ne peut ni sauter ni répéter une piste. Le registre durable `successful_render_jobs` conserve chaque succès : le rejeu de tout ancien callback reste idempotent, même après un tour complet.
+
+Les quatre dérivés instrumentaux locaux font exactement 30,000 s décodées, 48 kHz, stéréo, 192 kb/s, ne contiennent aucune voix et sont verrouillés par SHA‑256 dans `config/T5_MUSIC_PACK_V1_0_0.json`. Les sources Pixabay intégrales ne sont ni embarquées ni publiées. La chaîne utilise également :
+
 - **B — voix française masculine `voice-11`**, répartie sur les quatre scènes ;
 - ducking de la musique à **−3 dB hors parole et −10 dB sous parole**, avec attaque 120 ms et relâchement 450 ms ;
 - master cible **−16 LUFS / −2 dBTP** ;
 - livraison AAC stéréo 48 kHz à 192 kb/s.
 
-Le fichier musical Pixabay intégral n’est jamais versionné ni publié. GitHub Actions le télécharge temporairement depuis l’URL officielle, vérifie son SHA‑256, construit le mix, puis le supprime avec le répertoire de travail. La Release ne contient que l’œuvre complète et son master voix + musique.
+Le contrat de rotation est `config/T5_MUSIC_PACK_V1_0_0.json`, le contrat de mix est `config/T5_AUDIO_MIX_V1_0_0.json` et l’approbation est `approvals/APPROBATION_MUSIQUE_ET_VOIX_T5_2026-11-18.json`.
 
-Le contrat reproductible est `config/T5_AUDIO_MIX_V1_0_0.json`; l’approbation propriétaire est `approvals/APPROBATION_MUSIQUE_ET_VOIX_T5_2026-11-18.json`.
-
-Le RenderJob transporte désormais ce contrat complet : empreinte du contrat, identité et SHA‑256 d’Afrofire, manifeste et quatre empreintes de la voix `voice-11`, paramètres de mix et politique de commit. Le Worker refuse un callback `COMPLETED` qui n’atteste pas à la fois le QC visuel, le QC audio, le MP4 vérifié dans R2 et ces mêmes sources. L’état audio R2 n’est incrémenté qu’après ce callback complet et son rejeu reste idempotent.
+Le RenderJob transporte le choix exact, le dérivé local et son SHA‑256, la provenance de la source officielle, les empreintes des deux contrats, le manifeste et les quatre empreintes de la voix `voice-11`. Le Worker refuse un callback `COMPLETED` qui n’atteste pas le même choix, le QC visuel, le QC audio et le MP4 vérifié dans R2. L’état musical R2 n’est commité qu’après toutes ces preuves.
 
 ```text
 formulaire Cloudflare : 6 réponses + 12 écrans de capture
@@ -62,9 +70,9 @@ engine/render_runtime.py : plein cadre + sous-titres Playfair centrés et stable
         ↓
 MP4 visuel silencieux + QC 21/21 + résultat intermédiaire VISUAL_COMPLETED
         ↓
-téléchargement éphémère et contrôle SHA-256 d’Afrofire
+sélection du successeur strict et contrôle SHA-256 de son instrumental local de 30 s
         ↓
-audio/scripts/build_t5_complete_audio.py : voix B + ducking + mastering + mux bit-exact vidéo
+audio/scripts/build_t5_complete_audio.py : instrumentale sélectionnée + voix B + ducking + mastering + mux bit-exact vidéo
         ↓
 tools/finalize_t5_render_result.py : liaison des preuves audio et visuelles
         ↓
@@ -99,7 +107,7 @@ Les URL, dimensions, durées, tailles et SHA‑256 sont dans `rushes/manifest.js
 
 ## État vérifié
 
-La référence courante est le commit `34886de7581bdd6ee1e959fd647338746b7097e6` et la pré‑Release `t5-full-frame-v3-candidate-10` : CI principale, plan de contrôle Cloudflare et rendu complet réussis, QC visuel **21/21**, QC audio/vidéo **26/26**. Le MP4 complet a le SHA‑256 `9cc8b63cea41d221ceb2bfb02ca959400b53244609e04c585d57d218b3785425`. Le Worker Cloudflare de production n’a pas été déployé. Voir `STATUS.json`, `docs/T5_COMPLETE_AUDIO_AND_CONTROL_PLANE.md` et `reports/T5_FINAL_AUDIT_2026-11-20.md`.
+La rotation stricte est validée localement par **59 tests**, le type-check TypeScript, le dry-build Wrangler, un test boîte noire Cloudflare du cycle **1→2→3→4→1** avec rejeu de l’ancien succès après un tour complet, un rendu visuel **21/21 PASS** et quatre mixages audio **26/26 PASS**. Le premier rendu de la nouvelle rotation utilise `t5_music_300338`; son MP4 local a le SHA‑256 `d65d821e24c2363c7acd24451f380f10d539d2aec901a283c72979064c740adb`. Le Worker Cloudflare de production n’est pas déployé. La pré‑Release `t5-full-frame-v3-candidate-10` et son commit restent la baseline historique antérieure à la rotation.
 
 ## Fichiers principaux
 
@@ -107,9 +115,12 @@ La référence courante est le commit `34886de7581bdd6ee1e959fd647338746b7097e6`
 - `capture-guide/consignes_T5.json` — les instructions des quatre captures ;
 - `config/T5_CAPTURE_FLOW_V1_0_0.json` — les douze écrans A/B/C ;
 - `config/T5_TEXT_MOTION_V4_0_0.json` — baseline uniforme, centrage, deux lignes maximum et apparition en bloc ;
-- `config/T5_AUDIO_MIX_V1_0_0.json` — Afrofire, voix B, placements, ducking, mastering et contrôles ;
+- `config/T5_MUSIC_PACK_V1_0_0.json` — quatre instrumentales, ordre strict, provenance, droits et verrous ;
+- `config/T5_AUDIO_MIX_V1_0_0.json` — voix B, placements, ducking, mastering et contrôles communs ;
+- `audio/music/t5-afrobeat-v1/` — quatre dérivés propres de 30 s, preuves, provenance et checksums ;
 - `audio/voice/t5-voice-v1/` — quatre clips source `voice-11` approuvés et verrouillés par SHA‑256 ;
 - `audio/scripts/build_t5_complete_audio.py` — construction et validation du master complet ;
+- `schemas/T5_music_pack.schema.json` et `schemas/T5_music_selection_state.schema.json` — schémas stricts du pack et de l’état persistant ;
 - `schemas/T5_audio_mix.schema.json` — schéma strict du contrat audio ;
 - `assets/fonts/playfair-display/` — police Playfair Display variable embarquée, métadonnées et licence OFL‑1.1 ;
 - `montage/T5_MONTAGE_COMPLET_V3_0_0.json` — JSON complet de montage ;
@@ -121,7 +132,7 @@ La référence courante est le commit `34886de7581bdd6ee1e959fd647338746b7097e6`
 - `engine/render_runtime.py` — rendu des 900 images ;
 - `tools/validate_runtime_render.py` — QC visuel et résultat intermédiaire non terminal ;
 - `tools/finalize_t5_render_result.py` — RenderResult final lié au QC 21/21, au mix 26/26 et aux sources audio approuvées ;
-- `cloudflare/` — formulaire, captures, R2, contrat audio, dispatch GitHub, stockage de sortie, état audio transactionnel et callbacks ;
+- `cloudflare/` — formulaire, captures, R2, contrats audio/musique, sélection stricte, stockage de sortie, état musical transactionnel et callbacks ;
 - `.github/workflows/render-runtime.yml` — rendu serveur reproductible ;
 - `.github/workflows/cloudflare-control-plane.yml` — validation systématique et déploiement Cloudflare conditionnel sur secrets de production ;
 - `simulation/T5_12_ECRANS_EXECUTABLE.html` — simulation du parcours, jamais une livraison vidéo.
@@ -155,13 +166,11 @@ python tools/validate_runtime_render.py \
   --result output/runtime/t5-runtime-demo-0001/T5_VISUAL_RENDER_RESULT.json
 mv output/runtime/t5-runtime-demo-0001/VIDEO_T5_FORMULE_PLEIN_ECRAN_V3_A_VALIDER.mp4 \
   output/runtime/t5-runtime-demo-0001/T5_VISUEL_SILENCIEUX_QC_21_21.mp4
-curl --fail --location \
-  https://cdn.pixabay.com/audio/2025/02/12/audio_bf52f1c5ad.mp3 \
-  --output /tmp/afrofire-source.mp3
-echo '24e9606e14e4708e8c8ffa3a6a97429dbfc95049d388481392d72b971e932c61  /tmp/afrofire-source.mp3' | sha256sum --check --strict
+(cd audio/music/t5-afrobeat-v1 && sha256sum --check --strict SHA256SUMS.txt)
 python audio/scripts/build_t5_complete_audio.py \
   --silent-video output/runtime/t5-runtime-demo-0001/T5_VISUEL_SILENCIEUX_QC_21_21.mp4 \
-  --music-source /tmp/afrofire-source.mp3 \
+  --render-job demo/render_job_runtime_demo.json \
+  --music-source audio/music/t5-afrobeat-v1/t5_300338_afrofire_30s.mp3 \
   --config config/T5_AUDIO_MIX_V1_0_0.json \
   --output-dir output/runtime/t5-runtime-demo-0001
 python tools/finalize_t5_render_result.py \
@@ -171,11 +180,10 @@ python tools/finalize_t5_render_result.py \
   --audio-report output/runtime/t5-runtime-demo-0001/T5_COMPLETE_AUDIO_RENDER_REPORT.json \
   --video output/runtime/t5-runtime-demo-0001/VIDEO_T5_FORMULE_PLEIN_ECRAN_V3_A_VALIDER.mp4 \
   --output output/runtime/t5-runtime-demo-0001/T5_RENDER_RESULT.json
-rm /tmp/afrofire-source.mp3
 pytest -q
 ```
 
-Sortie visuelle intermédiaire : **30,000 s**, 720 × 1280, 30 i/s, 900 images, H.264/yuv420p, aucune piste audio et QC **21/21**. Sortie finale : le même flux vidéo copié bit pour bit, avec une piste AAC stéréo 48 kHz, Afrofire, voix B, master proche de −16 LUFS / −2 dBTP et contrôles audio/vidéo complets.
+Sortie visuelle intermédiaire : **30,000 s**, 720 × 1280, 30 i/s, 900 images, H.264/yuv420p, aucune piste audio et QC **21/21**. Sortie finale : le même flux vidéo copié bit pour bit, avec une piste AAC stéréo 48 kHz, l’instrumentale sélectionnée par le cycle, la voix B, un master proche de −16 LUFS / −2 dBTP et **26/26** contrôles audio/vidéo.
 
 ## Archives rejetées
 

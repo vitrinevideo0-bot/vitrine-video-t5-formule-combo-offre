@@ -32,16 +32,28 @@ def test_audio_contract_validates_strictly() -> None:
     ).validate(load())
 
 
-def test_owner_selected_afrofire_and_voice_b() -> None:
+def test_owner_approved_four_track_rotation_and_voice_b() -> None:
     config = load()
     music = config["music"]
+    pack = json.loads((ROOT / music["pack"]).read_text(encoding="utf-8"))
     voice = config["voice"]
-    assert music["selection_choice"] == "4"
-    assert music["pixabay_id"] == 300338
-    assert music["title"] == "Afrofire"
-    assert music["owner_approved"] is True
-    assert music["source_bundled"] is False
-    assert music["standalone_redistribution_forbidden"] is True
+    assert music["selection_mode"] == "strict_success_cycle"
+    assert music["variant_count"] == 4
+    assert music["full_sources_bundled"] is False
+    assert music["adapted_30s_instrumentals_bundled"] is True
+    assert [track["pixabay_id"] for track in pack["tracks"]] == [300338, 324016, 292156, 345669]
+    assert [track["id"] for track in pack["tracks"]] == pack["selection_contract"]["allowed_variant_ids"]
+    assert pack["selection_contract"]["first_render_variant_id"] == "t5_music_300338"
+    assert pack["selection_contract"]["state_update_policy"] == "after_completed_audio_qc_pass_only"
+    for track in pack["tracks"]:
+        path = ROOT / track["file"]
+        assert path.is_file()
+        assert path.stat().st_size == track["bytes"] == 721196
+        assert sha256(path) == track["sha256"]
+        assert track["duration_s"] == 30.0
+        assert track["contains_voice"] is False
+        assert track["owner_approved"] is True
+        assert track["production_eligible"] is True
     assert voice["voice_id"] == "voice-11"
     assert voice["selected_option"] == "B_masculine"
     assert voice["owner_selected_by_comparison"] is True
@@ -90,7 +102,11 @@ def test_approval_matches_contract() -> None:
     config = load()
     approval = json.loads((ROOT / config["approval"]).read_text(encoding="utf-8"))
     assert approval["status"] == "owner_approved_for_complete_mix_and_github_publication"
-    assert approval["music"]["selected_option"] == "4_afrofire"
+    assert approval["music"]["decision"] == "approve_four_track_rotation"
+    assert [item["id"] for item in approval["music"]["approved_order"]] == [
+        "t5_music_300338", "t5_music_324016", "t5_music_292156", "t5_music_345669"
+    ]
+    assert approval["music"]["automatic_cycle"] == "1→2→3→4→1"
     assert approval["voice"]["selected_option"] == "B_masculine"
     assert approval["voice"]["voice_id"] == "voice-11"
 
@@ -98,12 +114,18 @@ def test_approval_matches_contract() -> None:
 def test_render_job_transports_the_complete_owner_approved_audio_contract() -> None:
     job = json.loads((ROOT / "demo/render_job_runtime_demo.json").read_text(encoding="utf-8"))
     audio = job["audio"]
-    assert job["render"]["audio_mode"] == "owner_approved_afrofire_voice_b_complete"
+    assert job["render"]["audio_mode"] == "owner_approved_music_rotation_voice_b_complete"
     assert audio["contract"] == "config/T5_AUDIO_MIX_V1_0_0.json"
     assert audio["contract_sha256"] == sha256(CONFIG)
-    assert audio["music"]["source_sha256"] == load()["music"]["source_sha256"]
-    assert audio["music"]["source_bundled"] is False
+    assert audio["music_pack"] == "config/T5_MUSIC_PACK_V1_0_0.json"
+    assert audio["music_pack_sha256"] == sha256(ROOT / audio["music_pack"])
+    assert audio["music"]["selected_music_id"] == "t5_music_300338"
+    assert audio["music"]["selected_choice"] == "1"
+    assert audio["music"]["selection_mode"] == "strict_success_cycle"
+    assert audio["music"]["last_successful_music_id"] is None
+    assert audio["music"]["full_source_bundled"] is False
     assert audio["music"]["standalone_redistribution_forbidden"] is True
+    assert sha256(ROOT / audio["music"]["file"]) == audio["music"]["sha256"]
     voice_manifest = ROOT / audio["voice"]["manifest"]
     assert audio["voice"]["manifest_sha256"] == sha256(voice_manifest)
     assert audio["voice"]["voice_id"] == "voice-11"
@@ -133,7 +155,10 @@ def test_finalizer_emits_only_a_complete_audio_bound_render_result(tmp_path: Pat
     visual["inputs"]["capture_sha256"] = {
         slot: job["captures"][slot]["sha256"] for slot in ("S1", "S2", "S3", "S4")
     }
-    for key in ("audio_contract_sha256", "music_source_sha256", "voice_manifest_sha256", "voice_clip_source_sha256"):
+    for key in (
+        "audio_contract_sha256", "music_pack_sha256", "music_source_sha256",
+        "music_program_sha256", "voice_manifest_sha256", "voice_clip_source_sha256",
+    ):
         visual["inputs"].pop(key, None)
     for key in ("audio_quality", "audio", "audio_state_commit_allowed"):
         visual.pop(key, None)
@@ -145,7 +170,11 @@ def test_finalizer_emits_only_a_complete_audio_bound_render_result(tmp_path: Pat
         "status": "PASS",
         "summary": {"passed": 26, "failed": 0, "total": 26},
         "visual": {"input_file_sha256": "a" * 64, "bitstream_copy": True},
-        "music": {"source_sha256": config["music"]["source_sha256"]},
+        "music": {
+            "selected_music_id": job["audio"]["music"]["selected_music_id"],
+            "source_sha256": job["audio"]["music"]["source_sha256"],
+            "program_sha256": job["audio"]["music"]["sha256"],
+        },
         "voice": {
             "voice_id": "voice-11",
             "clips": [

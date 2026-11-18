@@ -7,14 +7,55 @@
   "timezone": "Africa/Lagos",
   "decision_channel": "arena_direct_selection",
   "music": {
-    "selected_option": "4_afrofire",
-    "title": "Afrofire",
-    "artist": "DPStudioMusic",
-    "pixabay_id": 300338,
-    "official_page": "https://pixabay.com/music/afrobeat-afrofire-300338/",
-    "license": "Pixabay Content License",
-    "owner_validated": true,
-    "validation_sequence": "The owner first confirmed validation, then explicitly selected option 4 in the four-choice selector."
+    "decision": "approve_four_track_rotation",
+    "approved_order": [
+      {
+        "choice": "1",
+        "id": "t5_music_300338",
+        "pixabay_id": 300338,
+        "title": "Afrofire",
+        "artist": "DPStudioMusic",
+        "clean_instrumental": "audio/music/t5-afrobeat-v1/t5_300338_afrofire_30s.mp3",
+        "clean_instrumental_sha256": "41ab3ce4be5a50d7ce451f7ada9b74dbe53d176a7822ad8d6d61573d9ecd1fd4",
+        "duration_s": 30.0,
+        "contains_voice": false
+      },
+      {
+        "choice": "2",
+        "id": "t5_music_324016",
+        "pixabay_id": 324016,
+        "title": "Afro 10",
+        "artist": "DasDrum",
+        "clean_instrumental": "audio/music/t5-afrobeat-v1/t5_324016_afro_10_30s.mp3",
+        "clean_instrumental_sha256": "c4b0aef58e38e6fc69bf5a558df83355365d805bfaaf291ed1bb0aea108f023a",
+        "duration_s": 30.0,
+        "contains_voice": false
+      },
+      {
+        "choice": "3",
+        "id": "t5_music_292156",
+        "pixabay_id": 292156,
+        "title": "Afro Trap x Football x Sport (Snitch)",
+        "artist": "47643651",
+        "clean_instrumental": "audio/music/t5-afrobeat-v1/t5_292156_snitch_30s.mp3",
+        "clean_instrumental_sha256": "565aca293ea38c330e1dbc27cbb7524cddf339eaf5299af92755be9e63668949",
+        "duration_s": 30.0,
+        "contains_voice": false
+      },
+      {
+        "choice": "4",
+        "id": "t5_music_345669",
+        "pixabay_id": 345669,
+        "title": "Dance Fever Dreams — Afrobeats",
+        "artist": "musicofthefuture_MOF",
+        "clean_instrumental": "audio/music/t5-afrobeat-v1/t5_345669_dance_fever_dreams_30s.mp3",
+        "clean_instrumental_sha256": "b458c78386617c0527250e850ec648999ea25b8ed6ddb43bb01ce8ccb70c8348",
+        "duration_s": 30.0,
+        "contains_voice": false
+      }
+    ],
+    "automatic_cycle": "1→2→3→4→1",
+    "state_update_policy": "after_completed_audio_qc_pass_only"
   },
   "voice": {
     "selected_option": "B_masculine",
@@ -35,11 +76,10 @@
     "validation_sequence": "The owner listened to two complete comparable readings and selected B — masculine."
   },
   "authorized_next_steps": [
-    "build four-scene voice stem",
-    "mix Afrofire with ducking under speech",
-    "master complete audio",
+    "use the four clean 30-second instrumentals in strict order 1→2→3→4",
+    "advance rotation only after completed audio QC PASS",
+    "mix the selected instrumental with voice B",
     "mux without changing the approved video bitstream",
-    "run independent audio and video quality controls",
     "publish through the existing GitHub Actions infrastructure"
   ],
   "rights_constraints": {

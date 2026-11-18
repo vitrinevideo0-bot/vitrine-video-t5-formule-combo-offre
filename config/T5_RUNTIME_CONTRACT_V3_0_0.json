@@ -171,7 +171,7 @@
     "visual_stage_audio_streams": 0,
     "final_output_audio_streams": 1,
     "audio_contract": "config/T5_AUDIO_MIX_V1_0_0.json",
-    "audio_mode": "owner_approved_afrofire_voice_b_complete",
+    "audio_mode": "owner_approved_music_rotation_voice_b_complete",
     "font_classification": "readable editorial display serif",
     "text_color": "#FFFFFF",
     "minimum_font_weight": 800,

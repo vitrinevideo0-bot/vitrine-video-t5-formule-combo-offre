@@ -164,7 +164,7 @@
           ]
         },
         "audio_mode": {
-          "const": "owner_approved_afrofire_voice_b_complete"
+          "const": "owner_approved_music_rotation_voice_b_complete"
         },
         "production_render_plane": {
           "const": "github_actions"
@@ -204,6 +204,8 @@
         "mode",
         "contract",
         "contract_sha256",
+        "music_pack",
+        "music_pack_sha256",
         "music",
         "voice",
         "mix_contract",
@@ -211,65 +213,337 @@
       ],
       "properties": {
         "mode": {
-          "const": "owner_approved_afrofire_voice_b_complete"
+          "const": "owner_approved_music_rotation_voice_b_complete"
         },
         "contract": {
           "const": "config/T5_AUDIO_MIX_V1_0_0.json"
         },
         "contract_sha256": {
-          "const": "ac1a5f7fe4da4d9f31156b3be2ec62c122bb3ab6f7055d943416f3537b629294"
+          "const": "c648217196738c35d5833b9a0eefa0f99fb6eba71808deb06aa6e87453c802ea"
         },
         "music": {
           "type": "object",
           "additionalProperties": false,
           "required": [
             "selection_mode",
+            "selected_music_id",
             "selected_choice",
             "pixabay_id",
             "title",
             "artist",
+            "file",
+            "sha256",
+            "bytes",
+            "duration_s",
+            "contains_voice",
+            "source_page",
             "source_url",
             "source_sha256",
             "source_bytes",
+            "source_start_s",
             "license",
-            "source_bundled",
-            "standalone_redistribution_forbidden"
+            "full_source_bundled",
+            "standalone_redistribution_forbidden",
+            "last_successful_music_id",
+            "state_update_policy"
           ],
           "properties": {
             "selection_mode": {
-              "const": "fixed_owner_approved"
+              "enum": [
+                "strict_success_cycle",
+                "explicit"
+              ]
+            },
+            "selected_music_id": {
+              "enum": [
+                "t5_music_300338",
+                "t5_music_324016",
+                "t5_music_292156",
+                "t5_music_345669"
+              ]
             },
             "selected_choice": {
-              "const": "4"
+              "enum": [
+                "1",
+                "2",
+                "3",
+                "4"
+              ]
             },
             "pixabay_id": {
-              "const": 300338
+              "enum": [
+                300338,
+                324016,
+                292156,
+                345669
+              ]
             },
             "title": {
-              "const": "Afrofire"
+              "type": "string",
+              "minLength": 1
             },
             "artist": {
-              "const": "DPStudioMusic"
+              "type": "string",
+              "minLength": 1
+            },
+            "file": {
+              "type": "string",
+              "pattern": "^audio/music/t5-afrobeat-v1/.*_30s\\.mp3$"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "bytes": {
+              "type": "integer",
+              "minimum": 100000
+            },
+            "duration_s": {
+              "const": 30.0
+            },
+            "contains_voice": {
+              "const": false
+            },
+            "source_page": {
+              "type": "string",
+              "format": "uri"
             },
             "source_url": {
-              "const": "https://cdn.pixabay.com/audio/2025/02/12/audio_bf52f1c5ad.mp3"
+              "type": "string",
+              "format": "uri"
             },
             "source_sha256": {
-              "const": "24e9606e14e4708e8c8ffa3a6a97429dbfc95049d388481392d72b971e932c61"
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
             },
             "source_bytes": {
-              "const": 7680768
+              "type": "integer",
+              "minimum": 100000
+            },
+            "source_start_s": {
+              "type": "number",
+              "minimum": 0
             },
             "license": {
               "const": "Pixabay Content License"
             },
-            "source_bundled": {
+            "full_source_bundled": {
               "const": false
             },
             "standalone_redistribution_forbidden": {
               "const": true
+            },
+            "last_successful_music_id": {
+              "enum": [
+                null,
+                "t5_music_300338",
+                "t5_music_324016",
+                "t5_music_292156",
+                "t5_music_345669"
+              ]
+            },
+            "state_update_policy": {
+              "const": "after_completed_audio_qc_pass_only"
             }
-          }
+          },
+          "oneOf": [
+            {
+              "properties": {
+                "selected_music_id": {
+                  "const": "t5_music_300338"
+                },
+                "selected_choice": {
+                  "const": "1"
+                },
+                "pixabay_id": {
+                  "const": 300338
+                },
+                "title": {
+                  "const": "Afrofire"
+                },
+                "artist": {
+                  "const": "DPStudioMusic"
+                },
+                "file": {
+                  "const": "audio/music/t5-afrobeat-v1/t5_300338_afrofire_30s.mp3"
+                },
+                "sha256": {
+                  "const": "41ab3ce4be5a50d7ce451f7ada9b74dbe53d176a7822ad8d6d61573d9ecd1fd4"
+                },
+                "bytes": {
+                  "const": 721196
+                },
+                "duration_s": {
+                  "const": 30.0
+                },
+                "contains_voice": {
+                  "const": false
+                },
+                "source_page": {
+                  "const": "https://pixabay.com/music/afrobeat-afrofire-300338/"
+                },
+                "source_url": {
+                  "const": "https://cdn.pixabay.com/audio/2025/02/12/audio_bf52f1c5ad.mp3"
+                },
+                "source_sha256": {
+                  "const": "24e9606e14e4708e8c8ffa3a6a97429dbfc95049d388481392d72b971e932c61"
+                },
+                "source_bytes": {
+                  "const": 7680768
+                },
+                "source_start_s": {
+                  "const": 0.0
+                }
+              }
+            },
+            {
+              "properties": {
+                "selected_music_id": {
+                  "const": "t5_music_324016"
+                },
+                "selected_choice": {
+                  "const": "2"
+                },
+                "pixabay_id": {
+                  "const": 324016
+                },
+                "title": {
+                  "const": "Afro 10"
+                },
+                "artist": {
+                  "const": "DasDrum"
+                },
+                "file": {
+                  "const": "audio/music/t5-afrobeat-v1/t5_324016_afro_10_30s.mp3"
+                },
+                "sha256": {
+                  "const": "c4b0aef58e38e6fc69bf5a558df83355365d805bfaaf291ed1bb0aea108f023a"
+                },
+                "bytes": {
+                  "const": 721196
+                },
+                "duration_s": {
+                  "const": 30.0
+                },
+                "contains_voice": {
+                  "const": false
+                },
+                "source_page": {
+                  "const": "https://pixabay.com/music/afrobeat-afro-10-324016/"
+                },
+                "source_url": {
+                  "const": "https://cdn.pixabay.com/download/audio/2025/04/07/audio_d9e6d8ba72.mp3?filename=dasdrum-afro-10-324016.mp3"
+                },
+                "source_sha256": {
+                  "const": "bef6c0a83ea63e3b24d86ea8576030b8b6e5a57d2d619dcdabd900ad1922ba78"
+                },
+                "source_bytes": {
+                  "const": 7680768
+                },
+                "source_start_s": {
+                  "const": 0.0
+                }
+              }
+            },
+            {
+              "properties": {
+                "selected_music_id": {
+                  "const": "t5_music_292156"
+                },
+                "selected_choice": {
+                  "const": "3"
+                },
+                "pixabay_id": {
+                  "const": 292156
+                },
+                "title": {
+                  "const": "Afro Trap x Football x Sport (Snitch)"
+                },
+                "artist": {
+                  "const": "47643651"
+                },
+                "file": {
+                  "const": "audio/music/t5-afrobeat-v1/t5_292156_snitch_30s.mp3"
+                },
+                "sha256": {
+                  "const": "565aca293ea38c330e1dbc27cbb7524cddf339eaf5299af92755be9e63668949"
+                },
+                "bytes": {
+                  "const": 721196
+                },
+                "duration_s": {
+                  "const": 30.0
+                },
+                "contains_voice": {
+                  "const": false
+                },
+                "source_page": {
+                  "const": "https://pixabay.com/music/afrobeat-afro-trap-x-football-x-sport-snitch-292156/"
+                },
+                "source_url": {
+                  "const": "https://cdn.pixabay.com/download/audio/2025/01/24/audio_53c925f982.mp3?filename=47643651-afro-trap-x-football-x-sport-snitch-292156.mp3"
+                },
+                "source_sha256": {
+                  "const": "7145b1d50e1f7cdfea30eceef4b3706823c48f041fcc4040ee0913173f63ca10"
+                },
+                "source_bytes": {
+                  "const": 5309753
+                },
+                "source_start_s": {
+                  "const": 1.92
+                }
+              }
+            },
+            {
+              "properties": {
+                "selected_music_id": {
+                  "const": "t5_music_345669"
+                },
+                "selected_choice": {
+                  "const": "4"
+                },
+                "pixabay_id": {
+                  "const": 345669
+                },
+                "title": {
+                  "const": "Dance Fever Dreams — Afrobeats"
+                },
+                "artist": {
+                  "const": "musicofthefuture_MOF"
+                },
+                "file": {
+                  "const": "audio/music/t5-afrobeat-v1/t5_345669_dance_fever_dreams_30s.mp3"
+                },
+                "sha256": {
+                  "const": "b458c78386617c0527250e850ec648999ea25b8ed6ddb43bb01ce8ccb70c8348"
+                },
+                "bytes": {
+                  "const": 721196
+                },
+                "duration_s": {
+                  "const": 30.0
+                },
+                "contains_voice": {
+                  "const": false
+                },
+                "source_page": {
+                  "const": "https://pixabay.com/music/afrobeat-dance-fever-dreams-afrobeats-345669/"
+                },
+                "source_url": {
+                  "const": "https://cdn.pixabay.com/download/audio/2025/05/22/audio_b5b19ae3d2.mp3?filename=musicofthefuture_mof-dance-fever-dreams-afrobeats-345669.mp3"
+                },
+                "source_sha256": {
+                  "const": "8f53bae5fa7d04ad113a7af772eb45a31c5074dc7612f826d97ea9aea690c80a"
+                },
+                "source_bytes": {
+                  "const": 3972864
+                },
+                "source_start_s": {
+                  "const": 0.0
+                }
+              }
+            }
+          ]
         },
         "voice": {
           "type": "object",
@@ -386,6 +660,12 @@
         },
         "state_update_policy": {
           "const": "after_completed_audio_qc_pass_only"
+        },
+        "music_pack": {
+          "const": "config/T5_MUSIC_PACK_V1_0_0.json"
+        },
+        "music_pack_sha256": {
+          "const": "428d5826e96a87bcddb1d585104968a1aa5ee29483ac00da60c50f85747a6c54"
         }
       }
     }

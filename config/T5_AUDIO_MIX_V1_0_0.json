@@ -1,14 +1,20 @@
 {
   "$schema": "../schemas/T5_audio_mix.schema.json",
   "schema_version": "1.0.0",
-  "id": "restauration_T5_afrofire_voice_B_v1_0_0",
+  "id": "restauration_T5_four_track_rotation_voice_B_v1_0_0",
   "template_id": "RESTAURATION-T5",
-  "status": "owner_approved_music_and_voice_ready_for_complete_render",
+  "status": "owner_approved_four_track_rotation_and_voice_ready_for_complete_render",
   "approved_on": "2026-11-18",
   "approval": "approvals/APPROBATION_MUSIQUE_ET_VOIX_T5_2026-11-18.json",
   "duration_s": 30.0,
   "sample_rate_hz": 48000,
-  "scene_boundaries_s": [0.0, 6.0, 14.0, 21.0, 30.0],
+  "scene_boundaries_s": [
+    0.0,
+    6.0,
+    14.0,
+    21.0,
+    30.0
+  ],
   "visual_stage": {
     "contract": "config/T5_RUNTIME_CONTRACT_V3_0_0.json",
     "text_motion": "config/T5_TEXT_MOTION_V4_0_0.json",
@@ -17,29 +23,15 @@
     "policy": "render silent visual, pass existing 21/21 QC, then mux complete audio while copying the H.264 bitstream"
   },
   "music": {
-    "provider": "Pixabay",
-    "selection_choice": "4",
-    "pixabay_id": 300338,
-    "title": "Afrofire",
-    "artist": "DPStudioMusic",
-    "official_page": "https://pixabay.com/music/afrobeat-afrofire-300338/",
-    "official_download_url": "https://cdn.pixabay.com/audio/2025/02/12/audio_bf52f1c5ad.mp3",
-    "source_sha256": "24e9606e14e4708e8c8ffa3a6a97429dbfc95049d388481392d72b971e932c61",
-    "source_bytes": 7680768,
-    "source_duration_s": 240.024,
-    "source_start_s": 0.0,
-    "owner_approved": true,
-    "license": "Pixabay Content License",
-    "license_url": "https://pixabay.com/service/license-summary/",
-    "content_id_registered_label_observed": false,
-    "content_id_observed_on": "2026-11-18",
-    "source_bundled": false,
-    "ephemeral_official_download_only": true,
-    "standalone_redistribution_forbidden": true,
+    "pack": "config/T5_MUSIC_PACK_V1_0_0.json",
+    "selection_mode": "strict_success_cycle",
+    "variant_count": 4,
+    "state_update_policy": "after_completed_audio_qc_pass_only",
+    "full_sources_bundled": false,
+    "adapted_30s_instrumentals_bundled": true,
+    "instrumentals_contain_voice": false,
     "program_target_lufs": -17.0,
-    "program_true_peak_dbtp_max": -3.0,
-    "fade_in_s": 0.15,
-    "fade_out_s": 0.8
+    "program_true_peak_dbtp_max": -2.0
   },
   "voice": {
     "provider": "Arena.ai Agent Mode",
@@ -110,7 +102,7 @@
   },
   "output": {
     "video_filename": "VIDEO_T5_FORMULE_PLEIN_ECRAN_V3_A_VALIDER.mp4",
-    "master_audio_filename": "T5_MASTER_AUDIO_AFROFIRE_VOIX_B_30S.wav",
+    "master_audio_filename": "T5_MASTER_AUDIO_MUSIC_ROTATION_VOIX_B_30S.wav",
     "report_filename": "T5_COMPLETE_AUDIO_RENDER_REPORT.json"
   },
   "quality_gates": {

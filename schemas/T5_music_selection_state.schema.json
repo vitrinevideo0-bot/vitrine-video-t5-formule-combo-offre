@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vitrine-video.example/schemas/T5_music_selection_state.schema.json",
+  "title": "RESTAURATION-T5 persistent strict music rotation state",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "last_successful_music_id",
+    "last_successful_render_job_id",
+    "successful_render_count",
+    "successful_render_jobs"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "last_successful_music_id": {
+      "enum": [
+        null,
+        "t5_music_300338",
+        "t5_music_324016",
+        "t5_music_292156",
+        "t5_music_345669"
+      ]
+    },
+    "last_successful_render_job_id": {
+      "type": ["string", "null"],
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{7,127}$"
+    },
+    "successful_render_count": {"type": "integer", "minimum": 0},
+    "successful_render_jobs": {
+      "type": "object",
+      "propertyNames": {"pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{7,127}$"},
+      "additionalProperties": {
+        "enum": [
+          "t5_music_300338",
+          "t5_music_324016",
+          "t5_music_292156",
+          "t5_music_345669"
+        ]
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"last_successful_music_id": {"type": "null"}}},
+      "then": {
+        "properties": {
+          "last_successful_render_job_id": {"type": "null"},
+          "successful_render_count": {"const": 0},
+          "successful_render_jobs": {"maxProperties": 0}
+        }
+      },
+      "else": {
+        "properties": {
+          "last_successful_render_job_id": {"type": "string"},
+          "successful_render_count": {"type": "integer", "minimum": 1},
+          "successful_render_jobs": {"minProperties": 1}
+        }
+      }
+    }
+  ]
+}

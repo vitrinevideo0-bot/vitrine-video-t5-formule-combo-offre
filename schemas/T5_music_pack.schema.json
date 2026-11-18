@@ -1,0 +1,511 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vitrine-video.example/schemas/T5_music_pack.schema.json",
+  "title": "RESTAURATION-T5 four-track music pack",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "schema_version",
+    "id",
+    "template_id",
+    "status",
+    "approved_on",
+    "approval",
+    "provider",
+    "license",
+    "license_url",
+    "selection_contract",
+    "timeline",
+    "format",
+    "license_contract",
+    "tracks",
+    "quality_gates"
+  ],
+  "properties": {
+    "$schema": {
+      "const": "../schemas/T5_music_pack.schema.json"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "id": {
+      "const": "restauration_T5_afrobeat_music_v1_0_0"
+    },
+    "template_id": {
+      "const": "RESTAURATION-T5"
+    },
+    "status": {
+      "const": "release_ready_all_four_tracks"
+    },
+    "approved_on": {
+      "const": "2026-11-18"
+    },
+    "approval": {
+      "const": "approvals/APPROBATION_MUSIQUE_ET_VOIX_T5_2026-11-18.json"
+    },
+    "provider": {
+      "const": "Pixabay"
+    },
+    "license": {
+      "const": "Pixabay Content License"
+    },
+    "license_url": {
+      "const": "https://pixabay.com/service/license-summary/"
+    },
+    "selection_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "variant_count",
+        "allowed_variant_ids",
+        "default_request",
+        "automatic_algorithm",
+        "no_immediate_repeat",
+        "explicit_repeat_policy",
+        "explicit_selection_policy",
+        "first_render_variant_id",
+        "first_render_pool_size",
+        "subsequent_pool_size",
+        "state_key",
+        "idempotency_ledger_key",
+        "state_update_policy",
+        "failed_render_state_policy",
+        "idempotent_success_callback",
+        "persistent_state_schema",
+        "cloudflare_state_object"
+      ],
+      "properties": {
+        "variant_count": {
+          "const": 4
+        },
+        "allowed_variant_ids": {
+          "const": [
+            "t5_music_300338",
+            "t5_music_324016",
+            "t5_music_292156",
+            "t5_music_345669"
+          ]
+        },
+        "default_request": {
+          "const": "auto"
+        },
+        "automatic_algorithm": {
+          "const": "strict owner-approved order 1→2→3→4→1 from last successful music"
+        },
+        "no_immediate_repeat": {
+          "const": true
+        },
+        "explicit_repeat_policy": {
+          "const": "reject"
+        },
+        "explicit_selection_policy": {
+          "const": "exact_successor_only"
+        },
+        "first_render_variant_id": {
+          "const": "t5_music_300338"
+        },
+        "first_render_pool_size": {
+          "const": 1
+        },
+        "subsequent_pool_size": {
+          "const": 1
+        },
+        "state_key": {
+          "const": "last_successful_music_id"
+        },
+        "idempotency_ledger_key": {
+          "const": "successful_render_jobs"
+        },
+        "state_update_policy": {
+          "const": "after_completed_audio_qc_pass_only"
+        },
+        "failed_render_state_policy": {
+          "const": "unchanged"
+        },
+        "idempotent_success_callback": {
+          "const": true
+        },
+        "persistent_state_schema": {
+          "const": "schemas/T5_music_selection_state.schema.json"
+        },
+        "cloudflare_state_object": {
+          "const": "music/t5-last-success.json"
+        }
+      }
+    },
+    "timeline": {
+      "const": {
+        "duration_s": 30.0,
+        "frames": 900,
+        "fps": 30,
+        "scene_markers_s": [
+          0,
+          6,
+          14,
+          21,
+          30
+        ]
+      }
+    },
+    "format": {
+      "const": {
+        "container": "MP3",
+        "codec": "MPEG Layer III",
+        "sample_rate_hz": 48000,
+        "channels": 2,
+        "bitrate_kbps": 192,
+        "duration_s": 30.0
+      }
+    },
+    "license_contract": {
+      "const": {
+        "official_download_only": true,
+        "standalone_redistribution_forbidden": true,
+        "original_full_tracks_bundled": false,
+        "adapted_30s_instrumentals_bundled": true,
+        "content_id_track_count": 0
+      }
+    },
+    "tracks": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "prefixItems": [
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/track"
+            },
+            {
+              "const": {
+                "id": "t5_music_300338",
+                "choice": "1",
+                "pixabay_id": 300338,
+                "title": "Afrofire",
+                "artist": "DPStudioMusic",
+                "page": "https://pixabay.com/music/afrobeat-afrofire-300338/",
+                "url": "https://cdn.pixabay.com/audio/2025/02/12/audio_bf52f1c5ad.mp3",
+                "duration": 240.024,
+                "ai": "displayed",
+                "file": "audio/music/t5-afrobeat-v1/t5_300338_afrofire_30s.mp3",
+                "sha256": "41ab3ce4be5a50d7ce451f7ada9b74dbe53d176a7822ad8d6d61573d9ecd1fd4",
+                "bytes": 721196,
+                "duration_s": 30.0,
+                "sample_rate_hz": 48000,
+                "channels": 2,
+                "bitrate_kbps": 192,
+                "integrated_lufs": -17.27,
+                "true_peak_dbtp": -4.81,
+                "contains_voice": false,
+                "source_sha256": "24e9606e14e4708e8c8ffa3a6a97429dbfc95049d388481392d72b971e932c61",
+                "source_bytes": 7680768,
+                "source_duration_s": 240.024,
+                "source_start_s": 0.0,
+                "source_page_checked_on": "2026-11-18",
+                "content_id_status": "not_displayed_on_source_page",
+                "ai_generated_badge": "displayed",
+                "owner_approved": true,
+                "production_eligible": true
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/track"
+            },
+            {
+              "const": {
+                "id": "t5_music_324016",
+                "choice": "2",
+                "pixabay_id": 324016,
+                "title": "Afro 10",
+                "artist": "DasDrum",
+                "page": "https://pixabay.com/music/afrobeat-afro-10-324016/",
+                "url": "https://cdn.pixabay.com/download/audio/2025/04/07/audio_d9e6d8ba72.mp3?filename=dasdrum-afro-10-324016.mp3",
+                "duration": 240.024,
+                "ai": "displayed",
+                "file": "audio/music/t5-afrobeat-v1/t5_324016_afro_10_30s.mp3",
+                "sha256": "c4b0aef58e38e6fc69bf5a558df83355365d805bfaaf291ed1bb0aea108f023a",
+                "bytes": 721196,
+                "duration_s": 30.0,
+                "sample_rate_hz": 48000,
+                "channels": 2,
+                "bitrate_kbps": 192,
+                "integrated_lufs": -17.24,
+                "true_peak_dbtp": -2.93,
+                "contains_voice": false,
+                "source_sha256": "bef6c0a83ea63e3b24d86ea8576030b8b6e5a57d2d619dcdabd900ad1922ba78",
+                "source_bytes": 7680768,
+                "source_duration_s": 240.024,
+                "source_start_s": 0.0,
+                "source_page_checked_on": "2026-11-18",
+                "content_id_status": "not_displayed_on_source_page",
+                "ai_generated_badge": "displayed",
+                "owner_approved": true,
+                "production_eligible": true
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/track"
+            },
+            {
+              "const": {
+                "id": "t5_music_292156",
+                "choice": "3",
+                "pixabay_id": 292156,
+                "title": "Afro Trap x Football x Sport (Snitch)",
+                "artist": "47643651",
+                "page": "https://pixabay.com/music/afrobeat-afro-trap-x-football-x-sport-snitch-292156/",
+                "url": "https://cdn.pixabay.com/download/audio/2025/01/24/audio_53c925f982.mp3?filename=47643651-afro-trap-x-football-x-sport-snitch-292156.mp3",
+                "duration": 165.929781,
+                "ai": "displayed",
+                "file": "audio/music/t5-afrobeat-v1/t5_292156_snitch_30s.mp3",
+                "sha256": "565aca293ea38c330e1dbc27cbb7524cddf339eaf5299af92755be9e63668949",
+                "bytes": 721196,
+                "duration_s": 30.0,
+                "sample_rate_hz": 48000,
+                "channels": 2,
+                "bitrate_kbps": 192,
+                "integrated_lufs": -16.98,
+                "true_peak_dbtp": -2.23,
+                "contains_voice": false,
+                "source_sha256": "7145b1d50e1f7cdfea30eceef4b3706823c48f041fcc4040ee0913173f63ca10",
+                "source_bytes": 5309753,
+                "source_duration_s": 165.929781,
+                "source_start_s": 1.92,
+                "source_page_checked_on": "2026-11-18",
+                "content_id_status": "not_displayed_on_source_page",
+                "ai_generated_badge": "displayed",
+                "owner_approved": true,
+                "production_eligible": true
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            {
+              "$ref": "#/$defs/track"
+            },
+            {
+              "const": {
+                "id": "t5_music_345669",
+                "choice": "4",
+                "pixabay_id": 345669,
+                "title": "Dance Fever Dreams — Afrobeats",
+                "artist": "musicofthefuture_MOF",
+                "page": "https://pixabay.com/music/afrobeat-dance-fever-dreams-afrobeats-345669/",
+                "url": "https://cdn.pixabay.com/download/audio/2025/05/22/audio_b5b19ae3d2.mp3?filename=musicofthefuture_mof-dance-fever-dreams-afrobeats-345669.mp3",
+                "duration": 124.152,
+                "ai": "displayed",
+                "file": "audio/music/t5-afrobeat-v1/t5_345669_dance_fever_dreams_30s.mp3",
+                "sha256": "b458c78386617c0527250e850ec648999ea25b8ed6ddb43bb01ce8ccb70c8348",
+                "bytes": 721196,
+                "duration_s": 30.0,
+                "sample_rate_hz": 48000,
+                "channels": 2,
+                "bitrate_kbps": 192,
+                "integrated_lufs": -17.05,
+                "true_peak_dbtp": -2.67,
+                "contains_voice": false,
+                "source_sha256": "8f53bae5fa7d04ad113a7af772eb45a31c5074dc7612f826d97ea9aea690c80a",
+                "source_bytes": 3972864,
+                "source_duration_s": 124.152,
+                "source_start_s": 0.0,
+                "source_page_checked_on": "2026-11-18",
+                "content_id_status": "not_displayed_on_source_page",
+                "ai_generated_badge": "displayed",
+                "owner_approved": true,
+                "production_eligible": true
+              }
+            }
+          ]
+        }
+      ],
+      "items": false
+    },
+    "quality_gates": {
+      "const": {
+        "exactly_four_tracks": true,
+        "approved_pixabay_ids": [
+          300338,
+          324016,
+          292156,
+          345669
+        ],
+        "duration_exact_decoded_30s": true,
+        "integrated_lufs_range": [
+          -17.7,
+          -16.3
+        ],
+        "true_peak_dbtp_max": -0.7,
+        "all_qc_pass": true,
+        "production_ready_track_count": 4,
+        "content_id_track_count": 0
+      }
+    }
+  },
+  "$defs": {
+    "track": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "choice",
+        "pixabay_id",
+        "title",
+        "artist",
+        "page",
+        "url",
+        "duration",
+        "ai",
+        "file",
+        "sha256",
+        "bytes",
+        "duration_s",
+        "sample_rate_hz",
+        "channels",
+        "bitrate_kbps",
+        "integrated_lufs",
+        "true_peak_dbtp",
+        "contains_voice",
+        "source_sha256",
+        "source_bytes",
+        "source_duration_s",
+        "source_start_s",
+        "source_page_checked_on",
+        "content_id_status",
+        "ai_generated_badge",
+        "owner_approved",
+        "production_eligible"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "choice": {
+          "enum": [
+            "1",
+            "2",
+            "3",
+            "4"
+          ]
+        },
+        "pixabay_id": {
+          "enum": [
+            300338,
+            324016,
+            292156,
+            345669
+          ]
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "artist": {
+          "type": "string",
+          "minLength": 1
+        },
+        "page": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://pixabay\\.com/music/"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://cdn\\.pixabay\\.com/(audio|download/audio)/"
+        },
+        "duration": {
+          "type": "number",
+          "minimum": 30
+        },
+        "ai": {
+          "enum": [
+            "displayed",
+            "not_displayed"
+          ]
+        },
+        "file": {
+          "type": "string",
+          "pattern": "^audio/music/t5-afrobeat-v1/.*_30s\\.mp3$"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "bytes": {
+          "type": "integer",
+          "minimum": 100000
+        },
+        "duration_s": {
+          "const": 30.0
+        },
+        "sample_rate_hz": {
+          "const": 48000
+        },
+        "channels": {
+          "const": 2
+        },
+        "bitrate_kbps": {
+          "const": 192
+        },
+        "integrated_lufs": {
+          "type": "number",
+          "minimum": -17.7,
+          "maximum": -16.3
+        },
+        "true_peak_dbtp": {
+          "type": "number",
+          "maximum": -0.7
+        },
+        "contains_voice": {
+          "const": false
+        },
+        "source_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "source_bytes": {
+          "type": "integer",
+          "minimum": 100000
+        },
+        "source_duration_s": {
+          "type": "number",
+          "minimum": 30
+        },
+        "source_start_s": {
+          "type": "number",
+          "minimum": 0
+        },
+        "source_page_checked_on": {
+          "type": "string",
+          "format": "date"
+        },
+        "content_id_status": {
+          "const": "not_displayed_on_source_page"
+        },
+        "ai_generated_badge": {
+          "enum": [
+            "displayed",
+            "not_displayed"
+          ]
+        },
+        "owner_approved": {
+          "const": true
+        },
+        "production_eligible": {
+          "const": true
+        }
+      }
+    }
+  }
+}

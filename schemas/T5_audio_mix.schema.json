@@ -23,19 +23,52 @@
     "quality_gates"
   ],
   "properties": {
-    "$schema": {"type": "string"},
-    "schema_version": {"const": "1.0.0"},
-    "id": {"const": "restauration_T5_afrofire_voice_B_v1_0_0"},
-    "template_id": {"const": "RESTAURATION-T5"},
-    "status": {"const": "owner_approved_music_and_voice_ready_for_complete_render"},
-    "approved_on": {"type": "string", "format": "date"},
-    "approval": {"type": "string"},
-    "duration_s": {"const": 30.0},
-    "sample_rate_hz": {"const": 48000},
+    "$schema": {
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "id": {
+      "const": "restauration_T5_four_track_rotation_voice_B_v1_0_0"
+    },
+    "template_id": {
+      "const": "RESTAURATION-T5"
+    },
+    "status": {
+      "const": "owner_approved_four_track_rotation_and_voice_ready_for_complete_render"
+    },
+    "approved_on": {
+      "type": "string",
+      "format": "date"
+    },
+    "approval": {
+      "type": "string"
+    },
+    "duration_s": {
+      "const": 30.0
+    },
+    "sample_rate_hz": {
+      "const": 48000
+    },
     "scene_boundaries_s": {
       "type": "array",
       "prefixItems": [
-        {"const": 0.0}, {"const": 6.0}, {"const": 14.0}, {"const": 21.0}, {"const": 30.0}
+        {
+          "const": 0.0
+        },
+        {
+          "const": 6.0
+        },
+        {
+          "const": 14.0
+        },
+        {
+          "const": 21.0
+        },
+        {
+          "const": 30.0
+        }
       ],
       "items": false,
       "minItems": 5,
@@ -43,71 +76,119 @@
     },
     "visual_stage": {
       "type": "object",
-      "required": ["contract", "text_motion", "baseline_commit", "baseline_release", "policy"],
+      "required": [
+        "contract",
+        "text_motion",
+        "baseline_commit",
+        "baseline_release",
+        "policy"
+      ],
       "additionalProperties": false,
       "properties": {
-        "contract": {"type": "string"},
-        "text_motion": {"type": "string"},
-        "baseline_commit": {"pattern": "^[0-9a-f]{40}$"},
-        "baseline_release": {"format": "uri"},
-        "policy": {"type": "string"}
+        "contract": {
+          "type": "string"
+        },
+        "text_motion": {
+          "type": "string"
+        },
+        "baseline_commit": {
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "baseline_release": {
+          "format": "uri"
+        },
+        "policy": {
+          "type": "string"
+        }
       }
     },
     "music": {
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "provider", "selection_choice", "pixabay_id", "title", "artist", "official_page",
-        "official_download_url", "source_sha256", "source_bytes", "source_duration_s", "source_start_s",
-        "owner_approved", "license", "license_url", "content_id_registered_label_observed",
-        "content_id_observed_on", "source_bundled", "ephemeral_official_download_only",
-        "standalone_redistribution_forbidden", "program_target_lufs", "program_true_peak_dbtp_max",
-        "fade_in_s", "fade_out_s"
+        "pack",
+        "selection_mode",
+        "variant_count",
+        "state_update_policy",
+        "full_sources_bundled",
+        "adapted_30s_instrumentals_bundled",
+        "instrumentals_contain_voice",
+        "program_target_lufs",
+        "program_true_peak_dbtp_max"
       ],
       "properties": {
-        "provider": {"const": "Pixabay"},
-        "selection_choice": {"const": "4"},
-        "pixabay_id": {"const": 300338},
-        "title": {"const": "Afrofire"},
-        "artist": {"const": "DPStudioMusic"},
-        "official_page": {"format": "uri"},
-        "official_download_url": {"format": "uri"},
-        "source_sha256": {"pattern": "^[0-9a-f]{64}$"},
-        "source_bytes": {"type": "integer", "minimum": 1},
-        "source_duration_s": {"type": "number", "minimum": 30},
-        "source_start_s": {"const": 0.0},
-        "owner_approved": {"const": true},
-        "license": {"const": "Pixabay Content License"},
-        "license_url": {"format": "uri"},
-        "content_id_registered_label_observed": {"const": false},
-        "content_id_observed_on": {"type": "string", "format": "date"},
-        "source_bundled": {"const": false},
-        "ephemeral_official_download_only": {"const": true},
-        "standalone_redistribution_forbidden": {"const": true},
-        "program_target_lufs": {"type": "number"},
-        "program_true_peak_dbtp_max": {"type": "number"},
-        "fade_in_s": {"type": "number", "minimum": 0},
-        "fade_out_s": {"type": "number", "minimum": 0}
+        "pack": {
+          "const": "config/T5_MUSIC_PACK_V1_0_0.json"
+        },
+        "selection_mode": {
+          "const": "strict_success_cycle"
+        },
+        "variant_count": {
+          "const": 4
+        },
+        "state_update_policy": {
+          "const": "after_completed_audio_qc_pass_only"
+        },
+        "full_sources_bundled": {
+          "const": false
+        },
+        "adapted_30s_instrumentals_bundled": {
+          "const": true
+        },
+        "instrumentals_contain_voice": {
+          "const": false
+        },
+        "program_target_lufs": {
+          "const": -17.0
+        },
+        "program_true_peak_dbtp_max": {
+          "const": -2.0
+        }
       }
     },
     "voice": {
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "provider", "voice_id", "language", "identity", "selected_option",
-        "owner_selected_by_comparison", "manifest", "normalization_target_lufs",
-        "normalization_true_peak_dbtp_max", "clips"
+        "provider",
+        "voice_id",
+        "language",
+        "identity",
+        "selected_option",
+        "owner_selected_by_comparison",
+        "manifest",
+        "normalization_target_lufs",
+        "normalization_true_peak_dbtp_max",
+        "clips"
       ],
       "properties": {
-        "provider": {"const": "Arena.ai Agent Mode"},
-        "voice_id": {"const": "voice-11"},
-        "language": {"const": "fr"},
-        "identity": {"const": "masculine advertising"},
-        "selected_option": {"const": "B_masculine"},
-        "owner_selected_by_comparison": {"const": true},
-        "manifest": {"type": "string"},
-        "normalization_target_lufs": {"type": "number"},
-        "normalization_true_peak_dbtp_max": {"type": "number"},
+        "provider": {
+          "const": "Arena.ai Agent Mode"
+        },
+        "voice_id": {
+          "const": "voice-11"
+        },
+        "language": {
+          "const": "fr"
+        },
+        "identity": {
+          "const": "masculine advertising"
+        },
+        "selected_option": {
+          "const": "B_masculine"
+        },
+        "owner_selected_by_comparison": {
+          "const": true
+        },
+        "manifest": {
+          "type": "string"
+        },
+        "normalization_target_lufs": {
+          "type": "number"
+        },
+        "normalization_true_peak_dbtp_max": {
+          "type": "number"
+        },
         "clips": {
           "type": "array",
           "minItems": 4,
@@ -116,18 +197,48 @@
             "type": "object",
             "additionalProperties": false,
             "required": [
-              "scene", "scene_start_s", "scene_end_s", "start_s", "text",
-              "source", "source_sha256", "source_duration_s"
+              "scene",
+              "scene_start_s",
+              "scene_end_s",
+              "start_s",
+              "text",
+              "source",
+              "source_sha256",
+              "source_duration_s"
             ],
             "properties": {
-              "scene": {"type": "integer", "minimum": 1, "maximum": 4},
-              "scene_start_s": {"type": "number", "minimum": 0},
-              "scene_end_s": {"type": "number", "maximum": 30},
-              "start_s": {"type": "number", "minimum": 0, "maximum": 30},
-              "text": {"type": "string", "minLength": 1},
-              "source": {"type": "string"},
-              "source_sha256": {"pattern": "^[0-9a-f]{64}$"},
-              "source_duration_s": {"type": "number", "exclusiveMinimum": 0}
+              "scene": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 4
+              },
+              "scene_start_s": {
+                "type": "number",
+                "minimum": 0
+              },
+              "scene_end_s": {
+                "type": "number",
+                "maximum": 30
+              },
+              "start_s": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 30
+              },
+              "text": {
+                "type": "string",
+                "minLength": 1
+              },
+              "source": {
+                "type": "string"
+              },
+              "source_sha256": {
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "source_duration_s": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
             }
           }
         }
@@ -137,60 +248,144 @@
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "music_open_gain_db", "music_under_voice_gain_db", "duck_depth_db", "duck_attack_ms",
-        "duck_release_ms", "duck_attack_curve", "duck_release_curve", "voice_gain_db", "sfx",
-        "master_target_lufs", "master_true_peak_dbtp_max", "delivery_audio"
+        "music_open_gain_db",
+        "music_under_voice_gain_db",
+        "duck_depth_db",
+        "duck_attack_ms",
+        "duck_release_ms",
+        "duck_attack_curve",
+        "duck_release_curve",
+        "voice_gain_db",
+        "sfx",
+        "master_target_lufs",
+        "master_true_peak_dbtp_max",
+        "delivery_audio"
       ],
       "properties": {
-        "music_open_gain_db": {"const": -3.0},
-        "music_under_voice_gain_db": {"const": -10.0},
-        "duck_depth_db": {"const": -7.0},
-        "duck_attack_ms": {"const": 120},
-        "duck_release_ms": {"const": 450},
-        "duck_attack_curve": {"const": "linear_db"},
-        "duck_release_curve": {"const": "linear_db"},
-        "voice_gain_db": {"const": 0.0},
-        "sfx": {"const": "none"},
-        "master_target_lufs": {"const": -16.0},
-        "master_true_peak_dbtp_max": {"const": -2.0},
-        "delivery_audio": {"type": "string"}
+        "music_open_gain_db": {
+          "const": -3.0
+        },
+        "music_under_voice_gain_db": {
+          "const": -10.0
+        },
+        "duck_depth_db": {
+          "const": -7.0
+        },
+        "duck_attack_ms": {
+          "const": 120
+        },
+        "duck_release_ms": {
+          "const": 450
+        },
+        "duck_attack_curve": {
+          "const": "linear_db"
+        },
+        "duck_release_curve": {
+          "const": "linear_db"
+        },
+        "voice_gain_db": {
+          "const": 0.0
+        },
+        "sfx": {
+          "const": "none"
+        },
+        "master_target_lufs": {
+          "const": -16.0
+        },
+        "master_true_peak_dbtp_max": {
+          "const": -2.0
+        },
+        "delivery_audio": {
+          "type": "string"
+        }
       }
     },
     "output": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["video_filename", "master_audio_filename", "report_filename"],
+      "required": [
+        "video_filename",
+        "master_audio_filename",
+        "report_filename"
+      ],
       "properties": {
-        "video_filename": {"type": "string", "pattern": "\\.mp4$"},
-        "master_audio_filename": {"type": "string", "pattern": "\\.wav$"},
-        "report_filename": {"type": "string", "pattern": "\\.json$"}
+        "video_filename": {
+          "type": "string",
+          "pattern": "\\.mp4$"
+        },
+        "master_audio_filename": {
+          "type": "string",
+          "pattern": "\\.wav$"
+        },
+        "report_filename": {
+          "type": "string",
+          "pattern": "\\.json$"
+        }
       }
     },
     "quality_gates": {
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "music_source_sha256_required", "exact_voice_clip_count", "duration_tolerance_s",
-        "integrated_lufs_min", "integrated_lufs_max", "wav_true_peak_dbtp_max",
-        "aac_true_peak_dbtp_max", "minimum_active_speech_to_music_db",
-        "clipped_sample_count_max", "exact_frames", "visual_bitstream_copy_required",
-        "audio_codec", "audio_channels", "audio_sample_rate_hz"
+        "music_source_sha256_required",
+        "exact_voice_clip_count",
+        "duration_tolerance_s",
+        "integrated_lufs_min",
+        "integrated_lufs_max",
+        "wav_true_peak_dbtp_max",
+        "aac_true_peak_dbtp_max",
+        "minimum_active_speech_to_music_db",
+        "clipped_sample_count_max",
+        "exact_frames",
+        "visual_bitstream_copy_required",
+        "audio_codec",
+        "audio_channels",
+        "audio_sample_rate_hz"
       ],
       "properties": {
-        "music_source_sha256_required": {"const": true},
-        "exact_voice_clip_count": {"const": 4},
-        "duration_tolerance_s": {"type": "number", "minimum": 0},
-        "integrated_lufs_min": {"type": "number"},
-        "integrated_lufs_max": {"type": "number"},
-        "wav_true_peak_dbtp_max": {"type": "number"},
-        "aac_true_peak_dbtp_max": {"type": "number"},
-        "minimum_active_speech_to_music_db": {"type": "number"},
-        "clipped_sample_count_max": {"const": 0},
-        "exact_frames": {"const": 900},
-        "visual_bitstream_copy_required": {"const": true},
-        "audio_codec": {"const": "aac"},
-        "audio_channels": {"const": 2},
-        "audio_sample_rate_hz": {"const": 48000}
+        "music_source_sha256_required": {
+          "const": true
+        },
+        "exact_voice_clip_count": {
+          "const": 4
+        },
+        "duration_tolerance_s": {
+          "type": "number",
+          "minimum": 0
+        },
+        "integrated_lufs_min": {
+          "type": "number"
+        },
+        "integrated_lufs_max": {
+          "type": "number"
+        },
+        "wav_true_peak_dbtp_max": {
+          "type": "number"
+        },
+        "aac_true_peak_dbtp_max": {
+          "type": "number"
+        },
+        "minimum_active_speech_to_music_db": {
+          "type": "number"
+        },
+        "clipped_sample_count_max": {
+          "const": 0
+        },
+        "exact_frames": {
+          "const": 900
+        },
+        "visual_bitstream_copy_required": {
+          "const": true
+        },
+        "audio_codec": {
+          "const": "aac"
+        },
+        "audio_channels": {
+          "const": 2
+        },
+        "audio_sample_rate_hz": {
+          "const": 48000
+        }
       }
     }
   }

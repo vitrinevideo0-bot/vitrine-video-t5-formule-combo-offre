@@ -6,6 +6,8 @@ on:
       - 'cloudflare/**'
       - 'config/T5_CAPTURE_FLOW_V1_0_0.json'
       - 'config/T5_AUDIO_MIX_V1_0_0.json'
+      - 'config/T5_MUSIC_PACK_V1_0_0.json'
+      - 'audio/music/t5-afrobeat-v1/**'
       - 'form/questions_T5.json'
       - 'demo/render_job_runtime_demo.json'
       - 'demo/render_result_runtime_example.json'
@@ -19,6 +21,8 @@ on:
       - 'cloudflare/**'
       - 'config/T5_CAPTURE_FLOW_V1_0_0.json'
       - 'config/T5_AUDIO_MIX_V1_0_0.json'
+      - 'config/T5_MUSIC_PACK_V1_0_0.json'
+      - 'audio/music/t5-afrobeat-v1/**'
       - 'form/questions_T5.json'
       - 'demo/render_job_runtime_demo.json'
       - 'demo/render_result_runtime_example.json'
@@ -78,7 +82,7 @@ jobs:
           npm test
           node --check public/app.js
 
-      - name: Intégration — formulaire, 12 écrans, R2, Afrofire, voice-11, dispatch, sortie et callback
+      - name: Intégration — formulaire, 12 écrans, R2, cycle musical strict, voice-11, dispatch, sortie et callback
         run: |
           set -euo pipefail
           rm -rf /tmp/t5-wrangler-control-plane
@@ -161,6 +165,8 @@ jobs:
       - name: Vérifier le Worker réellement déployé
         run: |
           curl --fail --silent --show-error "$PUBLIC_API_BASE/health" > /tmp/t5-health.json
-          jq -e '.status == "ok" and .control_plane == "cloudflare_worker" and .render_plane == "github_actions" and .audio_mode == "owner_approved_afrofire_voice_b_complete"' /tmp/t5-health.json
+          jq -e '.status == "ok" and .control_plane == "cloudflare_worker" and .render_plane == "github_actions" and .audio_mode == "owner_approved_music_rotation_voice_b_complete"' /tmp/t5-health.json
           curl --fail --silent --show-error "$PUBLIC_API_BASE/v1/contracts/audio-mix" \
-            | jq -e '.music.selection_choice == "4" and .music.title == "Afrofire" and .voice.voice_id == "voice-11"'
+            | jq -e '.music.selection_mode == "strict_success_cycle" and .music.variant_count == 4 and .voice.voice_id == "voice-11"'
+          curl --fail --silent --show-error "$PUBLIC_API_BASE/v1/contracts/music-pack" \
+            | jq -e '.selection_contract.allowed_variant_ids == ["t5_music_300338","t5_music_324016","t5_music_292156","t5_music_345669"]'

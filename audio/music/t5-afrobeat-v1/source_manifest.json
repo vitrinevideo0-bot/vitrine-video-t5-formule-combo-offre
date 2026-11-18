@@ -1,0 +1,126 @@
+{
+  "schema_version": "1.0.0",
+  "template_id": "RESTAURATION-T5",
+  "generated_on": "2026-11-18",
+  "provider": "Pixabay",
+  "license": "Pixabay Content License",
+  "approved_order": [
+    300338,
+    324016,
+    292156,
+    345669
+  ],
+  "full_original_sources_bundled": false,
+  "adapted_30s_instrumentals_bundled": true,
+  "instrumentals_contain_voice": false,
+  "tracks": [
+    {
+      "id": "t5_music_300338",
+      "choice": "1",
+      "pixabay_id": 300338,
+      "source": {
+        "official_page": "https://pixabay.com/music/afrobeat-afrofire-300338/",
+        "official_content_url": "https://cdn.pixabay.com/audio/2025/02/12/audio_bf52f1c5ad.mp3",
+        "sha256": "24e9606e14e4708e8c8ffa3a6a97429dbfc95049d388481392d72b971e932c61",
+        "bytes": 7680768,
+        "duration_s": 240.024,
+        "source_start_s": 0.0,
+        "bundled": false
+      },
+      "derivative": {
+        "file": "audio/music/t5-afrobeat-v1/t5_300338_afrofire_30s.mp3",
+        "sha256": "41ab3ce4be5a50d7ce451f7ada9b74dbe53d176a7822ad8d6d61573d9ecd1fd4",
+        "bytes": 721196,
+        "duration_s": 30.0,
+        "sample_rate_hz": 48000,
+        "channels": 2,
+        "bitrate_kbps": 192,
+        "integrated_lufs": -17.27,
+        "true_peak_dbtp": -4.81,
+        "contains_voice": false
+      },
+      "evidence_file": "audio/music/t5-afrobeat-v1/evidence/1_300338.json"
+    },
+    {
+      "id": "t5_music_324016",
+      "choice": "2",
+      "pixabay_id": 324016,
+      "source": {
+        "official_page": "https://pixabay.com/music/afrobeat-afro-10-324016/",
+        "official_content_url": "https://cdn.pixabay.com/download/audio/2025/04/07/audio_d9e6d8ba72.mp3?filename=dasdrum-afro-10-324016.mp3",
+        "sha256": "bef6c0a83ea63e3b24d86ea8576030b8b6e5a57d2d619dcdabd900ad1922ba78",
+        "bytes": 7680768,
+        "duration_s": 240.024,
+        "source_start_s": 0.0,
+        "bundled": false
+      },
+      "derivative": {
+        "file": "audio/music/t5-afrobeat-v1/t5_324016_afro_10_30s.mp3",
+        "sha256": "c4b0aef58e38e6fc69bf5a558df83355365d805bfaaf291ed1bb0aea108f023a",
+        "bytes": 721196,
+        "duration_s": 30.0,
+        "sample_rate_hz": 48000,
+        "channels": 2,
+        "bitrate_kbps": 192,
+        "integrated_lufs": -17.24,
+        "true_peak_dbtp": -2.93,
+        "contains_voice": false
+      },
+      "evidence_file": "audio/music/t5-afrobeat-v1/evidence/2_324016.json"
+    },
+    {
+      "id": "t5_music_292156",
+      "choice": "3",
+      "pixabay_id": 292156,
+      "source": {
+        "official_page": "https://pixabay.com/music/afrobeat-afro-trap-x-football-x-sport-snitch-292156/",
+        "official_content_url": "https://cdn.pixabay.com/download/audio/2025/01/24/audio_53c925f982.mp3?filename=47643651-afro-trap-x-football-x-sport-snitch-292156.mp3",
+        "sha256": "7145b1d50e1f7cdfea30eceef4b3706823c48f041fcc4040ee0913173f63ca10",
+        "bytes": 5309753,
+        "duration_s": 165.929781,
+        "source_start_s": 1.92,
+        "bundled": false
+      },
+      "derivative": {
+        "file": "audio/music/t5-afrobeat-v1/t5_292156_snitch_30s.mp3",
+        "sha256": "565aca293ea38c330e1dbc27cbb7524cddf339eaf5299af92755be9e63668949",
+        "bytes": 721196,
+        "duration_s": 30.0,
+        "sample_rate_hz": 48000,
+        "channels": 2,
+        "bitrate_kbps": 192,
+        "integrated_lufs": -16.98,
+        "true_peak_dbtp": -2.23,
+        "contains_voice": false
+      },
+      "evidence_file": "audio/music/t5-afrobeat-v1/evidence/3_292156.json"
+    },
+    {
+      "id": "t5_music_345669",
+      "choice": "4",
+      "pixabay_id": 345669,
+      "source": {
+        "official_page": "https://pixabay.com/music/afrobeat-dance-fever-dreams-afrobeats-345669/",
+        "official_content_url": "https://cdn.pixabay.com/download/audio/2025/05/22/audio_b5b19ae3d2.mp3?filename=musicofthefuture_mof-dance-fever-dreams-afrobeats-345669.mp3",
+        "sha256": "8f53bae5fa7d04ad113a7af772eb45a31c5074dc7612f826d97ea9aea690c80a",
+        "bytes": 3972864,
+        "duration_s": 124.152,
+        "source_start_s": 0.0,
+        "bundled": false
+      },
+      "derivative": {
+        "file": "audio/music/t5-afrobeat-v1/t5_345669_dance_fever_dreams_30s.mp3",
+        "sha256": "b458c78386617c0527250e850ec648999ea25b8ed6ddb43bb01ce8ccb70c8348",
+        "bytes": 721196,
+        "duration_s": 30.0,
+        "sample_rate_hz": 48000,
+        "channels": 2,
+        "bitrate_kbps": 192,
+        "integrated_lufs": -17.05,
+        "true_peak_dbtp": -2.67,
+        "contains_voice": false
+      },
+      "evidence_file": "audio/music/t5-afrobeat-v1/evidence/4_345669.json"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "id": "t5_music_345669",
+  "choice": "4",
+  "pixabay_id": 345669,
+  "title": "Dance Fever Dreams — Afrobeats",
+  "artist": "musicofthefuture_MOF",
+  "source_sha256": "8f53bae5fa7d04ad113a7af772eb45a31c5074dc7612f826d97ea9aea690c80a",
+  "source_bytes": 3972864,
+  "source_duration_s": 124.152,
+  "source_start_s": 0.0,
+  "source_page_checked_on": "2026-11-18",
+  "content_id_status": "not_displayed_on_source_page",
+  "ai_generated_badge": "displayed",
+  "owner_approved": true,
+  "production_eligible": true,
+  "schema_version": "1.0.0",
+  "official_page": "https://pixabay.com/music/afrobeat-dance-fever-dreams-afrobeats-345669/",
+  "official_content_url": "https://cdn.pixabay.com/download/audio/2025/05/22/audio_b5b19ae3d2.mp3?filename=musicofthefuture_mof-dance-fever-dreams-afrobeats-345669.mp3",
+  "license": "https://pixabay.com/service/license-summary/"
+}

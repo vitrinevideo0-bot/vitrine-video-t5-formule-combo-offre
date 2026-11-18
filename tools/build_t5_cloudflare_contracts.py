@@ -12,6 +12,7 @@ TARGETS = {
     ROOT / "cloudflare/src/form_contract.ts": ("FORM_CONTRACT", ROOT / "form/questions_T5.json"),
     ROOT / "cloudflare/src/capture_flow_contract.ts": ("CAPTURE_FLOW_CONTRACT", ROOT / "config/T5_CAPTURE_FLOW_V1_0_0.json"),
     ROOT / "cloudflare/src/audio_mix_contract.ts": ("AUDIO_MIX_CONTRACT", ROOT / "config/T5_AUDIO_MIX_V1_0_0.json"),
+    ROOT / "cloudflare/src/music_pack_contract.ts": ("MUSIC_PACK_CONTRACT", ROOT / "config/T5_MUSIC_PACK_V1_0_0.json"),
 }
 VOICE_MANIFEST = ROOT / "audio/voice/t5-voice-v1/manifest.json"
 
@@ -27,6 +28,8 @@ def rendered(name: str, source: Path) -> str:
     if name == "AUDIO_MIX_CONTRACT":
         content += f'export const AUDIO_MIX_CONTRACT_SHA256 = "{sha256(source)}" as const;\n'
         content += f'export const T5_VOICE_MANIFEST_SHA256 = "{sha256(VOICE_MANIFEST)}" as const;\n'
+    if name == "MUSIC_PACK_CONTRACT":
+        content += f'export const MUSIC_PACK_CONTRACT_SHA256 = "{sha256(source)}" as const;\n'
     return content
 
 

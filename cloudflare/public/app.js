@@ -390,7 +390,7 @@ async function pollStatus() {
     }
     if (status.status === 'COMPLETED') {
       title.textContent = 'Ton montage est prêt';
-      copy.textContent = 'Les 4 scènes, les 6 réponses, Afrofire et la voix B ont passé les contrôles visuel et audio sur GitHub.';
+      copy.textContent = 'Les 4 scènes, les 6 réponses, la musique sélectionnée par le cycle strict et la voix B ont passé les contrôles visuel et audio sur GitHub.';
       step.textContent = 'Rendu complet + contrôles 21/21 et 26/26 validés';
       step.classList.add('done');
       symbol.classList.add('complete');

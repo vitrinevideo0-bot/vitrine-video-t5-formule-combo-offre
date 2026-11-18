@@ -30,7 +30,9 @@
     "runtime_manifest_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
     "resolved_text_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
     "audio_contract_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "music_pack_sha256": "9999999999999999999999999999999999999999999999999999999999999999",
     "music_source_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+    "music_program_sha256": "41ab3ce4be5a50d7ce451f7ada9b74dbe53d176a7822ad8d6d61573d9ecd1fd4",
     "voice_manifest_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
     "voice_clip_source_sha256": {
       "S1": "5555555555555555555555555555555555555555555555555555555555555555",
@@ -84,14 +86,16 @@
     "total": 26
   },
   "audio": {
-    "mode": "owner_approved_afrofire_voice_b_complete",
+    "mode": "owner_approved_music_rotation_voice_b_complete",
     "music": {
-      "selected_choice": "4",
+      "selected_music_id": "t5_music_300338",
+      "selected_choice": "1",
       "pixabay_id": 300338,
       "title": "Afrofire",
       "artist": "DPStudioMusic",
-      "source_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
-      "source_bundled": false
+      "program_sha256": "41ab3ce4be5a50d7ce451f7ada9b74dbe53d176a7822ad8d6d61573d9ecd1fd4",
+      "source_sha256": "24e9606e14e4708e8c8ffa3a6a97429dbfc95049d388481392d72b971e932c61",
+      "full_source_bundled": false
     },
     "voice": {
       "selected_option": "B_masculine",

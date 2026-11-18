@@ -15,6 +15,8 @@ CASES = [
     ("schemas/T5_text_motion_v3.schema.json", "config/T5_TEXT_MOTION_V3_0_0.json"),
     ("schemas/T5_text_motion_v4.schema.json", "config/T5_TEXT_MOTION_V4_0_0.json"),
     ("schemas/T5_capture_flow.schema.json", "config/T5_CAPTURE_FLOW_V1_0_0.json"),
+    ("schemas/T5_audio_mix.schema.json", "config/T5_AUDIO_MIX_V1_0_0.json"),
+    ("schemas/T5_music_pack.schema.json", "config/T5_MUSIC_PACK_V1_0_0.json"),
     ("schemas/T5_rush_manifest.schema.json", "rushes/manifest.json"),
     ("schemas/T5_render_job.schema.json", "demo/render_job_runtime_demo.json"),
     ("schemas/T5_render_result.schema.json", "demo/render_result_runtime_example.json"),
@@ -34,6 +36,22 @@ def test_canonical_json_validates_against_published_schema(schema_path: str, ins
     validator = jsonschema.Draft202012Validator(schema, format_checker=jsonschema.FormatChecker())
     errors = sorted(validator.iter_errors(instance), key=lambda error: list(error.path))
     assert not errors, "\n".join(f"{list(error.path)}: {error.message}" for error in errors)
+
+
+def test_music_state_schema_accepts_only_the_strict_persistent_shape() -> None:
+    schema = load("schemas/T5_music_selection_state.schema.json")
+    jsonschema.Draft202012Validator.check_schema(schema)
+    state = {
+        "schema_version": "1.0.0",
+        "last_successful_music_id": None,
+        "last_successful_render_job_id": None,
+        "successful_render_count": 0,
+        "successful_render_jobs": {},
+    }
+    jsonschema.validate(state, schema)
+    state["last_successful_music_id"] = "unknown"
+    with pytest.raises(jsonschema.ValidationError):
+        jsonschema.validate(state, schema)
 
 
 def test_schemas_reject_static_or_incomplete_variants() -> None:
@@ -86,6 +104,11 @@ def test_schemas_reject_static_or_incomplete_variants() -> None:
     wrong_voice_job["audio"]["voice"]["voice_id"] = "voice-10"
     with pytest.raises(jsonschema.ValidationError):
         jsonschema.validate(wrong_voice_job, load("schemas/T5_render_job.schema.json"))
+
+    mismatched_music_job = load("demo/render_job_runtime_demo.json")
+    mismatched_music_job["audio"]["music"]["selected_music_id"] = "t5_music_324016"
+    with pytest.raises(jsonschema.ValidationError):
+        jsonschema.validate(mismatched_music_job, load("schemas/T5_render_job.schema.json"))
 
     rushes = load("rushes/manifest.json")
     rushes["license"]["raw_media_published_as_artifact"] = True

@@ -1,0 +1,20 @@
+{
+  "id": "t5_music_300338",
+  "choice": "1",
+  "pixabay_id": 300338,
+  "title": "Afrofire",
+  "artist": "DPStudioMusic",
+  "source_sha256": "24e9606e14e4708e8c8ffa3a6a97429dbfc95049d388481392d72b971e932c61",
+  "source_bytes": 7680768,
+  "source_duration_s": 240.024,
+  "source_start_s": 0.0,
+  "source_page_checked_on": "2026-11-18",
+  "content_id_status": "not_displayed_on_source_page",
+  "ai_generated_badge": "displayed",
+  "owner_approved": true,
+  "production_eligible": true,
+  "schema_version": "1.0.0",
+  "official_page": "https://pixabay.com/music/afrobeat-afrofire-300338/",
+  "official_content_url": "https://cdn.pixabay.com/audio/2025/02/12/audio_bf52f1c5ad.mp3",
+  "license": "https://pixabay.com/service/license-summary/"
+}

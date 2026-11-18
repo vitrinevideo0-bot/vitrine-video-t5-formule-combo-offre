@@ -5,6 +5,7 @@ import {
 } from "./audio_mix_contract";
 import { CAPTURE_FLOW_CONTRACT } from "./capture_flow_contract";
 import { FORM_CONTRACT } from "./form_contract";
+import { MUSIC_PACK_CONTRACT, MUSIC_PACK_CONTRACT_SHA256 } from "./music_pack_contract";
 
 export interface Env {
   ASSETS: Fetcher;
@@ -19,6 +20,7 @@ export interface Env {
 }
 
 type CaptureSlot = "S1" | "S2" | "S3" | "S4";
+type MusicId = "t5_music_300338" | "t5_music_324016" | "t5_music_292156" | "t5_music_345669";
 type JobStatus = "UPLOADING" | "READY" | "QUEUED" | "RUNNING" | "COMPLETED" | "FAILED";
 
 interface MerchantPayload {
@@ -60,6 +62,9 @@ interface StoredJob {
   updated_at: string;
   merchant_payload: MerchantPayload;
   captures: Partial<Record<CaptureSlot, CaptureMeta>>;
+  requested_music_id: "auto" | MusicId;
+  selected_music_id?: MusicId;
+  last_successful_music_id?: MusicId | null;
   job?: Record<string, unknown>;
   github?: Record<string, unknown>;
   output?: StoredOutput;
@@ -67,22 +72,23 @@ interface StoredJob {
   error?: unknown;
 }
 
-interface AudioState {
+interface MusicState {
   schema_version: "1.0.0";
-  selected_music_id: "afrofire-300338";
-  selected_voice_id: "voice-11";
+  last_successful_music_id: MusicId | null;
   last_successful_render_job_id: string | null;
   successful_render_count: number;
+  successful_render_jobs: Record<string, MusicId>;
 }
 
 const SLOTS: CaptureSlot[] = ["S1", "S2", "S3", "S4"];
+const MUSIC_IDS: MusicId[] = ["t5_music_300338", "t5_music_324016", "t5_music_292156", "t5_music_345669"];
 const FIELDS = ["nom", "offre", "contenu", "prix", "whatsapp", "quartier"] as const;
 const DURATIONS: Record<CaptureSlot, number> = { S1: 6000, S2: 8000, S3: 7000, S4: 9000 };
 const ALLOWED_MIME = new Set(["video/mp4", "video/webm", "video/quicktime"]);
 const MAX_CAPTURE_BYTES = 250 * 1024 * 1024;
 const MAX_OUTPUT_BYTES = 500 * 1024 * 1024;
 const OUTPUT_FILE = "VIDEO_T5_FORMULE_PLEIN_ECRAN_V3_A_VALIDER.mp4";
-const AUDIO_STATE_KEY = "audio/t5-last-success.json";
+const MUSIC_STATE_KEY = "music/t5-last-success.json";
 
 function json(data: unknown, status = 200): Response {
   return Response.json(data, { status, headers: { "cache-control": "no-store" } });
@@ -143,55 +149,95 @@ async function sha256Text(text: string): Promise<string> {
   return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
-function initialAudioState(): AudioState {
+function initialMusicState(): MusicState {
   return {
     schema_version: "1.0.0",
-    selected_music_id: "afrofire-300338",
-    selected_voice_id: "voice-11",
+    last_successful_music_id: null,
     last_successful_render_job_id: null,
     successful_render_count: 0,
+    successful_render_jobs: {},
   };
 }
 
-function validateAudioState(state: AudioState): AudioState {
+function validateMusicState(state: MusicState): MusicState {
+  const receipts = record(state.successful_render_jobs);
   if (
     state.schema_version !== "1.0.0"
-    || state.selected_music_id !== "afrofire-300338"
-    || state.selected_voice_id !== "voice-11"
+    || (state.last_successful_music_id !== null && !MUSIC_IDS.includes(state.last_successful_music_id))
     || !Number.isInteger(state.successful_render_count)
     || state.successful_render_count < 0
-    || (state.last_successful_render_job_id !== null && !validId(state.last_successful_render_job_id))
-  ) throw new Error("État audio T5 persistant invalide.");
-  return state;
+    || !receipts
+    || Object.keys(receipts).length !== state.successful_render_count
+    || Object.entries(receipts).some(([jobId, musicId]) => !validId(jobId) || !MUSIC_IDS.includes(musicId as MusicId))
+    || ((state.last_successful_music_id === null) !== (state.last_successful_render_job_id === null))
+    || ((state.successful_render_count === 0) !== (state.last_successful_music_id === null))
+    || (state.last_successful_render_job_id !== null
+      && receipts[state.last_successful_render_job_id] !== state.last_successful_music_id)
+  ) throw new Error("État musical T5 persistant invalide.");
+  return { ...state, successful_render_jobs: receipts as Record<string, MusicId> };
 }
 
-async function readAudioState(env: Env): Promise<AudioState> {
-  const object = await env.T5_MEDIA.get(AUDIO_STATE_KEY);
-  return object ? validateAudioState(await object.json<AudioState>()) : initialAudioState();
+async function readMusicState(env: Env): Promise<MusicState> {
+  const object = await env.T5_MEDIA.get(MUSIC_STATE_KEY);
+  return object ? validateMusicState(await object.json<MusicState>()) : initialMusicState();
 }
 
-async function commitAudioSuccess(env: Env, jobId: string): Promise<void> {
+function selectMusic(requested: "auto" | MusicId, last: MusicId | null) {
+  const contract = MUSIC_PACK_CONTRACT.selection_contract;
+  if (
+    contract.allowed_variant_ids.join("") !== MUSIC_IDS.join("")
+    || contract.first_render_variant_id !== MUSIC_IDS[0]
+    || contract.first_render_pool_size !== 1
+    || contract.subsequent_pool_size !== 1
+    || contract.explicit_selection_policy !== "exact_successor_only"
+    || contract.idempotency_ledger_key !== "successful_render_jobs"
+    || contract.state_update_policy !== "after_completed_audio_qc_pass_only"
+    || contract.failed_render_state_policy !== "unchanged"
+  ) throw new Error("Le contrat musical T5 ne garantit pas le cycle strict.");
+  const previousIndex = last === null ? -1 : MUSIC_IDS.indexOf(last);
+  const expected = MUSIC_PACK_CONTRACT.tracks[(previousIndex + 1) % MUSIC_PACK_CONTRACT.tracks.length];
+  if (requested !== "auto" && requested !== expected.id) {
+    throw new Error(`Le cycle T5 strict attend ${expected.id}; ${requested} ne peut pas le contourner.`);
+  }
+  return {
+    ...expected,
+    selection_mode: requested === "auto" ? "strict_success_cycle" as const : "explicit" as const,
+    last_successful_music_id: last,
+  };
+}
+
+async function commitMusicSuccess(env: Env, jobId: string, selected: MusicId): Promise<void> {
   for (let attempt = 0; attempt < 5; attempt += 1) {
-    const object = await env.T5_MEDIA.get(AUDIO_STATE_KEY);
-    const current = object ? validateAudioState(await object.json<AudioState>()) : initialAudioState();
-    if (current.last_successful_render_job_id === jobId) return;
-    const updated: AudioState = {
-      ...current,
+    const object = await env.T5_MEDIA.get(MUSIC_STATE_KEY);
+    const current = object ? validateMusicState(await object.json<MusicState>()) : initialMusicState();
+    if (Object.prototype.hasOwnProperty.call(current.successful_render_jobs, jobId)) {
+      if (current.successful_render_jobs[jobId] !== selected) {
+        throw new Error("Un callback T5 rejoué ne peut pas changer de musique.");
+      }
+      return;
+    }
+    const previousIndex = current.last_successful_music_id === null
+      ? -1
+      : MUSIC_IDS.indexOf(current.last_successful_music_id);
+    const expected = MUSIC_IDS[(previousIndex + 1) % MUSIC_IDS.length];
+    if (selected !== expected) {
+      throw new Error(`Le succès T5 doit respecter le cycle strict : ${expected} attendu, ${selected} reçu.`);
+    }
+    const updated: MusicState = {
+      schema_version: "1.0.0",
+      last_successful_music_id: selected,
       last_successful_render_job_id: jobId,
       successful_render_count: current.successful_render_count + 1,
+      successful_render_jobs: { ...current.successful_render_jobs, [jobId]: selected },
     };
-    const written = await env.T5_MEDIA.put(AUDIO_STATE_KEY, JSON.stringify(updated), {
+    const written = await env.T5_MEDIA.put(MUSIC_STATE_KEY, JSON.stringify(updated), {
       onlyIf: object ? { etagMatches: object.etag } : { etagDoesNotMatch: "*" },
       httpMetadata: { contentType: "application/json" },
-      customMetadata: {
-        selected_music_id: updated.selected_music_id,
-        selected_voice_id: updated.selected_voice_id,
-        last_successful_render_job_id: jobId,
-      },
+      customMetadata: { last_successful_music_id: selected, last_successful_render_job_id: jobId },
     });
     if (written) return;
   }
-  throw new Error("Conflit concurrent persistant sur l'état audio T5.");
+  throw new Error("Conflit concurrent persistant sur l'état musical T5.");
 }
 
 async function readJob(env: Env, jobId: string): Promise<StoredJob | null> {
@@ -221,12 +267,16 @@ function runtimeCaptureUri(jobId: string, slot: CaptureSlot, mime: string): stri
   return `rushes/runtime/${jobId}/${slot}.${extension}`;
 }
 
-function buildRenderJob(state: StoredJob): Record<string, unknown> {
+async function buildRenderJob(state: StoredJob, env: Env): Promise<Record<string, unknown>> {
   const captures = Object.fromEntries(SLOTS.map((slot) => {
     const capture = state.captures[slot];
     if (!capture) throw new Error(`Capture ${slot} absente.`);
     return [slot, capture];
   }));
+  const musicState = await readMusicState(env);
+  const selectedMusic = selectMusic(state.requested_music_id, musicState.last_successful_music_id);
+  state.selected_music_id = selectedMusic.id;
+  state.last_successful_music_id = musicState.last_successful_music_id;
   return {
     schema_version: "1.0.0",
     job_id: state.job_id,
@@ -236,21 +286,33 @@ function buildRenderJob(state: StoredJob): Record<string, unknown> {
     merchant_payload: state.merchant_payload,
     captures,
     audio: {
-      mode: "owner_approved_afrofire_voice_b_complete",
+      mode: "owner_approved_music_rotation_voice_b_complete",
       contract: "config/T5_AUDIO_MIX_V1_0_0.json",
       contract_sha256: AUDIO_MIX_CONTRACT_SHA256,
+      music_pack: "config/T5_MUSIC_PACK_V1_0_0.json",
+      music_pack_sha256: MUSIC_PACK_CONTRACT_SHA256,
       music: {
-        selection_mode: "fixed_owner_approved",
-        selected_choice: AUDIO_MIX_CONTRACT.music.selection_choice,
-        pixabay_id: AUDIO_MIX_CONTRACT.music.pixabay_id,
-        title: AUDIO_MIX_CONTRACT.music.title,
-        artist: AUDIO_MIX_CONTRACT.music.artist,
-        source_url: AUDIO_MIX_CONTRACT.music.official_download_url,
-        source_sha256: AUDIO_MIX_CONTRACT.music.source_sha256,
-        source_bytes: AUDIO_MIX_CONTRACT.music.source_bytes,
-        license: AUDIO_MIX_CONTRACT.music.license,
-        source_bundled: AUDIO_MIX_CONTRACT.music.source_bundled,
-        standalone_redistribution_forbidden: AUDIO_MIX_CONTRACT.music.standalone_redistribution_forbidden,
+        selection_mode: selectedMusic.selection_mode,
+        selected_music_id: selectedMusic.id,
+        selected_choice: selectedMusic.choice,
+        pixabay_id: selectedMusic.pixabay_id,
+        title: selectedMusic.title,
+        artist: selectedMusic.artist,
+        file: selectedMusic.file,
+        sha256: selectedMusic.sha256,
+        bytes: selectedMusic.bytes,
+        duration_s: selectedMusic.duration_s,
+        contains_voice: selectedMusic.contains_voice,
+        source_page: selectedMusic.page,
+        source_url: selectedMusic.url,
+        source_sha256: selectedMusic.source_sha256,
+        source_bytes: selectedMusic.source_bytes,
+        source_start_s: selectedMusic.source_start_s,
+        license: MUSIC_PACK_CONTRACT.license,
+        full_source_bundled: false,
+        standalone_redistribution_forbidden: true,
+        last_successful_music_id: selectedMusic.last_successful_music_id,
+        state_update_policy: "after_completed_audio_qc_pass_only",
       },
       voice: {
         source_mode: "owner_approved_registered_clips",
@@ -279,7 +341,7 @@ function buildRenderJob(state: StoredJob): Record<string, unknown> {
       frames: 900,
       duration_s: 30.0,
       scene_durations_s: [6, 8, 7, 9],
-      audio_mode: "owner_approved_afrofire_voice_b_complete",
+      audio_mode: "owner_approved_music_rotation_voice_b_complete",
       production_render_plane: "github_actions",
     },
     output: { uri: outputUri(state.job_id), filename: OUTPUT_FILE },
@@ -298,13 +360,18 @@ async function createJob(request: Request, env: Env): Promise<Response> {
     const state = await readJob(env, existingId);
     return json({ job_id: existingId, status: state?.status, idempotent_replay: true });
   }
+  const requestedMusic = String(body.music_id || "auto") as "auto" | MusicId;
+  if (requestedMusic !== "auto" && !MUSIC_IDS.includes(requestedMusic as MusicId)) {
+    return fail(400, "T5_INVALID_MUSIC_ID", "music_id doit valoir auto ou un identifiant approuvé du pack T5.");
+  }
   const merchant = validatePayload(body.merchant_payload);
-  const seed = `${idempotencyKey}\n${canonicalStringify(merchant)}\n${Date.now()}\n${crypto.randomUUID()}`;
+  const seed = `${idempotencyKey}\n${canonicalStringify(merchant)}\n${requestedMusic}\n${Date.now()}\n${crypto.randomUUID()}`;
   const jobId = `t5-runtime-${(await sha256Text(seed)).slice(0, 24)}`;
   const now = new Date().toISOString();
   const state: StoredJob = {
     status: "UPLOADING", job_id: jobId, idempotency_key: idempotencyKey,
     created_at: now, updated_at: now, merchant_payload: merchant, captures: {},
+    requested_music_id: requestedMusic,
   };
   await writeJob(env, state);
   const claim = await env.T5_MEDIA.put(idemKey(idempotencyKey), jobId, {
@@ -382,7 +449,15 @@ async function dispatch(request: Request, env: Env, jobId: string): Promise<Resp
   if ((!retrying && state.status !== "READY") || !SLOTS.every((slot) => state.captures[slot])) {
     return fail(409, "T5_CAPTURES_INCOMPLETE", "Les quatre captures acceptées sont requises.");
   }
-  state.job = buildRenderJob(state);
+  try {
+    state.job = await buildRenderJob(state, env);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Sélection musicale invalide.";
+    if (message.startsWith("Le cycle T5 strict attend")) {
+      return fail(409, "T5_MUSIC_SEQUENCE_CONFLICT", message, true);
+    }
+    throw error;
+  }
   state.status = "QUEUED";
   await writeJob(env, state);
   const githubApi = (env.GITHUB_API_BASE || "https://api.github.com").replace(/\/$/, "");
@@ -475,12 +550,12 @@ async function validateCallbackPayload(state: StoredJob, status: string, body: R
     if (!inputs || inputs.merchant_payload_sha256 !== await sha256Text(canonicalStringify(state.merchant_payload))) return "Les réponses du résultat divergent du RenderJob.";
     if (!captureSha || SLOTS.some((slot) => captureSha[slot] !== state.captures[slot]?.sha256)) return "Les captures du résultat divergent du RenderJob.";
     if (!validSha(inputs.runtime_manifest_sha256) || !validSha(inputs.resolved_text_sha256)) return "La provenance runtime du résultat est incomplète.";
-    if (!job || jobRender?.visual_mode !== "runtime_full_frame_render" || jobRender.audio_mode !== "owner_approved_afrofire_voice_b_complete") return "Le RenderJob stocké n'autorise pas le rendu complet.";
+    if (!job || jobRender?.visual_mode !== "runtime_full_frame_render" || jobRender.audio_mode !== "owner_approved_music_rotation_voice_b_complete") return "Le RenderJob stocké n'autorise pas le rendu complet.";
     if (!jobAudio || !jobMusic || !jobVoice || !jobVoiceClips) return "Le contrat audio du RenderJob est incomplet.";
-    if (inputs.audio_contract_sha256 !== jobAudio.contract_sha256 || inputs.music_source_sha256 !== jobMusic.source_sha256 || inputs.voice_manifest_sha256 !== jobVoice.manifest_sha256) return "La provenance audio diverge du RenderJob.";
+    if (inputs.audio_contract_sha256 !== jobAudio.contract_sha256 || inputs.music_pack_sha256 !== jobAudio.music_pack_sha256 || inputs.music_source_sha256 !== jobMusic.source_sha256 || inputs.music_program_sha256 !== jobMusic.sha256 || inputs.voice_manifest_sha256 !== jobVoice.manifest_sha256) return "La provenance audio diverge du RenderJob.";
     if (!resultVoiceClips || SLOTS.some((slot) => resultVoiceClips[slot] !== jobVoiceClips[slot])) return "Les sources voix du résultat divergent du RenderJob.";
     if (!resultAudio || resultAudio.mode !== jobAudio.mode || resultAudio.visual_bitstream_copy !== true) return "L'attestation du mix complet est invalide.";
-    if (!resultMusic || resultMusic.pixabay_id !== jobMusic.pixabay_id || resultMusic.source_sha256 !== jobMusic.source_sha256 || resultMusic.source_bundled !== false) return "Afrofire n'est pas attestée conformément au RenderJob.";
+    if (!resultMusic || resultMusic.selected_music_id !== jobMusic.selected_music_id || resultMusic.pixabay_id !== jobMusic.pixabay_id || resultMusic.source_sha256 !== jobMusic.source_sha256 || resultMusic.program_sha256 !== jobMusic.sha256 || resultMusic.full_source_bundled !== false) return "La musique sélectionnée n'est pas attestée conformément au RenderJob.";
     if (!resultVoice || resultVoice.voice_id !== jobVoice.voice_id || resultVoice.manifest_sha256 !== jobVoice.manifest_sha256 || !resultVoiceAudioClips || SLOTS.some((slot) => resultVoiceAudioClips[slot] !== jobVoiceClips[slot])) return "La voix B n'est pas attestée conformément au RenderJob.";
     if (!finalMix || finalMix.audio_codec !== "aac" || finalMix.sample_rate_hz !== 48000 || finalMix.channels !== 2 || finalMix.one_audio_stream !== true) return "Le flux audio final est invalide.";
     if (typeof finalMix.integrated_lufs !== "number" || finalMix.integrated_lufs < -16.6 || finalMix.integrated_lufs > -15.4 || typeof finalMix.true_peak_dbtp !== "number" || finalMix.true_peak_dbtp > -1.0) return "Les mesures audio finales sont hors contrat.";
@@ -511,10 +586,11 @@ async function callback(request: Request, env: Env, jobId: string): Promise<Resp
   state.status = status as JobStatus;
   state.github = { run_id: body.github_run_id, run_url: body.github_run_url };
   if (status === "COMPLETED") {
+    if (!state.selected_music_id) return fail(409, "T5_MUSIC_SELECTION_MISSING", "La musique sélectionnée manque au job.");
     try {
-      await commitAudioSuccess(env, state.job_id);
+      await commitMusicSuccess(env, state.job_id, state.selected_music_id);
     } catch (error) {
-      return fail(409, "T5_AUDIO_STATE_CONFLICT", error instanceof Error ? error.message : "Conflit d'état audio.", true);
+      return fail(409, "T5_MUSIC_STATE_CONFLICT", error instanceof Error ? error.message : "Conflit d'état musical.", true);
     }
     state.result = body.result;
   }
@@ -557,15 +633,17 @@ async function handle(request: Request, env: Env): Promise<Response> {
       control_plane: "cloudflare_worker",
       render_plane: "github_actions",
       cloudflare_rendering: false,
-      audio_mode: "owner_approved_afrofire_voice_b_complete",
+      audio_mode: "owner_approved_music_rotation_voice_b_complete",
+      music_rotation: "t5_music_300338→t5_music_324016→t5_music_292156→t5_music_345669→t5_music_300338",
     });
   }
   if (request.method === "GET" && url.pathname === "/v1/contracts/form") return json(FORM_CONTRACT);
   if (request.method === "GET" && url.pathname === "/v1/contracts/capture-flow") return json(CAPTURE_FLOW_CONTRACT);
   if (request.method === "GET" && url.pathname === "/v1/contracts/audio-mix") return json(AUDIO_MIX_CONTRACT);
-  if (request.method === "GET" && url.pathname === "/v1/audio-state") {
+  if (request.method === "GET" && url.pathname === "/v1/contracts/music-pack") return json(MUSIC_PACK_CONTRACT);
+  if (request.method === "GET" && url.pathname === "/v1/music-state") {
     if (!(await authorized(request, env.CALLBACK_TOKEN))) return fail(401, "T5_UNAUTHORIZED", "Authentification requise.");
-    return json(await readAudioState(env));
+    return json(await readMusicState(env));
   }
   if (request.method === "POST" && url.pathname === "/v1/jobs") {
     if (!(await authorized(request, env.CLIENT_API_TOKEN))) return fail(401, "T5_UNAUTHORIZED", "Jeton client requis.");

@@ -2,8 +2,9 @@
 """Transforme l'attestation visuelle T5 en RenderResult complet après le mix audio.
 
 Le callback Cloudflare ne doit jamais accepter le résultat visuel silencieux. Ce
-finaliseur lie donc explicitement Afrofire, la voix B voice-11, le rapport 26/26
-et le MP4 final avant de produire un RenderResult au statut COMPLETED.
+finaliseur lie donc explicitement l’instrumentale choisie par le cycle strict,
+la voix B voice-11, le rapport 26/26 et le MP4 final avant de produire un
+RenderResult au statut COMPLETED.
 """
 from __future__ import annotations
 
@@ -78,17 +79,29 @@ def main() -> int:
     voice = audio["voice"]
     config_music = config["music"]
     config_voice = config["voice"]
+    pack_path = ROOT / config_music["pack"]
+    pack = load(pack_path)
+    selected_pack_track = next((track for track in pack["tracks"] if track["id"] == music["selected_music_id"]), None)
     voice_manifest = ROOT / config_voice["manifest"]
     clip_hashes = {f"S{clip['scene']}": clip["source_sha256"] for clip in config_voice["clips"]}
 
-    require(audio["mode"] == "owner_approved_afrofire_voice_b_complete", "Unexpected audio mode")
+    require(audio["mode"] == "owner_approved_music_rotation_voice_b_complete", "Unexpected audio mode")
     require(job["render"]["audio_mode"] == audio["mode"], "Render audio mode diverges from audio contract")
     require(audio["contract"] == str(audio_config_path.relative_to(ROOT)), "Audio contract path mismatch")
     require(audio["contract_sha256"] == sha256(audio_config_path), "Audio contract SHA-256 mismatch")
+    require(audio["music_pack"] == str(pack_path.relative_to(ROOT)), "Music pack path mismatch")
+    require(audio["music_pack_sha256"] == sha256(pack_path), "Music pack SHA-256 mismatch")
+    require(selected_pack_track is not None, "Selected music is absent from the approved pack")
+    for job_key, pack_key in (
+        ("selected_music_id", "id"), ("selected_choice", "choice"), ("pixabay_id", "pixabay_id"),
+        ("title", "title"), ("artist", "artist"), ("file", "file"), ("sha256", "sha256"),
+        ("bytes", "bytes"), ("source_sha256", "source_sha256"), ("source_bytes", "source_bytes"),
+        ("source_start_s", "source_start_s"),
+    ):
+        require(music[job_key] == selected_pack_track[pack_key], f"Music pack binding mismatch: {job_key}")
     require(voice["manifest_sha256"] == sha256(voice_manifest), "Voice manifest SHA-256 mismatch")
     require(voice["clip_source_sha256"] == clip_hashes, "Voice clip binding mismatch")
-    require(music["source_sha256"] == config_music["source_sha256"], "Music source binding mismatch")
-    require(music["source_bundled"] is False, "The full music source must not be bundled")
+    require(music["full_source_bundled"] is False, "The full music source must not be bundled")
     require(music["standalone_redistribution_forbidden"] is True, "Standalone music redistribution must remain forbidden")
 
     final_video = report["final_video"]
@@ -97,7 +110,9 @@ def main() -> int:
     require(final_video["bytes"] == args.video.stat().st_size, "Final MP4 size mismatch")
     require(report["visual"]["input_file_sha256"] == visual["output"]["sha256"], "Audio stage did not consume the visual-QC MP4")
     require(report["visual"]["bitstream_copy"] is True, "Visual bitstream was re-encoded")
-    require(report["music"]["source_sha256"] == music["source_sha256"], "Audio report music diverges from RenderJob")
+    require(report["music"]["selected_music_id"] == music["selected_music_id"], "Audio report music ID diverges from RenderJob")
+    require(report["music"]["source_sha256"] == music["source_sha256"], "Audio report music source diverges from RenderJob")
+    require(report["music"]["program_sha256"] == music["sha256"], "Audio report music program diverges from RenderJob")
     require(report["voice"]["voice_id"] == voice["voice_id"], "Audio report voice diverges from RenderJob")
     require(
         {f"S{item['scene']}": item["source_sha256"] for item in report["voice"]["clips"]} == clip_hashes,
@@ -116,7 +131,9 @@ def main() -> int:
     result["output"]["bytes"] = final_video["bytes"]
     result["inputs"].update({
         "audio_contract_sha256": audio["contract_sha256"],
+        "music_pack_sha256": audio["music_pack_sha256"],
         "music_source_sha256": music["source_sha256"],
+        "music_program_sha256": music["sha256"],
         "voice_manifest_sha256": voice["manifest_sha256"],
         "voice_clip_source_sha256": voice["clip_source_sha256"],
     })
@@ -129,12 +146,14 @@ def main() -> int:
     result["audio"] = {
         "mode": audio["mode"],
         "music": {
+            "selected_music_id": music["selected_music_id"],
             "selected_choice": music["selected_choice"],
             "pixabay_id": music["pixabay_id"],
             "title": music["title"],
             "artist": music["artist"],
+            "program_sha256": music["sha256"],
             "source_sha256": music["source_sha256"],
-            "source_bundled": music["source_bundled"],
+            "full_source_bundled": music["full_source_bundled"],
         },
         "voice": {
             "selected_option": voice["selected_option"],
