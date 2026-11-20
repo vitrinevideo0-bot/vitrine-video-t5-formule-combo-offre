@@ -1,0 +1,90 @@
+name: Premier montage silencieux T5 sur GitHub
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish_prerelease:
+        description: Publier le montage validé dans une pré-Release
+        required: true
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: t5-first-montage-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  render-validate-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Installer FFmpeg et les dépendances
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg
+          python -m pip install -r requirements.txt
+
+      - name: Tester les contrats et les preuves
+        run: |
+          python -m compileall -q engine tools tests
+          pytest -q
+          python tools/build_t5_capture_flow.py --output /tmp/T5_CAPTURE_FLOW_V1_0_0.json
+          cmp config/T5_CAPTURE_FLOW_V1_0_0.json /tmp/T5_CAPTURE_FLOW_V1_0_0.json
+          rm -rf /tmp/t5-ui-screens
+          python tools/generate_t5_ui_screens.py --output-dir /tmp/t5-ui-screens
+          diff -qr ui-screens /tmp/t5-ui-screens
+
+      - name: Télécharger et vérifier le rush Pexels sans le publier
+        run: python tools/fetch_t5_rush.py
+
+      - name: Produire le premier montage
+        run: |
+          rm -rf output/t5-first-montage-v1 .tmp/t5-first-montage
+          python engine/render_first_montage.py
+
+      - name: Valider 30 secondes, 900 images, continuité et fin stable
+        run: python tools/validate_first_montage.py
+
+      - name: Assembler la livraison sans le rush brut
+        run: |
+          set -euo pipefail
+          rm -rf release
+          mkdir release
+          cp output/t5-first-montage-v1/VIDEO_T5_PREMIER_MONTAGE_SILENCIEUX_V1_A_JUGER.mp4 release/
+          cp output/t5-first-montage-v1/T5_PREMIER_MONTAGE_PLANCHE.jpg release/
+          cp output/t5-first-montage-v1/T5_FIRST_MONTAGE_RENDER_REPORT.json release/
+          cp output/t5-first-montage-v1/T5_FIRST_MONTAGE_VALIDATION.json release/
+          cp rushes/manifest.json release/T5_RUSH_MANIFEST_SANS_MEDIA.json
+          cp docs/LICENCE_RUSH_DEMO.md release/
+          (cd release && sha256sum * > SHA256SUMS.txt)
+          test ! -e release/pexels_25724633.mp4
+
+      - name: Publier l’artefact
+        uses: actions/upload-artifact@v6
+        with:
+          name: t5-first-montage-${{ github.run_id }}
+          path: release/
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Publier une pré-Release additive
+        if: ${{ inputs.publish_prerelease }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="t5-first-montage-v1-candidate-${GITHUB_RUN_NUMBER}"
+          gh release create "$TAG" release/* \
+            --title "T5 · Premier montage silencieux V1 · candidat ${GITHUB_RUN_NUMBER}" \
+            --notes "Premier montage T5 à juger. Source unique Pexels hash-verrouillée, continuité d’une seule formule, transitions T1, 30 s, 900 images, fin stable et aucune piste audio. Les données visibles sont des placeholders de démonstration à remplacer." \
+            --prerelease \
+            --target "$GITHUB_SHA"

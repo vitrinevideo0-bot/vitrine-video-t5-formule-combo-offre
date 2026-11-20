@@ -1,0 +1,204 @@
+{
+  "schema_version": "1.0.0",
+  "template_id": "RESTAURATION-T5",
+  "status": "owner_approved_simple_french_proof",
+  "copy_revision": "T5_12_ECRANS_CORRIGES_2026-11-18",
+  "sources": {
+    "questions": "form/questions_T5.json",
+    "guide": "capture-guide/consignes_T5.json",
+    "capture_flow": "config/T5_CAPTURE_FLOW_V1_0_0.json"
+  },
+  "stable_screen_count": 12,
+  "states": [
+    "A_GUIDE",
+    "B_RECORDING",
+    "C_REVIEW"
+  ],
+  "display_states": [
+    "A / GUIDE",
+    "B / ENREGISTREMENT",
+    "C / VÉRIFICATION"
+  ],
+  "screens": [
+    {
+      "screen_number": 1,
+      "scene": 1,
+      "state": "A_GUIDE",
+      "display_state": "A / GUIDE",
+      "screen_id": "T5_CAPTURE_S1_A_GUIDE",
+      "file": "T5_CAPTURE_S1_A_GUIDE.png",
+      "size": [
+        720,
+        1280
+      ],
+      "sha256": "95a5c1aedc950bfda18dda27a51c3d13d9039fde8850d1621b2e9f85f8192604",
+      "json_binding": "config/T5_CAPTURE_FLOW_V1_0_0.json#/screens/0"
+    },
+    {
+      "screen_number": 2,
+      "scene": 1,
+      "state": "B_RECORDING",
+      "display_state": "B / ENREGISTREMENT",
+      "screen_id": "T5_CAPTURE_S1_B_RECORDING",
+      "file": "T5_CAPTURE_S1_B_RECORDING.png",
+      "size": [
+        720,
+        1280
+      ],
+      "sha256": "59f7ed6c1ca29ddb2ac5ac8ff645b579a9d6ca066b15ce5bb3cbc424429cd280",
+      "json_binding": "config/T5_CAPTURE_FLOW_V1_0_0.json#/screens/1"
+    },
+    {
+      "screen_number": 3,
+      "scene": 1,
+      "state": "C_REVIEW",
+      "display_state": "C / VÉRIFICATION",
+      "screen_id": "T5_CAPTURE_S1_C_REVIEW",
+      "file": "T5_CAPTURE_S1_C_REVIEW.png",
+      "size": [
+        720,
+        1280
+      ],
+      "sha256": "811c580dde871b073aa10eb221de406027d7d62d316efcc6d75800e945bed589",
+      "json_binding": "config/T5_CAPTURE_FLOW_V1_0_0.json#/screens/2"
+    },
+    {
+      "screen_number": 4,
+      "scene": 2,
+      "state": "A_GUIDE",
+      "display_state": "A / GUIDE",
+      "screen_id": "T5_CAPTURE_S2_A_GUIDE",
+      "file": "T5_CAPTURE_S2_A_GUIDE.png",
+      "size": [
+        720,
+        1280
+      ],
+      "sha256": "8a9c28d057648be04590336bb916b81d55ba0e5e79deabe23f52f1f3eaa86ead",
+      "json_binding": "config/T5_CAPTURE_FLOW_V1_0_0.json#/screens/3"
+    },
+    {
+      "screen_number": 5,
+      "scene": 2,
+      "state": "B_RECORDING",
+      "display_state": "B / ENREGISTREMENT",
+      "screen_id": "T5_CAPTURE_S2_B_RECORDING",
+      "file": "T5_CAPTURE_S2_B_RECORDING.png",
+      "size": [
+        720,
+        1280
+      ],
+      "sha256": "4a80958b0c070a75bde7c8dff2686cc0fe8b509c814aab826784071d40fe16fc",
+      "json_binding": "config/T5_CAPTURE_FLOW_V1_0_0.json#/screens/4"
+    },
+    {
+      "screen_number": 6,
+      "scene": 2,
+      "state": "C_REVIEW",
+      "display_state": "C / VÉRIFICATION",
+      "screen_id": "T5_CAPTURE_S2_C_REVIEW",
+      "file": "T5_CAPTURE_S2_C_REVIEW.png",
+      "size": [
+        720,
+        1280
+      ],
+      "sha256": "f6916f32efb095735f18bb0e7712b700bdfc1f12f2db0d91713ff8b72b22c3a6",
+      "json_binding": "config/T5_CAPTURE_FLOW_V1_0_0.json#/screens/5"
+    },
+    {
+      "screen_number": 7,
+      "scene": 3,
+      "state": "A_GUIDE",
+      "display_state": "A / GUIDE",
+      "screen_id": "T5_CAPTURE_S3_A_GUIDE",
+      "file": "T5_CAPTURE_S3_A_GUIDE.png",
+      "size": [
+        720,
+        1280
+      ],
+      "sha256": "cbb97384be4cf561869d11197a6924935538091a5bd614a7141dd1ea2a1a8289",
+      "json_binding": "config/T5_CAPTURE_FLOW_V1_0_0.json#/screens/6"
+    },
+    {
+      "screen_number": 8,
+      "scene": 3,
+      "state": "B_RECORDING",
+      "display_state": "B / ENREGISTREMENT",
+      "screen_id": "T5_CAPTURE_S3_B_RECORDING",
+      "file": "T5_CAPTURE_S3_B_RECORDING.png",
+      "size": [
+        720,
+        1280
+      ],
+      "sha256": "5ab7bb1a53f6f39eea58086736dd54f1540c8056d1aa1385b3d6b6382035a068",
+      "json_binding": "config/T5_CAPTURE_FLOW_V1_0_0.json#/screens/7"
+    },
+    {
+      "screen_number": 9,
+      "scene": 3,
+      "state": "C_REVIEW",
+      "display_state": "C / VÉRIFICATION",
+      "screen_id": "T5_CAPTURE_S3_C_REVIEW",
+      "file": "T5_CAPTURE_S3_C_REVIEW.png",
+      "size": [
+        720,
+        1280
+      ],
+      "sha256": "03ab702044c74de60b79de35833fdb33757c98e592d1079aeab8fda96c116fd5",
+      "json_binding": "config/T5_CAPTURE_FLOW_V1_0_0.json#/screens/8"
+    },
+    {
+      "screen_number": 10,
+      "scene": 4,
+      "state": "A_GUIDE",
+      "display_state": "A / GUIDE",
+      "screen_id": "T5_CAPTURE_S4_A_GUIDE",
+      "file": "T5_CAPTURE_S4_A_GUIDE.png",
+      "size": [
+        720,
+        1280
+      ],
+      "sha256": "f558cc46be16c5b44935cb23fbc3af959737445ef69ea74501cd5c74b8af0546",
+      "json_binding": "config/T5_CAPTURE_FLOW_V1_0_0.json#/screens/9"
+    },
+    {
+      "screen_number": 11,
+      "scene": 4,
+      "state": "B_RECORDING",
+      "display_state": "B / ENREGISTREMENT",
+      "screen_id": "T5_CAPTURE_S4_B_RECORDING",
+      "file": "T5_CAPTURE_S4_B_RECORDING.png",
+      "size": [
+        720,
+        1280
+      ],
+      "sha256": "7e051f35c8f238dec1f239323ca12590c32d58c0d4f8e62114cf8741829e217d",
+      "json_binding": "config/T5_CAPTURE_FLOW_V1_0_0.json#/screens/10"
+    },
+    {
+      "screen_number": 12,
+      "scene": 4,
+      "state": "C_REVIEW",
+      "display_state": "C / VÉRIFICATION",
+      "screen_id": "T5_CAPTURE_S4_C_REVIEW",
+      "file": "T5_CAPTURE_S4_C_REVIEW.png",
+      "size": [
+        720,
+        1280
+      ],
+      "sha256": "5f07e5386a23cbefc7fe7961aad54515b96e980b7c0e235e485a0d823caa7e59",
+      "json_binding": "config/T5_CAPTURE_FLOW_V1_0_0.json#/screens/11"
+    }
+  ],
+  "board": "T5_PLANCHE_12_ECRANS.png",
+  "board_size": [
+    898,
+    2116
+  ],
+  "board_sha256": "1236446346e7110870e88fba181825a6be5cd0cfad84e4c3499b8fd68c74b171",
+  "external_media_used": false,
+  "text_truncation_used": false,
+  "font_files": [
+    "assets/fonts/DejaVuSans.ttf",
+    "assets/fonts/DejaVuSans-Bold.ttf"
+  ]
+}

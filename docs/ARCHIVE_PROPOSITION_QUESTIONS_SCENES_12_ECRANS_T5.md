@@ -1,8 +1,10 @@
 # T5 RESTAURATION — FORMULE, COMBO ET OFFRE
 
-## Questions et 12 écrans corrigés à valider
+## Archive de la proposition ayant précédé l’approbation
 
-**Statut : PROPOSITION LOCALE — NON PUBLIÉE SUR GITHUB**
+**Statut : ARCHIVE — REMPLACÉE PAR LE CONTRAT APPROUVÉ**
+
+La source active est `docs/CONTRAT_QUESTIONS_12_ECRANS_T5.md`. Cette archive est conservée uniquement pour la traçabilité.
 
 **30 secondes · 4 scènes**
 

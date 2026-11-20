@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/vitrinevideo0-bot/vitrine-video-t5-formule-combo-offre/raw/main/schemas/T5_rush_manifest.schema.json",
+  "title": "RESTAURATION-T5 licensed demo rush manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "template_id", "purpose", "continuity_rule", "license", "source", "output_contract", "transition_contract", "scenes"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "template_id": { "const": "RESTAURATION-T5" },
+    "purpose": { "type": "string", "minLength": 1 },
+    "continuity_rule": {
+      "type": "object",
+      "required": ["one_offer_per_ad", "same_dish_drink_and_sides_across_four_scenes", "demo_offer", "source_count"],
+      "properties": {
+        "one_offer_per_ad": { "const": true },
+        "same_dish_drink_and_sides_across_four_scenes": { "const": true },
+        "demo_offer": { "type": "string", "minLength": 1 },
+        "source_count": { "const": 1 }
+      },
+      "additionalProperties": false
+    },
+    "license": {
+      "type": "object",
+      "required": ["provider", "license_url", "verified_at_utc", "summary", "raw_media_committed", "raw_media_published_as_artifact"],
+      "properties": {
+        "provider": { "const": "Pexels" },
+        "license_url": { "const": "https://www.pexels.com/license/" },
+        "verified_at_utc": { "type": "string", "format": "date" },
+        "summary": { "type": "string", "minLength": 1 },
+        "raw_media_committed": { "const": false },
+        "raw_media_published_as_artifact": { "const": false }
+      },
+      "additionalProperties": false
+    },
+    "source": {
+      "type": "object",
+      "required": ["pexels_id", "creator", "page_title", "page_url", "download_url", "cache_filename", "expected_bytes", "sha256", "width", "height", "fps", "duration_seconds", "visible_items"],
+      "properties": {
+        "pexels_id": { "const": 25724633 },
+        "creator": { "type": "string", "minLength": 1 },
+        "page_title": { "type": "string", "minLength": 1 },
+        "page_url": { "type": "string", "format": "uri", "pattern": "^https://www\\.pexels\\.com/" },
+        "download_url": { "type": "string", "format": "uri", "pattern": "^https://videos\\.pexels\\.com/" },
+        "cache_filename": { "const": "pexels_25724633.mp4" },
+        "expected_bytes": { "type": "integer", "minimum": 1 },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "width": { "const": 1440 },
+        "height": { "const": 2430 },
+        "fps": { "const": 60.0 },
+        "duration_seconds": { "type": "number", "exclusiveMinimum": 11.0 },
+        "visible_items": { "type": "array", "minItems": 2, "items": { "type": "string", "minLength": 1 } }
+      },
+      "additionalProperties": false
+    },
+    "output_contract": {
+      "type": "object",
+      "required": ["width", "height", "fps", "duration_seconds", "total_frames", "video_codec", "pixel_format", "audio_streams", "burned_demo_text", "demo_text_must_be_replaced_for_merchant_delivery"],
+      "properties": {
+        "width": { "const": 720 },
+        "height": { "const": 1280 },
+        "fps": { "const": 30 },
+        "duration_seconds": { "const": 30.0 },
+        "total_frames": { "const": 900 },
+        "video_codec": { "const": "h264" },
+        "pixel_format": { "const": "yuv420p" },
+        "audio_streams": { "const": 0 },
+        "burned_demo_text": { "const": true },
+        "demo_text_must_be_replaced_for_merchant_delivery": { "const": true }
+      },
+      "additionalProperties": false
+    },
+    "transition_contract": {
+      "type": "object",
+      "required": ["reference", "family", "duration_seconds", "offsets_seconds", "variants"],
+      "properties": {
+        "reference": { "const": "T1" },
+        "family": { "const": "dish_swipe" },
+        "duration_seconds": { "const": 0.267 },
+        "offsets_seconds": { "const": [6.0, 14.0, 21.0] },
+        "variants": { "const": ["slideleft", "slideright", "slideleft"] }
+      },
+      "additionalProperties": false
+    },
+    "scenes": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "prefixItems": [
+        { "$ref": "#/$defs/scene1" },
+        { "$ref": "#/$defs/scene2" },
+        { "$ref": "#/$defs/scene3" },
+        { "$ref": "#/$defs/scene4" }
+      ],
+      "items": false
+    }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "scene": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scene", "title", "catalog_duration_seconds", "render_input_duration_seconds", "trim_start_seconds", "motion_seconds", "freeze_tail_seconds", "purpose"],
+      "properties": {
+        "scene": { "type": "string" },
+        "title": { "type": "string", "minLength": 1 },
+        "catalog_duration_seconds": { "type": "integer", "minimum": 1 },
+        "render_input_duration_seconds": { "type": "number", "exclusiveMinimum": 0 },
+        "trim_start_seconds": { "type": "number", "minimum": 0 },
+        "motion_seconds": { "type": "number", "exclusiveMinimum": 0 },
+        "freeze_tail_seconds": { "type": "number", "minimum": 0 },
+        "purpose": { "type": "string", "minLength": 1 }
+      }
+    },
+    "scene1": { "allOf": [{ "$ref": "#/$defs/scene" }, { "properties": { "scene": { "const": "S1" }, "title": { "const": "LA FORMULE" }, "catalog_duration_seconds": { "const": 6 } } }] },
+    "scene2": { "allOf": [{ "$ref": "#/$defs/scene" }, { "properties": { "scene": { "const": "S2" }, "title": { "const": "CE QU'IL Y A DANS LA FORMULE" }, "catalog_duration_seconds": { "const": 8 } } }] },
+    "scene3": { "allOf": [{ "$ref": "#/$defs/scene" }, { "properties": { "scene": { "const": "S3" }, "title": { "const": "LE PRIX" }, "catalog_duration_seconds": { "const": 7 } } }] },
+    "scene4": { "allOf": [{ "$ref": "#/$defs/scene" }, { "properties": { "scene": { "const": "S4" }, "title": { "const": "COMMANDER" }, "catalog_duration_seconds": { "const": 9 } } }] }
+  }
+}

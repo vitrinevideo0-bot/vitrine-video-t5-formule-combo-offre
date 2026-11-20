@@ -1,0 +1,46 @@
+name: Contrats, questions et 12 écrans T5
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Installer les dépendances
+        run: python -m pip install -r requirements.txt
+
+      - name: Compiler et tester
+        run: |
+          python -m compileall -q engine tools tests
+          pytest -q
+
+      - name: Prouver le contrat des 12 écrans
+        run: |
+          python tools/build_t5_capture_flow.py --output /tmp/T5_CAPTURE_FLOW_V1_0_0.json
+          cmp config/T5_CAPTURE_FLOW_V1_0_0.json /tmp/T5_CAPTURE_FLOW_V1_0_0.json
+
+      - name: Prouver les 12 PNG
+        run: |
+          rm -rf /tmp/t5-ui-screens
+          python tools/generate_t5_ui_screens.py --output-dir /tmp/t5-ui-screens
+          diff -qr ui-screens /tmp/t5-ui-screens
+
+      - name: Prouver la simulation autonome
+        run: |
+          python tools/build_t5_simulation.py --output /tmp/T5_12_ECRANS_EXECUTABLE.html
+          cmp simulation/T5_12_ECRANS_EXECUTABLE.html /tmp/T5_12_ECRANS_EXECUTABLE.html

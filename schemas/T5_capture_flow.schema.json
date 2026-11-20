@@ -1,0 +1,189 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/vitrinevideo0-bot/vitrine-video-t5-formule-combo-offre/raw/main/schemas/T5_capture_flow.schema.json",
+  "title": "RESTAURATION-T5 executable twelve-screen capture flow",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "contract_id",
+    "template_id",
+    "template_version",
+    "status",
+    "copy_revision",
+    "sources",
+    "counts",
+    "scene_durations_ms",
+    "continuity_rules",
+    "transient_states",
+    "runtime_rules",
+    "screens",
+    "session_model",
+    "renderer_handoff"
+  ],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "contract_id": { "const": "restauration_t5_formule_combo_offre_capture_flow_v1_0_0" },
+    "template_id": { "const": "RESTAURATION-T5" },
+    "template_version": { "const": "1.0.0" },
+    "status": { "const": "owner_approved_executable_contract" },
+    "copy_revision": { "const": "T5_12_ECRANS_CORRIGES_2026-11-18" },
+    "sources": {
+      "type": "object",
+      "required": ["guide", "questions", "approval"],
+      "properties": {
+        "guide": { "$ref": "#/$defs/hashSource" },
+        "questions": { "$ref": "#/$defs/hashSource" },
+        "approval": { "type": "string", "pattern": "^approvals/.*\\.json$" }
+      },
+      "additionalProperties": false
+    },
+    "counts": {
+      "const": {
+        "merchant_questions": 6,
+        "scenes": 4,
+        "states_per_scene": 3,
+        "stable_capture_screens": 12
+      }
+    },
+    "scene_durations_ms": {
+      "const": [6000, 8000, 7000, 9000]
+    },
+    "continuity_rules": {
+      "type": "object",
+      "required": ["one_offer_per_ad", "same_dish_drink_and_sides_across_all_scenes", "source_text"],
+      "properties": {
+        "one_offer_per_ad": { "const": true },
+        "same_dish_drink_and_sides_across_all_scenes": { "const": true },
+        "source_text": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "transient_states": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "counted_in_12_stable_screens", "sequence", "trigger", "then", "must_not_be_written_into_capture"],
+        "properties": {
+          "id": { "const": "COUNTDOWN_3_2_1" },
+          "counted_in_12_stable_screens": { "const": false },
+          "sequence": { "const": [3, 2, 1] },
+          "trigger": { "const": "START_RECORDING" },
+          "then": { "const": "B_RECORDING" },
+          "must_not_be_written_into_capture": { "const": true }
+        },
+        "additionalProperties": false
+      }
+    },
+    "runtime_rules": {
+      "type": "object",
+      "required": ["camera_required", "microphone_requested", "speech_optional", "playback_audio_enabled", "source_speed", "video_orientation", "automatic_subtitles", "retake_deletes_previous_capture"],
+      "properties": {
+        "camera_required": { "const": true },
+        "microphone_requested": { "const": true },
+        "speech_optional": { "const": true },
+        "playback_audio_enabled": { "const": true },
+        "source_speed": { "const": 1.0 },
+        "video_orientation": { "const": "vertical" },
+        "automatic_subtitles": { "const": false },
+        "retake_deletes_previous_capture": { "const": true }
+      },
+      "additionalProperties": false
+    },
+    "screens": {
+      "type": "array",
+      "minItems": 12,
+      "maxItems": 12,
+      "items": { "$ref": "#/$defs/screen" }
+    },
+    "session_model": {
+      "type": "object",
+      "required": ["name", "fields", "persistence"],
+      "properties": {
+        "name": { "const": "T5FormuleComboOffreSession" },
+        "fields": { "const": ["merchant_payload", "captures", "current_screen_id", "accepted_scene_ids"] },
+        "persistence": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "renderer_handoff": {
+      "type": "object",
+      "required": ["trigger", "render_job", "capture_bindings", "merchant_payload_source", "merchant_payload_targets", "production_render_plane"],
+      "properties": {
+        "trigger": { "const": "ACCEPT_CAPTURE on T5_CAPTURE_S4_C_REVIEW" },
+        "render_job": { "const": "demo/render_job_silent_demo.json" },
+        "capture_bindings": {
+          "type": "object",
+          "minProperties": 4,
+          "maxProperties": 4,
+          "additionalProperties": { "type": "string", "pattern": "^runtime\\.captures\\.S[1-4]\\.uri$" }
+        },
+        "merchant_payload_source": { "const": "form/questions_T5.json" },
+        "merchant_payload_targets": {
+          "type": "array",
+          "minItems": 6,
+          "maxItems": 6,
+          "items": { "type": "string", "pattern": "^merchant_payload\\." }
+        },
+        "production_render_plane": { "const": "github_actions" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "hashSource": {
+      "type": "object",
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      },
+      "additionalProperties": false
+    },
+    "action": {
+      "type": "object",
+      "required": ["event", "effects", "next_screen_id"],
+      "properties": {
+        "event": { "type": "string", "minLength": 1 },
+        "label": { "type": "string", "minLength": 1 },
+        "effects": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+        "next_screen_id": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "screen": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scene_id", "scene_index", "scene_total", "capture_duration_ms", "capture_slot", "data_used",
+        "continuity_rule", "ordinal", "screen_id", "route_key", "state", "display_state", "bindings",
+        "resolved_text", "visible_components", "forbidden_components", "actions", "proof_png"
+      ],
+      "properties": {
+        "scene_id": { "enum": ["S1", "S2", "S3", "S4"] },
+        "scene_index": { "type": "integer", "minimum": 1, "maximum": 4 },
+        "scene_total": { "const": 4 },
+        "capture_duration_ms": { "enum": [6000, 7000, 8000, 9000] },
+        "capture_slot": { "type": "string", "pattern": "^captures\\.S[1-4]$" },
+        "data_used": { "type": "array", "minItems": 1, "items": { "type": "string", "pattern": "^merchant_payload\\." } },
+        "continuity_rule": { "type": "string", "minLength": 1 },
+        "ordinal": { "type": "integer", "minimum": 1, "maximum": 12 },
+        "screen_id": { "type": "string", "pattern": "^T5_CAPTURE_S[1-4]_[ABC]_" },
+        "route_key": { "type": "string", "pattern": "^t5\\.capture\\.s[1-4]\\." },
+        "state": { "enum": ["A_GUIDE", "B_RECORDING", "C_REVIEW"] },
+        "display_state": { "enum": ["A / GUIDE", "B / ENREGISTREMENT", "C / VÉRIFICATION"] },
+        "bindings": { "type": "object" },
+        "resolved_text": { "type": "object" },
+        "visible_components": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+        "forbidden_components": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+        "capture": { "type": "object" },
+        "playback": { "type": "object" },
+        "actions": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/action" } },
+        "proof_png": { "type": "string", "pattern": "^ui-screens/T5_CAPTURE_S[1-4]_[ABC]_.*\\.png$" }
+      }
+    }
+  }
+}

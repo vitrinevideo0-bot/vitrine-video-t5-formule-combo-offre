@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/vitrinevideo0-bot/vitrine-video-t5-formule-combo-offre/raw/main/schemas/T5_render_job.schema.json",
+  "title": "RESTAURATION-T5 first silent montage RenderJob",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "job_id", "template_id", "template_version", "is_demo", "merchant_payload", "captures", "render_profile", "output"],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "job_id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "template_id": { "const": "RESTAURATION-T5" },
+    "template_version": { "const": "1.0.0" },
+    "is_demo": { "const": true },
+    "merchant_payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["nom", "offre", "contenu", "prix", "whatsapp", "quartier"],
+      "properties": {
+        "nom": { "$ref": "#/$defs/nonEmpty" },
+        "offre": { "$ref": "#/$defs/nonEmpty" },
+        "contenu": { "$ref": "#/$defs/nonEmpty" },
+        "prix": { "$ref": "#/$defs/nonEmpty" },
+        "whatsapp": { "$ref": "#/$defs/nonEmpty" },
+        "quartier": { "$ref": "#/$defs/nonEmpty" }
+      }
+    },
+    "captures": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "continuity"],
+      "properties": {
+        "source": { "const": "rushes/manifest.json" },
+        "continuity": { "const": "one_pexels_source_same_cake_and_cappuccino" }
+      }
+    },
+    "render_profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["width", "height", "fps", "duration_seconds", "scene_durations_seconds", "transition_reference", "transition_style", "include_audio", "burn_demo_text", "demo_disclaimer_required"],
+      "properties": {
+        "width": { "const": 720 },
+        "height": { "const": 1280 },
+        "fps": { "const": 30 },
+        "duration_seconds": { "const": 30.0 },
+        "scene_durations_seconds": { "const": [6, 8, 7, 9] },
+        "transition_reference": { "const": "T1" },
+        "transition_style": { "const": "dish_swipe_slide" },
+        "include_audio": { "const": false },
+        "burn_demo_text": { "const": true },
+        "demo_disclaimer_required": { "const": true }
+      }
+    },
+    "output": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["filename", "audio", "demo_only"],
+      "properties": {
+        "filename": { "const": "VIDEO_T5_PREMIER_MONTAGE_SILENCIEUX_V1_A_JUGER.mp4" },
+        "audio": { "const": false },
+        "demo_only": { "const": true }
+      }
+    }
+  },
+  "$defs": {
+    "nonEmpty": { "type": "string", "minLength": 1, "maxLength": 140 }
+  }
+}

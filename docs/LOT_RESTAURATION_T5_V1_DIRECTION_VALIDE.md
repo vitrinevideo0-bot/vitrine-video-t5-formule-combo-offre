@@ -1,5 +1,5 @@
 # RESTAURATION‑T5 — Formule, combo ou offre
-## Direction V1 + T1 · reverse engineering à valider
+## Direction V1 + T1 · choix validé le 18 novembre 2026
 
 **Choix propriétaire enregistré : V1 avec T1.**
 
@@ -8,7 +8,7 @@
 
 Ces vidéos restent des références d’analyse. Elles ne seront ni intégrées, ni republiées, ni copiées dans T5.
 
-## Proposition T5 issue du reverse engineering
+## Adaptation T5 issue du reverse engineering
 
 | Scène | Durée | Capture demandée | Information affichée |
 |---|---:|---|---|
@@ -17,7 +17,7 @@ Ces vidéos restent des références d’analyse. Elles ne seront ni intégrées
 | S3 — LE PRIX | 7 s | Retour à la formule complète, quantité visible | prix exact et éventuelle condition fournie |
 | S4 — COMMANDER | 9 s | Fermeture de la boîte, remise du pack, comptoir ou point de retrait | quartier/zone + WhatsApp + CTA |
 
-## Grammaire de transition proposée
+## Grammaire de transition retenue
 
 1. **S1 → S2 — PACK SWIPE** : la boîte, le plateau ou le sac traverse le cadre ; coupe au maximum d’occlusion ; premier élément apparaît dans le même axe.
 2. **Dans S2 — MATCHED ITEM SWAPS** : chaque élément est tenu à la même hauteur et dans le même cadre ; de courtes impulsions latérales révèlent les composants sans masquer leur quantité.
@@ -32,11 +32,9 @@ Ces vidéos restent des références d’analyse. Elles ne seront ni intégrées
 - quantité, prix et conditions viennent exclusivement des réponses du commerçant ;
 - une transition reste courte et subordonnée à la lisibilité du produit ;
 - aucun séparateur décoratif permanent, aucune barre colorée générique et aucun effet opaque copié ;
-- format cible proposé : 30 s, 720 × 1280, 30 i/s, 900 images, scènes 6/8/7/9 s ;
+- format cible retenu : 30 s, 720 × 1280, 30 i/s, 900 images, scènes 6/8/7/9 s ;
 - aucun moteur, écran, audio ou déploiement n’est déclaré par cette seule proposition.
 
-## Décision attendue
+## Décision enregistrée
 
-- **VALIDER V1 + T1 ADAPTÉ** : autorise la création des six questions T5, des douze écrans A/B/C et de leurs JSON exécutables ;
-- **DEMANDER UNE MODIFICATION** : préciser la scène ou la transition à ajuster ;
-- **REFUSER** : les décisions V1/T1 restent archivées mais aucune implémentation n’est lancée.
+Le propriétaire a choisi **V1 avec T1** le 18 novembre 2026. L’approbation structurée est conservée dans `approvals/APPROBATION_DIRECTION_CREATIVE_T5_2026-11-18.json`. La validation ultérieure des six questions et des douze écrans est conservée séparément.

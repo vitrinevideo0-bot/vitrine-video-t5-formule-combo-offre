@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/vitrinevideo0-bot/vitrine-video-t5-formule-combo-offre/raw/main/schemas/T5_questions.schema.json",
+  "title": "RESTAURATION-T5 owner-approved merchant questions",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "template_id",
+    "title",
+    "status",
+    "additionalProperties",
+    "fields",
+    "proposal_decision",
+    "approval"
+  ],
+  "properties": {
+    "schema_version": { "const": "1.0.0" },
+    "template_id": { "const": "RESTAURATION-T5" },
+    "title": { "type": "string", "minLength": 1 },
+    "status": { "const": "owner_approved" },
+    "additionalProperties": { "const": false },
+    "fields": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "prefixItems": [
+        { "$ref": "#/$defs/nom" },
+        { "$ref": "#/$defs/offre" },
+        { "$ref": "#/$defs/contenu" },
+        { "$ref": "#/$defs/prix" },
+        { "$ref": "#/$defs/whatsapp" },
+        { "$ref": "#/$defs/quartier" }
+      ],
+      "items": false
+    },
+    "proposal_decision": {
+      "type": "object",
+      "required": ["question_count", "all_six_required", "why", "invented_content_forbidden"],
+      "properties": {
+        "question_count": { "const": 6 },
+        "all_six_required": { "const": true },
+        "why": { "type": "string", "minLength": 1 },
+        "invented_content_forbidden": { "const": true }
+      },
+      "additionalProperties": false
+    },
+    "approval": {
+      "type": "object",
+      "required": ["date", "decision_channel", "question_id", "selected_option_id", "decision", "scope"],
+      "properties": {
+        "date": { "const": "2026-11-18" },
+        "decision_channel": { "const": "arena_ask_user" },
+        "question_id": { "const": "validation_questions_t5" },
+        "selected_option_id": { "const": "valider_questions" },
+        "decision": { "const": "Valider les 6 questions" },
+        "scope": {
+          "type": "array",
+          "minItems": 6,
+          "maxItems": 6,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "$defs": {
+    "field": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "question", "required", "minLength", "maxLength", "example", "json_target", "used_in_scenes"],
+      "properties": {
+        "id": { "type": "string" },
+        "question": { "type": "string", "minLength": 1 },
+        "required": { "const": true },
+        "minLength": { "type": "integer", "minimum": 1 },
+        "maxLength": { "type": "integer", "minimum": 4 },
+        "example": { "type": "string", "minLength": 1 },
+        "helper": { "type": "string", "minLength": 1 },
+        "pattern": { "type": "string", "minLength": 1 },
+        "json_target": { "type": "string", "pattern": "^merchant_payload\\.[a-z]+$" },
+        "used_in_scenes": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "enum": ["S1", "S2", "S3", "S4"] }
+        }
+      }
+    },
+    "nom": {
+      "allOf": [
+        { "$ref": "#/$defs/field" },
+        { "properties": { "id": { "const": "nom" }, "json_target": { "const": "merchant_payload.nom" } } }
+      ]
+    },
+    "offre": {
+      "allOf": [
+        { "$ref": "#/$defs/field" },
+        { "properties": { "id": { "const": "offre" }, "json_target": { "const": "merchant_payload.offre" } } }
+      ]
+    },
+    "contenu": {
+      "allOf": [
+        { "$ref": "#/$defs/field" },
+        { "properties": { "id": { "const": "contenu" }, "json_target": { "const": "merchant_payload.contenu" } } }
+      ]
+    },
+    "prix": {
+      "allOf": [
+        { "$ref": "#/$defs/field" },
+        { "properties": { "id": { "const": "prix" }, "json_target": { "const": "merchant_payload.prix" } } }
+      ]
+    },
+    "whatsapp": {
+      "allOf": [
+        { "$ref": "#/$defs/field" },
+        { "properties": { "id": { "const": "whatsapp" }, "json_target": { "const": "merchant_payload.whatsapp" } } }
+      ]
+    },
+    "quartier": {
+      "allOf": [
+        { "$ref": "#/$defs/field" },
+        { "properties": { "id": { "const": "quartier" }, "json_target": { "const": "merchant_payload.quartier" } } }
+      ]
+    }
+  }
+}

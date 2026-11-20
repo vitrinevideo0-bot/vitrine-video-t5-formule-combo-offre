@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.0.0",
+  "template_id": "RESTAURATION-T5",
+  "decision_id": "T5_QUESTIONS_12_ECRANS_2026-11-18",
+  "status": "owner_approved_for_implementation",
+  "date_local": "2026-11-18",
+  "timezone": "Africa/Lagos",
+  "decision_channel": "arena_chat_and_ask_user",
+  "creative_direction": {
+    "video_reference": "V1",
+    "transition_reference": "T1"
+  },
+  "screen_copy": {
+    "decision": "Owner supplied the corrected 12-screen wording and the one-formula continuity rule.",
+    "source": "capture-guide/consignes_T5.json",
+    "sha256": "91d3906b4bec0139c236a2b7dec99d95bdc08035e0702770c776ad581f1602e6"
+  },
+  "questions": {
+    "decision": "Valider les 6 questions",
+    "selected_option_id": "valider_questions",
+    "source": "form/questions_T5.json",
+    "sha256": "9426cbdb5e11a0b951f805573660ea7e75ee7789c72a97d9b8a49af9c9eeaeb0"
+  },
+  "requirements": {
+    "one_formula_per_ad": true,
+    "same_dish_drink_and_sides_across_four_scenes": true,
+    "screen_count": 12,
+    "scene_durations_seconds": [
+      6,
+      8,
+      7,
+      9
+    ],
+    "simple_concrete_french": true
+  },
+  "publication_authorized": true
+}

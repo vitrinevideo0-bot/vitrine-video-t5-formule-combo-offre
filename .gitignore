@@ -1,9 +1,14 @@
-.cache/
-.tmp/
-reference-media/
-*.mp4
-*.mov
-*.mkv
-*.webm
-.DS_Store
 __pycache__/
+.pytest_cache/
+*.py[cod]
+.DS_Store
+
+# Médias bruts : jamais versionnés ni publiés.
+.cache/
+rushes/cache/
+rushes/*.mp4
+
+# Fichiers intermédiaires et rendus locaux reproductibles.
+.tmp/
+output/
+release/

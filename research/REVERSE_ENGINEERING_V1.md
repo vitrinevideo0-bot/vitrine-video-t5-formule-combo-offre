@@ -1,7 +1,7 @@
 # RESTAURATION‑T5 — Reverse engineering V1 + T1
 
 Date : 2026-11-18  
-État : proposition préparée après sélection propriétaire ; validation créative encore requise.
+État : direction V1 + T1 approuvée ; adaptation T5 appliquée au premier candidat silencieux.
 
 ## Sources sélectionnées
 
@@ -110,7 +110,7 @@ Les copies privées ont seulement servi à mesurer les plans et les ruptures. El
 
 ---
 
-# 3. DÉCISION MOTEUR PROPOSÉE
+# 3. DÉCISION MOTEUR RETENUE POUR LE PREMIER CANDIDAT
 
 ## 3.1 Contrat temporel
 
@@ -132,7 +132,7 @@ Chaque raccord doit être déterministe et décrit dans le JSON :
 - position cible du produit ;
 - fallback en cut sec si le rush ne fournit pas le mouvement nécessaire.
 
-Cible initiale à valider : zone de rupture de 4 à 8 images, sans masque permanent. Le moteur ne fabrique ni boîte, ni main, ni quantité absente du rush.
+Le premier candidat utilise une zone de rupture de 8 images, sans masque permanent. Le moteur ne fabrique ni boîte, ni main, ni quantité absente du rush.
 
 ## 3.3 Règles de lisibilité
 
@@ -142,12 +142,11 @@ Cible initiale à valider : zone de rupture de 4 à 8 images, sans masque perman
 - aucun flash décoratif, aucune barre unie et aucun élément de marque de la référence ;
 - les transitions internes de S2 ne peuvent pas réduire le temps utile de preuve des composants.
 
-## 3.4 Frontières de cette validation
+## 3.4 Frontières des approbations
 
-Une validation de ce document autorisera les six questions et les douze écrans exécutables. Elle n’approuvera pas encore :
+La direction V1 + T1, puis les six questions et les douze écrans, ont été approuvés séparément. Le premier montage silencieux reste un candidat à juger. Aucune approbation n’est encore déclarée pour :
 
-- une palette ou des polices finales ;
+- une palette ou des polices de production finales ;
 - une musique ou une voix ;
-- un master silencieux ;
-- un déploiement Cloudflare ;
-- une publication GitHub de production.
+- le premier montage en tant que master final ;
+- un déploiement Cloudflare.

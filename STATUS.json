@@ -4,41 +4,62 @@
   "template_name": "Formule, combo ou offre",
   "updated_on": "2026-11-18",
   "workflow": {
-    "status_number": 4,
-    "status": "Owner-recommended T5 12-screen copy recorded locally; six questions remain pending explicit confirmation before any GitHub publication",
+    "status_number": 5,
+    "status": "Owner-approved questions and 12-screen copy implemented locally; first silent montage passes local validation and awaits GitHub server validation plus owner review",
     "completion_percent_claimed": null
   },
   "owner_decisions": {
     "video_reference": "V1",
     "transition_reference": "T1",
-    "approval_record": "approvals/APPROBATION_DIRECTION_CREATIVE_T5_2026-11-18.json"
+    "creative_approval": "approvals/APPROBATION_DIRECTION_CREATIVE_T5_2026-11-18.json",
+    "questions_and_screens_approval": "approvals/APPROBATION_QUESTIONS_ET_12_ECRANS_T5_2026-11-18.json",
+    "one_offer_per_ad": true,
+    "same_dish_drink_and_sides_across_four_scenes": true,
+    "six_questions_approved": true,
+    "twelve_screen_copy_approved": true
   },
-  "prepared": {
-    "reference_manifest": true,
-    "reverse_engineering_three_layers": true,
-    "four_scene_adaptation_proposed": true,
-    "deterministic_transition_grammar_proposed": true,
-    "six_merchant_questions_proposed": true,
-    "twelve_screen_copy_proposed": true,
-    "proposal_document": "docs/PROPOSITION_QUESTIONS_SCENES_12_ECRANS_T5_A_VALIDER.md",
-    "owner_recommended_screen_copy_recorded": true,
-    "owner_rule_one_formula_across_four_scenes": true
+  "implementation": {
+    "questions_json": true,
+    "capture_guide_json": true,
+    "twelve_screen_flow": true,
+    "twelve_png_proofs": true,
+    "standalone_simulation": true,
+    "licensed_demo_rush_manifest": true,
+    "first_silent_montage_renderer": true,
+    "first_silent_montage_validator": true,
+    "github_ci_workflow": true,
+    "github_render_workflow": true
   },
-  "not_started": [
-    "owner_validation_of_six_questions",
-    "owner_validation_of_reverse_engineering",
-    "capture_contract",
-    "visual_engine",
-    "voice_audition",
-    "music_audition",
-    "complete_render",
-    "cloudflare_control_plane",
-    "integrator_package"
-  ],
+  "local_validation": {
+    "python_tests": "PASS_16_OF_16",
+    "first_montage": "PASS_12_OF_12",
+    "first_montage_sha256": "694fe4ff15cfa4d22938ce065619bd43ab1260c70867228b47dae42bf3c77139",
+    "deterministic_rerender_sha256_match": true,
+    "duration_seconds": 30.0,
+    "frames": 900,
+    "dimensions": "720x1280",
+    "fps": 30,
+    "audio_streams": 0,
+    "final_three_seconds_stable": true,
+    "raw_rush_committed": false,
+    "raw_rush_published": false
+  },
+  "server_validation": {
+    "repository_created": false,
+    "repository_public": false,
+    "implementation_commit": null,
+    "ci_run_id": null,
+    "render_run_id": null,
+    "release_tag": null,
+    "first_montage_sha256": null
+  },
   "claims": {
-    "implemented": false,
+    "implemented": true,
     "github_published": false,
+    "first_montage_owner_approved": false,
+    "audio_implemented": false,
     "cloudflare_deployed": false,
     "production_ready": false
-  }
+  },
+  "next_decision": "Owner judges the first silent montage before voice, music, final merchant data or production integration."
 }

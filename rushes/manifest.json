@@ -1,0 +1,106 @@
+{
+  "schema_version": "1.0.0",
+  "template_id": "RESTAURATION-T5",
+  "purpose": "Un rush Pexels vertical de démonstration montre la même formule gâteau et cappuccino. Quatre fenêtres et gels d'image en sont dérivés sans publier le rush brut.",
+  "continuity_rule": {
+    "one_offer_per_ad": true,
+    "same_dish_drink_and_sides_across_four_scenes": true,
+    "demo_offer": "Gâteau et cappuccino",
+    "source_count": 1
+  },
+  "license": {
+    "provider": "Pexels",
+    "license_url": "https://www.pexels.com/license/",
+    "verified_at_utc": "2026-11-18",
+    "summary": "La page indique une licence gratuite Pexels. Le projet conserve l'attribution et ne versionne ni ne republie le rush brut.",
+    "raw_media_committed": false,
+    "raw_media_published_as_artifact": false
+  },
+  "source": {
+    "pexels_id": 25724633,
+    "creator": "Esra Afşar",
+    "page_title": "A table with a plate of food on it",
+    "page_url": "https://www.pexels.com/video/a-table-with-a-plate-of-food-on-it-25724633/",
+    "download_url": "https://videos.pexels.com/video-files/25724633/11903941_1440_2430_60fps.mp4",
+    "cache_filename": "pexels_25724633.mp4",
+    "expected_bytes": 11277371,
+    "sha256": "2301f2f293451064a03d1eb67a70e36e4b43fae9f8ae039c043c7770576de7ab",
+    "width": 1440,
+    "height": 2430,
+    "fps": 60.0,
+    "duration_seconds": 11.283333,
+    "visible_items": [
+      "une part de gâteau sur une assiette",
+      "un cappuccino dans une tasse"
+    ]
+  },
+  "output_contract": {
+    "width": 720,
+    "height": 1280,
+    "fps": 30,
+    "duration_seconds": 30.0,
+    "total_frames": 900,
+    "video_codec": "h264",
+    "pixel_format": "yuv420p",
+    "audio_streams": 0,
+    "burned_demo_text": true,
+    "demo_text_must_be_replaced_for_merchant_delivery": true
+  },
+  "transition_contract": {
+    "reference": "T1",
+    "family": "dish_swipe",
+    "duration_seconds": 0.267,
+    "offsets_seconds": [
+      6.0,
+      14.0,
+      21.0
+    ],
+    "variants": [
+      "slideleft",
+      "slideright",
+      "slideleft"
+    ]
+  },
+  "scenes": [
+    {
+      "scene": "S1",
+      "title": "LA FORMULE",
+      "catalog_duration_seconds": 6,
+      "render_input_duration_seconds": 6.267,
+      "trim_start_seconds": 0.0,
+      "motion_seconds": 1.5,
+      "freeze_tail_seconds": 4.767,
+      "purpose": "La tasse et le gâteau sont visibles ensemble, puis l'image reste lisible."
+    },
+    {
+      "scene": "S2",
+      "title": "CE QU'IL Y A DANS LA FORMULE",
+      "catalog_duration_seconds": 8,
+      "render_input_duration_seconds": 8.267,
+      "trim_start_seconds": 2.5,
+      "motion_seconds": 8.267,
+      "freeze_tail_seconds": 0.0,
+      "purpose": "Le mouvement réel sépare puis réunit le gâteau et le cappuccino."
+    },
+    {
+      "scene": "S3",
+      "title": "LE PRIX",
+      "catalog_duration_seconds": 7,
+      "render_input_duration_seconds": 7.267,
+      "trim_start_seconds": 10.6,
+      "motion_seconds": 0.2,
+      "freeze_tail_seconds": 7.067,
+      "purpose": "La formule complète reste stable pour rendre le prix lisible."
+    },
+    {
+      "scene": "S4",
+      "title": "COMMANDER",
+      "catalog_duration_seconds": 9,
+      "render_input_duration_seconds": 9.0,
+      "trim_start_seconds": 8.0,
+      "motion_seconds": 3.283333,
+      "freeze_tail_seconds": 5.716667,
+      "purpose": "La tasse revient près du gâteau, puis la fin reste stable pour le contact."
+    }
+  ]
+}

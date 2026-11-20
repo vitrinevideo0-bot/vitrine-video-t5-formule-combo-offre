@@ -1,0 +1,80 @@
+{
+  "schema_version": "1.0.0",
+  "template_id": "RESTAURATION-T5",
+  "version": "1.0.0",
+  "display_name": "Formule, combo et offre",
+  "status": "OWNER_APPROVED_IMPLEMENTED_PENDING_FIRST_MONTAGE_REVIEW",
+  "format": {
+    "width": 720,
+    "height": 1280,
+    "orientation": "vertical",
+    "fps": 30,
+    "frames": 900,
+    "duration_seconds": 30.0,
+    "scene_durations_seconds": [
+      6,
+      8,
+      7,
+      9
+    ]
+  },
+  "merchant_payload": {
+    "source": "form/questions_T5.json",
+    "ordered_fields": [
+      "nom",
+      "offre",
+      "contenu",
+      "prix",
+      "whatsapp",
+      "quartier"
+    ],
+    "required_fields": [
+      "nom",
+      "offre",
+      "contenu",
+      "prix",
+      "whatsapp",
+      "quartier"
+    ],
+    "invented_content_forbidden": true
+  },
+  "capture": {
+    "approval": "approvals/APPROBATION_QUESTIONS_ET_12_ECRANS_T5_2026-11-18.json",
+    "guide": "capture-guide/consignes_T5.json",
+    "flow": "config/T5_CAPTURE_FLOW_V1_0_0.json",
+    "simulation": "simulation/T5_12_ECRANS_EXECUTABLE.html",
+    "proof_manifest": "ui-screens/manifest.json",
+    "proof_board": "ui-screens/T5_PLANCHE_12_ECRANS.png",
+    "stable_screen_count": 12,
+    "camera_capture_count": 4
+  },
+  "continuity": {
+    "one_offer_per_ad": true,
+    "same_dish_drink_and_sides_across_four_scenes": true,
+    "owner_rule_source": "capture-guide/consignes_T5.json#/owner_rule"
+  },
+  "creative_direction": {
+    "video_reference": "V1",
+    "transition_reference": "T1",
+    "approval": "approvals/APPROBATION_DIRECTION_CREATIVE_T5_2026-11-18.json",
+    "reverse_engineering": "research/REVERSE_ENGINEERING_V1.md",
+    "transition_family": "dish_swipe"
+  },
+  "demo_media": {
+    "manifest": "rushes/manifest.json",
+    "license_document": "docs/LICENCE_RUSH_DEMO.md",
+    "raw_media_committed": false,
+    "raw_media_published": false,
+    "single_source_for_continuity": true
+  },
+  "first_montage": {
+    "render_job": "demo/render_job_silent_demo.json",
+    "renderer": "engine/render_first_montage.py",
+    "validator": "tools/validate_first_montage.py",
+    "workflow": ".github/workflows/render-first-montage.yml",
+    "expected_filename": "VIDEO_T5_PREMIER_MONTAGE_SILENCIEUX_V1_A_JUGER.mp4",
+    "audio": false,
+    "demo_text_requires_replacement": true,
+    "owner_review_required": true
+  }
+}
