@@ -31,6 +31,20 @@ Le moteur V3 remplace entièrement l’ancien montage à cartes :
 
 Le contrat complet est `montage/T5_MONTAGE_COMPLET_V3_0_0.json`. Les liaisons exécutables sont dans `config/T5_RUNTIME_CONTRACT_V3_0_0.json` et la mise en forme stable active est pilotée par `config/T5_TEXT_MOTION_V4_0_0.json`.
 
+## Audio approuvé : Afrofire + voix B
+
+Après validation séparée de la musique puis de la voix, la livraison complète utilise :
+
+- **4 — Afrofire / DPStudioMusic**, Pixabay ID `300338`, depuis le début du morceau ;
+- **B — voix française masculine `voice-11`**, répartie sur les quatre scènes ;
+- ducking de la musique à **−3 dB hors parole et −10 dB sous parole**, avec attaque 120 ms et relâchement 450 ms ;
+- master cible **−16 LUFS / −2 dBTP** ;
+- livraison AAC stéréo 48 kHz à 192 kb/s.
+
+Le fichier musical Pixabay intégral n’est jamais versionné ni publié. GitHub Actions le télécharge temporairement depuis l’URL officielle, vérifie son SHA‑256, construit le mix, puis le supprime avec le répertoire de travail. La Release ne contient que l’œuvre complète et son master voix + musique.
+
+Le contrat reproductible est `config/T5_AUDIO_MIX_V1_0_0.json`; l’approbation propriétaire est `approvals/APPROBATION_MUSIQUE_ET_VOIX_T5_2026-11-18.json`.
+
 ```text
 formulaire Cloudflare : 6 réponses + 12 écrans de capture
         ↓
@@ -44,7 +58,13 @@ tools/build_t5_runtime_visual_inputs.py
         ↓
 engine/render_runtime.py : plein cadre + sous-titres Playfair centrés et stables + raccords T1
         ↓
-MP4 30 s + QC 21/21 + RenderResult, ou RenderError
+MP4 visuel silencieux + QC 21/21
+        ↓
+téléchargement éphémère et contrôle SHA-256 d’Afrofire
+        ↓
+audio/scripts/build_t5_complete_audio.py : voix B + ducking + mastering + mux bit-exact vidéo
+        ↓
+MP4 complet 30 s + QC audio/vidéo + RenderResult, ou RenderError
 ```
 
 Cloudflare reste uniquement le **plan de contrôle et de stockage**. Le rendu vidéo est interdit sur Cloudflare et exécuté sur **GitHub Actions**.
@@ -79,6 +99,10 @@ Les URL, dimensions, durées, tailles et SHA‑256 sont dans `rushes/manifest.js
 - `capture-guide/consignes_T5.json` — les instructions des quatre captures ;
 - `config/T5_CAPTURE_FLOW_V1_0_0.json` — les douze écrans A/B/C ;
 - `config/T5_TEXT_MOTION_V4_0_0.json` — baseline uniforme, centrage, deux lignes maximum et apparition en bloc ;
+- `config/T5_AUDIO_MIX_V1_0_0.json` — Afrofire, voix B, placements, ducking, mastering et contrôles ;
+- `audio/voice/t5-voice-v1/` — quatre clips source `voice-11` approuvés et verrouillés par SHA‑256 ;
+- `audio/scripts/build_t5_complete_audio.py` — construction et validation du master complet ;
+- `schemas/T5_audio_mix.schema.json` — schéma strict du contrat audio ;
 - `assets/fonts/playfair-display/` — police Playfair Display variable embarquée, métadonnées et licence OFL‑1.1 ;
 - `montage/T5_MONTAGE_COMPLET_V3_0_0.json` — JSON complet de montage ;
 - `adapter/t5_adapter.py` — six réponses + quatre captures → RenderJob ;
@@ -119,10 +143,22 @@ python tools/validate_runtime_render.py \
   --render-report output/runtime/t5-runtime-demo-0001/T5_RUNTIME_RENDER_REPORT.json \
   --validation output/runtime/t5-runtime-demo-0001/T5_RUNTIME_VALIDATION.json \
   --result output/runtime/t5-runtime-demo-0001/T5_RENDER_RESULT.json
+mv output/runtime/t5-runtime-demo-0001/VIDEO_T5_FORMULE_PLEIN_ECRAN_V3_A_VALIDER.mp4 \
+  output/runtime/t5-runtime-demo-0001/T5_VISUEL_SILENCIEUX_QC_21_21.mp4
+curl --fail --location \
+  https://cdn.pixabay.com/audio/2025/02/12/audio_bf52f1c5ad.mp3 \
+  --output /tmp/afrofire-source.mp3
+echo '24e9606e14e4708e8c8ffa3a6a97429dbfc95049d388481392d72b971e932c61  /tmp/afrofire-source.mp3' | sha256sum --check --strict
+python audio/scripts/build_t5_complete_audio.py \
+  --silent-video output/runtime/t5-runtime-demo-0001/T5_VISUEL_SILENCIEUX_QC_21_21.mp4 \
+  --music-source /tmp/afrofire-source.mp3 \
+  --config config/T5_AUDIO_MIX_V1_0_0.json \
+  --output-dir output/runtime/t5-runtime-demo-0001
+rm /tmp/afrofire-source.mp3
 pytest -q
 ```
 
-Sortie attendue : **30,000 s**, 720 × 1280, 30 i/s, 900 images, H.264/yuv420p, aucune piste audio et QC **21/21**, avec Playfair Display grande, blanche et grasse, centrée sur une baseline fixe, protégée par un contour sombre fin et affichée en blocs complets depuis le JSON.
+Sortie visuelle intermédiaire : **30,000 s**, 720 × 1280, 30 i/s, 900 images, H.264/yuv420p, aucune piste audio et QC **21/21**. Sortie finale : le même flux vidéo copié bit pour bit, avec une piste AAC stéréo 48 kHz, Afrofire, voix B, master proche de −16 LUFS / −2 dBTP et contrôles audio/vidéo complets.
 
 ## Archives rejetées
 

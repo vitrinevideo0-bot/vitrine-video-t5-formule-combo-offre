@@ -1,0 +1,57 @@
+{
+  "schema_version": "1.0.0",
+  "template_id": "RESTAURATION-T5",
+  "status": "owner_approved_voice_B",
+  "approved_on": "2026-11-18",
+  "provider": "Arena.ai Agent Mode",
+  "voice_id": "voice-11",
+  "language": "fr",
+  "identity": "masculine advertising",
+  "selection": {
+    "owner_selected": true,
+    "selected_option": "B_masculine",
+    "comparison": [
+      "voice-10 — feminine advertising",
+      "voice-11 — masculine advertising"
+    ]
+  },
+  "clips": [
+    {
+      "scene": 1,
+      "text": "À Burger Atelier Kandi, découvre notre formule Double Burger.",
+      "file": "source/scene1.mp3",
+      "sha256": "9fae7f38c1096538c9e31809be63efc4f74ba95d2f6d7ac3a1f6e8c27923d034",
+      "bytes": 42858,
+      "source_duration_s": 5.32898,
+      "start_s": 0.45
+    },
+    {
+      "scene": 2,
+      "text": "Un double burger généreux, une portion de frites croustillantes et un verre de cola bien frais.",
+      "file": "source/scene2.mp3",
+      "sha256": "8f3fad37a9efa5f83838fdf5927eb070631c6004e740478582002f3d8268ba57",
+      "bytes": 60204,
+      "source_duration_s": 7.497143,
+      "start_s": 6.35
+    },
+    {
+      "scene": 3,
+      "text": "Le tout pour seulement cinq mille francs CFA.",
+      "file": "source/scene3.mp3",
+      "sha256": "92e6bda7a2f55df44f7462c8e2e59561f5ad4bde3542c7c5b5df4c24e9e2a215",
+      "bytes": 22378,
+      "source_duration_s": 2.76898,
+      "start_s": 18.15
+    },
+    {
+      "scene": 4,
+      "text": "Une formule gourmande à savourer. Écris-nous sur WhatsApp et commande maintenant, près du marché central à Kandi.",
+      "file": "source/scene4.mp3",
+      "sha256": "da6d9609bf17c6ffcf8f450317aed3ea144624bca46ec33ab5ce88c7eb13c244",
+      "bytes": 61249,
+      "source_duration_s": 7.627755,
+      "start_s": 21.2
+    }
+  ],
+  "integrity_file": "SHA256SUMS.txt"
+}

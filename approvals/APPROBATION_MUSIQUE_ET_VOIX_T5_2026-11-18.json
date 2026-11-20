@@ -1,0 +1,52 @@
+{
+  "schema_version": "1.0.0",
+  "template_id": "RESTAURATION-T5",
+  "decision_id": "T5_MUSIC_AND_VOICE_APPROVAL_2026-11-18",
+  "status": "owner_approved_for_complete_mix_and_github_publication",
+  "date_local": "2026-11-18",
+  "timezone": "Africa/Lagos",
+  "decision_channel": "arena_direct_selection",
+  "music": {
+    "selected_option": "4_afrofire",
+    "title": "Afrofire",
+    "artist": "DPStudioMusic",
+    "pixabay_id": 300338,
+    "official_page": "https://pixabay.com/music/afrobeat-afrofire-300338/",
+    "license": "Pixabay Content License",
+    "owner_validated": true,
+    "validation_sequence": "The owner first confirmed validation, then explicitly selected option 4 in the four-choice selector."
+  },
+  "voice": {
+    "selected_option": "B_masculine",
+    "voice_id": "voice-11",
+    "language": "fr",
+    "identity": "masculine advertising",
+    "comparison_candidates": [
+      {
+        "option": "A_feminine",
+        "voice_id": "voice-10"
+      },
+      {
+        "option": "B_masculine",
+        "voice_id": "voice-11"
+      }
+    ],
+    "owner_validated": true,
+    "validation_sequence": "The owner listened to two complete comparable readings and selected B — masculine."
+  },
+  "authorized_next_steps": [
+    "build four-scene voice stem",
+    "mix Afrofire with ducking under speech",
+    "master complete audio",
+    "mux without changing the approved video bitstream",
+    "run independent audio and video quality controls",
+    "publish through the existing GitHub Actions infrastructure"
+  ],
+  "rights_constraints": {
+    "music_source_must_not_be_bundled": true,
+    "music_source_must_not_be_sold_or_redistributed_standalone": true,
+    "final_video_may_embed_music_as_part_of_a_larger_creative_work": true,
+    "license_is_nonexclusive": true,
+    "content_id_absence_is_not_an_absolute_future_guarantee": true
+  }
+}

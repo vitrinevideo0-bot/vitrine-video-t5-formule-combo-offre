@@ -1,4 +1,4 @@
-name: Rendu T5 V3 plein écran — 4 captures et 6 réponses
+name: Rendu complet T5 V3 — Afrofire + voix B
 
 on:
   workflow_dispatch:
@@ -40,12 +40,13 @@ jobs:
           ffmpeg -version | head -n 1
           ffprobe -version | head -n 1
 
-      - name: Tester contrats, liaisons de pixels et isolation des captures
+      - name: Tester contrats, liaisons de pixels, voix et isolation des captures
         run: |
-          python -m compileall -q adapter engine tools tests
+          python -m compileall -q adapter engine tools audio/scripts tests
           pytest -q
           python tools/build_t5_capture_flow.py --output /tmp/T5_CAPTURE_FLOW_V1_0_0.json
           cmp config/T5_CAPTURE_FLOW_V1_0_0.json /tmp/T5_CAPTURE_FLOW_V1_0_0.json
+          (cd audio/voice/t5-voice-v1 && sha256sum --check --strict SHA256SUMS.txt)
 
       - name: Obtenir le RenderJob Cloudflare ou construire la fixture formulaire
         env:
@@ -132,7 +133,7 @@ jobs:
             --capture-dir .tmp/t5-runtime/captures \
             --output-dir "output/runtime/$T5_JOB_ID"
 
-      - name: Contrôler le vrai MP4 et émettre RenderResult
+      - name: Contrôler le vrai MP4 visuel et émettre RenderResult
         run: |
           OUTDIR="output/runtime/$T5_JOB_ID"
           python tools/validate_runtime_render.py \
@@ -143,7 +144,71 @@ jobs:
             --validation "$OUTDIR/T5_RUNTIME_VALIDATION.json" \
             --result "$OUTDIR/T5_RENDER_RESULT.json"
 
-      - name: Déposer le MP4 vérifié puis callback COMPLETED
+      - name: Télécharger Afrofire depuis la source officielle et verrouiller son intégrité
+        run: |
+          set -euo pipefail
+          mkdir -p .tmp/t5-runtime/audio
+          MUSIC_URL="$(jq -r '.music.official_download_url' config/T5_AUDIO_MIX_V1_0_0.json)"
+          MUSIC_SHA="$(jq -r '.music.source_sha256' config/T5_AUDIO_MIX_V1_0_0.json)"
+          MUSIC_BYTES="$(jq -r '.music.source_bytes' config/T5_AUDIO_MIX_V1_0_0.json)"
+          curl --fail --location --retry 5 --retry-all-errors \
+            "$MUSIC_URL" --output .tmp/t5-runtime/audio/afrofire-source.mp3
+          echo "$MUSIC_SHA  .tmp/t5-runtime/audio/afrofire-source.mp3" | sha256sum --check --strict
+          test "$(stat -c '%s' .tmp/t5-runtime/audio/afrofire-source.mp3)" = "$MUSIC_BYTES"
+
+      - name: Construire le master Afrofire + voix masculine B sans réencoder l’image
+        run: |
+          set -euo pipefail
+          OUTDIR="output/runtime/$T5_JOB_ID"
+          mv "$OUTDIR/VIDEO_T5_FORMULE_PLEIN_ECRAN_V3_A_VALIDER.mp4" \
+            "$OUTDIR/T5_VISUEL_SILENCIEUX_QC_21_21.mp4"
+          python audio/scripts/build_t5_complete_audio.py \
+            --silent-video "$OUTDIR/T5_VISUEL_SILENCIEUX_QC_21_21.mp4" \
+            --music-source .tmp/t5-runtime/audio/afrofire-source.mp3 \
+            --config config/T5_AUDIO_MIX_V1_0_0.json \
+            --output-dir "$OUTDIR"
+          jq -e '.status == "PASS" and .summary.failed == 0' \
+            "$OUTDIR/T5_COMPLETE_AUDIO_RENDER_REPORT.json"
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          from jsonschema import Draft202012Validator
+          outdir = Path('output/runtime') / os.environ['T5_JOB_ID']
+          report = json.loads((outdir / 'T5_COMPLETE_AUDIO_RENDER_REPORT.json').read_text())
+          result_path = outdir / 'T5_RENDER_RESULT.json'
+          result = json.loads(result_path.read_text())
+          result['output']['sha256'] = report['final_video']['sha256']
+          result['output']['bytes'] = report['final_video']['bytes']
+          schema = json.loads(Path('schemas/T5_render_result.schema.json').read_text())
+          Draft202012Validator(schema).validate(result)
+          result_path.write_text(json.dumps(result, ensure_ascii=False, indent=2) + '\n')
+          PY
+          rm -f .tmp/t5-runtime/audio/afrofire-source.mp3
+          test ! -e .tmp/t5-runtime/audio/afrofire-source.mp3
+          test ! -e "$OUTDIR/afrofire-source.mp3"
+
+      - name: Résumer les contrôles du rendu complet
+        run: |
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          from pathlib import Path
+          report = json.loads(Path(f"output/runtime/{__import__('os').environ['T5_JOB_ID']}/T5_COMPLETE_AUDIO_RENDER_REPORT.json").read_text())
+          final = report['final_video']
+          audio = report['intelligibility']
+          print('# RESTAURATION‑T5 — rendu complet')
+          print()
+          print(f"**{report['status']} — {report['summary']['passed']}/{report['summary']['total']} contrôles audio/vidéo PASS**, après le QC visuel 21/21.")
+          print()
+          print('- musique : **4 — Afrofire / DPStudioMusic**')
+          print('- voix : **B masculine / voice-11**')
+          print(f"- sortie : `{final['file']}`")
+          print(f"- SHA-256 : `{final['sha256']}`")
+          print(f"- audio : {final['integrated_lufs']:.2f} LUFS, {final['true_peak_dbtp']:.2f} dBTP, AAC stéréo 48 kHz")
+          print(f"- intelligibilité voix/musique : {audio['aggregate_speech_to_music_db']:.2f} dB")
+          print(f"- flux vidéo copié bit pour bit : `{report['visual']['output_video_bitstream_sha256']}`")
+          PY
+
+      - name: Déposer le MP4 complet vérifié puis callback COMPLETED
         if: github.event_name == 'repository_dispatch'
         env:
           CALLBACK_TOKEN: ${{ secrets.T5_CALLBACK_TOKEN }}
@@ -179,6 +244,8 @@ jobs:
           rm -rf release
           mkdir release
           cp "$OUTDIR/VIDEO_T5_FORMULE_PLEIN_ECRAN_V3_A_VALIDER.mp4" release/
+          cp "$OUTDIR/T5_MASTER_AUDIO_AFROFIRE_VOIX_B_30S.wav" release/
+          cp "$OUTDIR/T5_COMPLETE_AUDIO_RENDER_REPORT.json" release/
           cp "$OUTDIR/T5_RUNTIME_PLANCHE_12_IMAGES.jpg" release/
           cp "$OUTDIR/T5_RUNTIME_RENDER_REPORT.json" release/
           cp "$OUTDIR/T5_RUNTIME_VALIDATION.json" release/
@@ -188,6 +255,10 @@ jobs:
           cp .tmp/t5-runtime/runtime-manifest.json release/T5_RUNTIME_CAPTURE_MANIFEST.json
           cp config/T5_RUNTIME_CONTRACT_V3_0_0.json release/
           cp config/T5_TEXT_MOTION_V4_0_0.json release/
+          cp config/T5_AUDIO_MIX_V1_0_0.json release/
+          cp audio/voice/t5-voice-v1/manifest.json release/T5_VOICE_MANIFEST.json
+          cp approvals/APPROBATION_MUSIQUE_ET_VOIX_T5_2026-11-18.json release/
+          cp schemas/T5_audio_mix.schema.json release/
           cp schemas/T5_render_job.schema.json release/
           cp schemas/T5_render_result.schema.json release/
           cp schemas/T5_render_error.schema.json release/
@@ -198,8 +269,9 @@ jobs:
           cp approvals/APPROBATION_CORRECTION_BASELINE_SOUS_TITRES_T5_2026-11-18.json release/
           cp rushes/manifest.json release/T5_DEMO_SOURCE_PROVENANCE.json
           cp docs/LICENCE_RUSH_DEMO_V3.md release/
-          if find release -maxdepth 1 -type f \( -name 'S[1-4]*.mp4' -o -name '*.mov' -o -name '*.webm' \) | grep -q .; then
-            echo 'Rush brut interdit dans la livraison' >&2
+          test "$(find release -maxdepth 1 -type f -name '*.mp4' | wc -l)" -eq 1
+          if find release -maxdepth 1 -type f \( -name 'S[1-4]*.mp4' -o -name '*.mov' -o -name '*.webm' -o -name '*.mp3' \) | grep -q .; then
+            echo 'Rush brut ou source musicale autonome interdits dans la livraison' >&2
             exit 1
           fi
           (cd release && find . -maxdepth 1 -type f ! -name SHA256SUMS.txt -printf '%f\n' | sort | xargs sha256sum > SHA256SUMS.txt)
@@ -208,7 +280,7 @@ jobs:
       - name: Publier l’artefact reproductible
         uses: actions/upload-artifact@v4
         with:
-          name: T5-full-frame-v3-${{ github.run_id }}
+          name: T5-complete-afrofire-voice-B-${{ github.run_id }}
           path: release/
           if-no-files-found: error
           retention-days: 30
@@ -217,21 +289,22 @@ jobs:
         if: github.event_name == 'workflow_dispatch' && inputs.publish_prerelease
         run: |
           cat > /tmp/t5-runtime-release-notes.md <<'EOF'
-          # RESTAURATION‑T5 — candidat plein écran V3
+          # RESTAURATION‑T5 — rendu complet Afrofire + voix B
 
-          Ce candidat corrige le candidat #6 : la famille **Playfair Display est conservée exactement**, mais la mise en forme animée lettre par lettre est abandonnée afin que tous les glyphes restent sur une baseline droite et stable. Le candidat Bodoni #5 demeure rejeté.
+          Ce candidat ajoute les deux éléments explicitement choisis par le propriétaire au visuel Playfair stable du candidat #7 : **4 — Afrofire / DPStudioMusic** et **B — voix française masculine `voice-11`**.
 
-          - le formulaire distingue les **six intitulés, questions simples et exemples** approuvés ;
-          - les **six réponses** viennent du `merchant_payload` du RenderJob ;
-          - les sous-titres **Playfair Display ExtraBold/Black** apparaissent en bloc complet, centrés, sans rotation ni déplacement vertical, sur deux lignes maximum avec interligne 1,2 ; ligatures et variantes décoratives sont désactivées ;
-          - le texte blanc reçoit un contour sombre fin et une ombre légère, avec des marges de sécurité latérales et basses ;
-          - les scènes S1, S2, S3 et S4 consomment **quatre captures distinctes**, chacune vérifiée par SHA‑256 ;
-          - le manifeste visuel est construit au runtime, puis consommé par le moteur ;
-          - rendu exclusivement sur **GitHub Actions** ; Cloudflare ne fait que contrôler, stocker et dispatcher ;
-          - 30,000 s, 720 × 1280, 30 i/s, 900 images, H.264, aucune piste audio ;
-          - QC 21/21 : plein cadre sans cartes, sous-titres stables liés au JSON V4, baseline uniforme, apparition en bloc, dégradé continu jusqu’au dernier pixel, texte limité aux six valeurs, trois raccords T1 de huit images, intégrité, durée, stabilité finale et absence de rush brut.
+          - le visuel est d’abord rendu puis contrôlé avec le QC existant **21/21** ;
+          - le flux H.264 du visuel validé est ensuite copié bit pour bit, sans réencodage ;
+          - Afrofire est téléchargée de façon éphémère depuis l’URL officielle Pixabay puis vérifiée par SHA‑256 ;
+          - le fichier musical intégral n’est ni versionné, ni inclus dans l’artefact, ni publié dans la Release ;
+          - quatre clips de voix approuvés sont placés à 0,45 s, 6,35 s, 18,15 s et 21,20 s ;
+          - ducking : −3 dB hors parole, −10 dB sous parole, attaque 120 ms et relâchement 450 ms ;
+          - master cible : −16 LUFS / −2 dBTP ; livraison AAC stéréo 48 kHz à 192 kb/s ;
+          - 30,000 s, 720 × 1280, 30 i/s, 900 images, H.264/yuv420p + une piste AAC ;
+          - les contrôles audio/vidéo vérifient notamment la durée, le nombre d’images, l’intégrité des sources, l’intelligibilité, l’absence d’écrêtage et l’identité exacte du flux vidéo ;
+          - la Release contient le MP4 complet, le master voix + musique et les rapports, mais aucun MP3 Pixabay autonome.
 
-          Les valeurs visibles sont la fixture formulaire de validation `Burger Atelier Kandi`. Elles ne sont pas codées dans le moteur : les tests prouvent que changer chaque réponse change les pixels attendus.
+          Les valeurs visibles et prononcées correspondent à la fixture `Burger Atelier Kandi`. Le moteur visuel demeure dynamique : les six réponses proviennent toujours du `merchant_payload` du RenderJob.
           EOF
 
       - name: Publier une pré-Release additive du vrai rendu GitHub
@@ -247,7 +320,7 @@ jobs:
           fi
           gh release create "$TAG" release/* \
             --target "$GITHUB_SHA" \
-            --title "T5 Formule — plein écran V3 #${GITHUB_RUN_NUMBER}" \
+            --title "T5 Formule — Afrofire + voix B #${GITHUB_RUN_NUMBER}" \
             --notes-file /tmp/t5-runtime-release-notes.md \
             --prerelease
 

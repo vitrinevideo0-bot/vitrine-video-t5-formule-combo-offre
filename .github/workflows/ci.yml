@@ -34,10 +34,11 @@ jobs:
           python -m pip install -r requirements.txt
           npm ci --prefix cloudflare
 
-      - name: Compiler et tester contrats, pixels et captures
+      - name: Compiler et tester contrats, pixels, captures et audio approuvé
         run: |
-          python -m compileall -q adapter engine tools tests
+          python -m compileall -q adapter engine tools audio/scripts tests
           pytest -q
+          (cd audio/voice/t5-voice-v1 && sha256sum --check --strict SHA256SUMS.txt)
 
       - name: Prouver le RenderJob formulaire → quatre captures
         run: |
