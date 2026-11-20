@@ -1,12 +1,14 @@
 {
   "schema_version": "1.0.0",
   "template_id": "RESTAURATION-T5",
-  "title": "Proposition des 4 scènes et des 12 écrans T5",
-  "status": "proposal_pending_owner_review",
+  "title": "T5 RESTAURATION — FORMULE, COMBO ET OFFRE",
+  "status": "owner_recommended_copy_pending_final_question_review",
+  "copy_revision": "T5_12_ECRANS_CORRIGES_2026-11-18",
+  "owner_rule": "Une seule formule par publicité. Le même plat, la même boisson et les mêmes accompagnements restent présents dans les quatre scènes.",
   "creative_direction": {
     "video_reference": "V1",
     "transition_reference": "T1",
-    "adaptation": "Montrer toute la formule, chaque élément, le prix, puis la commande. Les glissements sont faits avec les vrais plats, le plateau, le sac ou la boîte."
+    "adaptation": "Présenter une seule formule de façon constante dans les quatre scènes, sans changer le plat, la boisson ni les accompagnements."
   },
   "total_duration_seconds": 30,
   "scene_durations_seconds": [
@@ -26,52 +28,57 @@
   "avoid_section_title": "À ÉVITER",
   "action_section_title": "CE QUE TU DOIS FAIRE",
   "speech_section_title": "TU PEUX PARLER PENDANT QUE TU FILMES",
+  "example_section_title": "EXEMPLE DE PHRASE (FACULTATIF)",
   "speech_note": "Tu peux parler en fon, yoruba, français, anglais ou dans une autre langue que tu maîtrises. Tu peux aussi ne pas parler si tu préfères.",
   "primary_action": "COMMENCER À FILMER",
-  "recording_audio_status": "Son activé.",
+  "recording_audio_status": "Micro activé.",
   "recording_orientation_status": "Vidéo verticale.",
+  "review_audio_status": "Son activé.",
   "redo_action": "REFAIRE",
   "scenes": [
     {
       "n": 1,
       "seconds": 6,
-      "title": "LA FORMULE",
+      "scene_name": "LA FORMULE",
       "data_used": [
         "merchant_payload.nom",
-        "merchant_payload.offre"
+        "merchant_payload.offre",
+        "merchant_payload.contenu"
       ],
       "guide": {
         "screen_label": "ÉCRAN 01 — A / GUIDE",
         "scene_counter": "SCÈNE 1 SUR 4 — 6 SECONDES",
-        "instruction": "Montre toute la formule dès le début. On doit voir en même temps tous les plats, boissons ou produits qui sont vendus ensemble.",
+        "title": "VOICI NOTRE FORMULE !",
+        "instruction": "Montre toute ta formule. On doit voir le plat, la boisson et tout ce qui est vendu ensemble.",
         "film_list": [
-          "Tous les éléments de la formule.",
-          "Le plateau, la table, la boîte ou le sac qui les réunit.",
-          "Une image propre où rien n'est caché."
+          "Le plat et la boisson.",
+          "Tout ce qui est dans la formule.",
+          "Le plateau bien présenté."
         ],
         "avoid_list": [
-          "Oublier un élément de la formule.",
-          "Cacher un produit derrière un autre.",
-          "Filmer sur une table sale ou en désordre."
+          "Oublier un élément.",
+          "Cacher le plat ou la boisson.",
+          "Filmer sur une table sale."
         ],
-        "required_action": "Pose ton téléphone à un endroit stable, face à la table. Mets tous les éléments sur un plateau ou sur la table. Fais glisser doucement la formule dans l'image, puis arrête-la au centre."
+        "required_action": "Mets toute ta formule sur la table. Pose ton téléphone devant et montre tout en même temps. Ne touche plus au plateau pendant que tu filmes.",
+        "optional_example": "« Voici notre formule du jour ! Tout est prêt pour toi. »"
       },
       "recording": {
         "screen_label": "ÉCRAN 02 — B / ENREGISTREMENT",
         "scene_counter": "SCÈNE 1 SUR 4 — 6 SECONDES",
         "status": "REC",
-        "instruction": "FAIS GLISSER LA FORMULE DANS L'IMAGE",
-        "timer_initial": "Temps restant : 00:00 / 00:06",
+        "timer_initial": "00:00 / 00:06",
+        "instruction": "MONTRE TOUTE TA FORMULE.",
         "auto_stop_status": "Arrêt automatique à la fin des 6 secondes."
       },
       "review": {
         "screen_label": "ÉCRAN 03 — C / VÉRIFICATION",
         "take_label": "PRISE 1 — 0:06",
-        "question": "EST-CE QU'ON VOIT TOUTE LA FORMULE ?",
+        "question": "EST-CE QU'ON VOIT BIEN TOUTE LA FORMULE ?",
         "checks": [
-          "Tous les éléments sont visibles en même temps.",
-          "Rien n'est caché derrière un autre produit.",
-          "La formule s'arrête bien au centre de l'image."
+          "Le plat et la boisson sont visibles.",
+          "Rien n'est caché.",
+          "Toute la formule est bien dans la vidéo."
         ],
         "positive_action": "SCÈNE SUIVANTE"
       }
@@ -79,42 +86,44 @@
     {
       "n": 2,
       "seconds": 8,
-      "title": "CE QU'ELLE CONTIENT",
+      "scene_name": "CE QU'IL Y A DANS LA FORMULE",
       "data_used": [
         "merchant_payload.contenu"
       ],
       "guide": {
         "screen_label": "ÉCRAN 04 — A / GUIDE",
         "scene_counter": "SCÈNE 2 SUR 4 — 8 SECONDES",
-        "instruction": "Montre chaque élément de la formule, un après l'autre. Si la formule contient deux boissons ou trois morceaux, montre bien toute la quantité.",
+        "title": "REGARDE TOUT CE QU'IL Y A DEDANS !",
+        "instruction": "Montre de plus près les différents éléments de ta formule pour que les clients voient bien ce qu'ils vont recevoir.",
         "film_list": [
-          "Chaque plat, boisson ou produit inclus.",
-          "La vraie quantité donnée au client.",
-          "Chaque élément placé au même endroit dans l'image."
+          "Le plat principal.",
+          "La boisson.",
+          "L'accompagnement, s'il y en a."
         ],
         "avoid_list": [
-          "Oublier un élément ou une quantité.",
-          "Mettre un produit trop loin du téléphone.",
-          "Bouger le téléphone entre les éléments."
+          "Cacher un élément.",
+          "Mettre ta main devant le plat.",
+          "Filmer trop vite."
         ],
-        "required_action": "Pose le téléphone sans bouger, face à un endroit vide sur la table. Mets le premier élément au centre. Toutes les deux secondes, fais-le glisser sur le côté et mets l'élément suivant à la même place."
+        "required_action": "Garde ton téléphone posé. Avec ton doigt, montre le plat, puis la boisson et le reste de la formule.",
+        "optional_example": "« Voici le plat, la boisson et tout ce qui accompagne notre formule ! »"
       },
       "recording": {
         "screen_label": "ÉCRAN 05 — B / ENREGISTREMENT",
         "scene_counter": "SCÈNE 2 SUR 4 — 8 SECONDES",
         "status": "REC",
-        "instruction": "MONTRE CHAQUE ÉLÉMENT",
-        "timer_initial": "Temps restant : 00:00 / 00:08",
+        "timer_initial": "00:00 / 00:08",
+        "instruction": "MONTRE LE PLAT, LA BOISSON ET L'ACCOMPAGNEMENT.",
         "auto_stop_status": "Arrêt automatique à la fin des 8 secondes."
       },
       "review": {
         "screen_label": "ÉCRAN 06 — C / VÉRIFICATION",
         "take_label": "PRISE 2 — 0:08",
-        "question": "EST-CE QU'ON VOIT CHAQUE ÉLÉMENT ET SA QUANTITÉ ?",
+        "question": "EST-CE QU'ON VOIT BIEN CE QU'IL Y A DANS LA FORMULE ?",
         "checks": [
-          "Tous les éléments annoncés sont montrés.",
-          "Les quantités sont faciles à compter.",
-          "Le téléphone ne bouge pas pendant les changements."
+          "Le plat est bien visible.",
+          "La boisson est bien visible.",
+          "On voit aussi les accompagnements."
         ],
         "positive_action": "SCÈNE SUIVANTE"
       }
@@ -122,44 +131,45 @@
     {
       "n": 3,
       "seconds": 7,
-      "title": "LE PRIX",
+      "scene_name": "LE PRIX",
       "data_used": [
         "merchant_payload.offre",
-        "merchant_payload.contenu",
         "merchant_payload.prix"
       ],
       "guide": {
         "screen_label": "ÉCRAN 07 — A / GUIDE",
         "scene_counter": "SCÈNE 3 SUR 4 — 7 SECONDES",
-        "instruction": "Montre encore toute la formule. Cette image servira à afficher le prix exact sans cacher les plats ou les boissons.",
+        "title": "VOICI LE PRIX DE LA FORMULE !",
+        "instruction": "Montre encore toute ta formule. Le prix sera ajouté sur ta vidéo.",
         "film_list": [
-          "Toute la formule réunie.",
-          "Les quantités bien visibles.",
-          "Un espace libre au-dessus ou à côté de la formule."
+          "Le plat et la boisson.",
+          "Tous les éléments de la formule.",
+          "Une belle présentation sur la table."
         ],
         "avoid_list": [
-          "Couper un plat ou une boisson dans l'image.",
-          "Mettre la formule trop près du bord.",
-          "Bouger le téléphone pendant la prise."
+          "Cacher une partie du plat.",
+          "Mettre le plateau trop près du bord.",
+          "Bouger le téléphone."
         ],
-        "required_action": "Remets toute la formule sur la table. Pose ton téléphone à un endroit stable et cadre tous les éléments. Ne bouge plus jusqu'à la fin des 7 secondes."
+        "required_action": "Laisse toute la formule sur la table. Pose ton téléphone bien devant et filme sans le bouger.",
+        "optional_example": "« Tout ça est disponible au prix affiché ! »"
       },
       "recording": {
         "screen_label": "ÉCRAN 08 — B / ENREGISTREMENT",
         "scene_counter": "SCÈNE 3 SUR 4 — 7 SECONDES",
         "status": "REC",
-        "instruction": "GARDE TOUTE LA FORMULE DANS L'IMAGE",
-        "timer_initial": "Temps restant : 00:00 / 00:07",
+        "timer_initial": "00:00 / 00:07",
+        "instruction": "GARDE TOUTE LA FORMULE DANS LA VIDÉO.",
         "auto_stop_status": "Arrêt automatique à la fin des 7 secondes."
       },
       "review": {
         "screen_label": "ÉCRAN 09 — C / VÉRIFICATION",
         "take_label": "PRISE 3 — 0:07",
-        "question": "EST-CE QU'ON VOIT TOUTE LA FORMULE SANS BOUGER ?",
+        "question": "EST-CE QU'ON VOIT BIEN TOUTE LA FORMULE ?",
         "checks": [
-          "Tous les éléments restent visibles.",
-          "Il y a une place libre pour afficher le prix.",
-          "Le téléphone reste stable du début à la fin."
+          "Tous les éléments sont visibles.",
+          "Le plat est bien présenté.",
+          "La vidéo reste stable."
         ],
         "positive_action": "SCÈNE SUIVANTE"
       }
@@ -167,7 +177,7 @@
     {
       "n": 4,
       "seconds": 9,
-      "title": "COMMANDER",
+      "scene_name": "COMMANDER",
       "data_used": [
         "merchant_payload.nom",
         "merchant_payload.whatsapp",
@@ -176,44 +186,58 @@
       "guide": {
         "screen_label": "ÉCRAN 10 — A / GUIDE",
         "scene_counter": "SCÈNE 4 SUR 4 — 9 SECONDES",
-        "instruction": "Montre la formule prête à partir. Ferme la boîte ou le sac, ou montre le plateau prêt à être remis au client.",
+        "title": "ENVIE DE COMMANDER ?",
+        "instruction": "Montre ta formule prête à être servie. Fais une dernière belle présentation pour donner envie aux clients de commander.",
         "film_list": [
-          "La boîte, le sac ou le plateau avec la formule.",
-          "Tes mains quand tu fermes ou présentes la commande.",
-          "La commande prête à être prise."
+          "Toute la formule prête.",
+          "Le plat et la boisson bien présentés.",
+          "Le plateau ou la commande."
         ],
         "avoid_list": [
-          "Cacher complètement la commande avec tes mains.",
-          "Montrer un emballage sale ou abîmé.",
-          "Bouger le téléphone pendant les trois dernières secondes."
+          "Cacher une partie de la formule.",
+          "Montrer une table sale.",
+          "Bouger le téléphone à la fin."
         ],
-        "required_action": "Pose ton téléphone face à la table ou au comptoir. Ferme la boîte ou le sac, puis place la commande au centre. Pendant les trois dernières secondes, retire tes mains et ne bouge plus le téléphone."
+        "required_action": "Mets ta formule devant ton téléphone. Filme-la bien et garde ton téléphone sans bouger jusqu'à la fin.",
+        "optional_example": "« Tu veux cette formule ? Écris-nous sur WhatsApp pour commander ! »"
       },
       "recording": {
         "screen_label": "ÉCRAN 11 — B / ENREGISTREMENT",
         "scene_counter": "SCÈNE 4 SUR 4 — 9 SECONDES",
         "status": "REC",
-        "instruction": "FERME LA BOÎTE OU LE SAC PUIS NE BOUGE PLUS",
-        "timer_initial": "Temps restant : 00:00 / 00:09",
+        "timer_initial": "00:00 / 00:09",
+        "instruction": "MONTRE TA FORMULE BIEN PRÉSENTÉE.",
         "auto_stop_status": "Arrêt automatique à la fin des 9 secondes."
       },
       "review": {
         "screen_label": "ÉCRAN 12 — C / VÉRIFICATION",
         "take_label": "PRISE 4 — 0:09",
-        "question": "EST-CE QUE LA COMMANDE EST PRÊTE ET LA FIN BIEN STABLE ?",
+        "question": "EST-CE QUE TA FORMULE EST BIEN PRÉSENTÉE ?",
         "checks": [
-          "La boîte, le sac ou le plateau est bien visible.",
-          "La commande paraît prête à être remise au client.",
-          "Le téléphone ne bouge plus pendant les trois dernières secondes."
+          "Le plat et la boisson sont visibles.",
+          "Toute la formule est bien présentée.",
+          "La vidéo reste stable jusqu'à la fin."
         ],
         "positive_action": "VOIR MON MONTAGE"
       }
     }
   ],
+  "button_spacing_interpretation": {
+    "source_text_joined_labels": [
+      "REFAIRESCÈNE SUIVANTE",
+      "REFAIREVOIR MON MONTAGE"
+    ],
+    "implemented_as_two_buttons": true,
+    "left_button": "REFAIRE",
+    "right_buttons": [
+      "SCÈNE SUIVANTE",
+      "VOIR MON MONTAGE"
+    ]
+  },
   "publication": {
     "github_published": false,
     "executable_flow_created": false,
     "proof_png_created": false,
-    "reason": "Le propriétaire doit voir et valider cette proposition avant l'implémentation."
+    "reason": "Les questions doivent encore être confirmées avant l'implémentation et la publication."
   }
 }

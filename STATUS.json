@@ -4,8 +4,8 @@
   "template_name": "Formule, combo ou offre",
   "updated_on": "2026-11-18",
   "workflow": {
-    "status_number": 3,
-    "status": "V1 and T1 selected; simple T5 questions, four scenes and 12 screen copy prepared locally and awaiting owner review before any GitHub publication",
+    "status_number": 4,
+    "status": "Owner-recommended T5 12-screen copy recorded locally; six questions remain pending explicit confirmation before any GitHub publication",
     "completion_percent_claimed": null
   },
   "owner_decisions": {
@@ -20,10 +20,12 @@
     "deterministic_transition_grammar_proposed": true,
     "six_merchant_questions_proposed": true,
     "twelve_screen_copy_proposed": true,
-    "proposal_document": "docs/PROPOSITION_QUESTIONS_SCENES_12_ECRANS_T5_A_VALIDER.md"
+    "proposal_document": "docs/PROPOSITION_QUESTIONS_SCENES_12_ECRANS_T5_A_VALIDER.md",
+    "owner_recommended_screen_copy_recorded": true,
+    "owner_rule_one_formula_across_four_scenes": true
   },
   "not_started": [
-    "owner_validation_of_questions_and_twelve_screen_copy",
+    "owner_validation_of_six_questions",
     "owner_validation_of_reverse_engineering",
     "capture_contract",
     "visual_engine",
