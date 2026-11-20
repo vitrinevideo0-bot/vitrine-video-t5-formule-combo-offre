@@ -52,9 +52,10 @@ def main() -> int:
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
 
+    audio_config_path = args.audio_config.resolve()
     visual = load(args.visual_result)
     job = load(args.render_job)
-    config = load(args.audio_config)
+    config = load(audio_config_path)
     report = load(args.audio_report)
     schema = load(ROOT / "schemas/T5_render_result.schema.json")
     job_schema = load(ROOT / "schemas/T5_render_job.schema.json")
@@ -82,8 +83,8 @@ def main() -> int:
 
     require(audio["mode"] == "owner_approved_afrofire_voice_b_complete", "Unexpected audio mode")
     require(job["render"]["audio_mode"] == audio["mode"], "Render audio mode diverges from audio contract")
-    require(audio["contract"] == str(args.audio_config.relative_to(ROOT)), "Audio contract path mismatch")
-    require(audio["contract_sha256"] == sha256(args.audio_config), "Audio contract SHA-256 mismatch")
+    require(audio["contract"] == str(audio_config_path.relative_to(ROOT)), "Audio contract path mismatch")
+    require(audio["contract_sha256"] == sha256(audio_config_path), "Audio contract SHA-256 mismatch")
     require(voice["manifest_sha256"] == sha256(voice_manifest), "Voice manifest SHA-256 mismatch")
     require(voice["clip_source_sha256"] == clip_hashes, "Voice clip binding mismatch")
     require(music["source_sha256"] == config_music["source_sha256"], "Music source binding mismatch")

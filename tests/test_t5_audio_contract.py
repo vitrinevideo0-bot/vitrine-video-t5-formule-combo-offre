@@ -177,7 +177,7 @@ def test_finalizer_emits_only_a_complete_audio_bound_render_result(tmp_path: Pat
             "python", "tools/finalize_t5_render_result.py",
             "--visual-result", str(visual_path),
             "--render-job", str(job_path),
-            "--audio-config", str(CONFIG),
+            "--audio-config", "config/T5_AUDIO_MIX_V1_0_0.json",
             "--audio-report", str(report_path),
             "--video", str(video),
             "--output", str(output_path),
