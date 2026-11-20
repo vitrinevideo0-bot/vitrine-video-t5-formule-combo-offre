@@ -97,6 +97,10 @@ La fixture serveur V3 utilise quatre vidéos Pexels distinctes d’**Aida Shukuh
 
 Les URL, dimensions, durées, tailles et SHA‑256 sont dans `rushes/manifest.json`. Les médias bruts sont téléchargés uniquement dans un cache ignoré par Git ; ils ne sont ni commités ni publiés dans les artefacts ou Releases.
 
+## État vérifié
+
+La référence courante est le commit `34886de7581bdd6ee1e959fd647338746b7097e6` et la pré‑Release `t5-full-frame-v3-candidate-10` : CI principale, plan de contrôle Cloudflare et rendu complet réussis, QC visuel **21/21**, QC audio/vidéo **26/26**. Le MP4 complet a le SHA‑256 `9cc8b63cea41d221ceb2bfb02ca959400b53244609e04c585d57d218b3785425`. Le Worker Cloudflare de production n’a pas été déployé. Voir `STATUS.json`, `docs/T5_COMPLETE_AUDIO_AND_CONTROL_PLANE.md` et `reports/T5_FINAL_AUDIT_2026-11-20.md`.
+
 ## Fichiers principaux
 
 - `form/questions_T5.json` — les six questions ;

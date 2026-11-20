@@ -1,5 +1,7 @@
 # T5 V2 — choix d’architecture après audit de T1, T2, T3 et T4
 
+> **Document historique remplacé.** Il décrit la décision V2 initiale, pas l’état livré. La chaîne active est V3 plein écran avec audio complet ; voir `docs/T5_COMPLETE_AUDIO_AND_CONTROL_PLANE.md`, `STATUS.json` et l’audit de clôture dans `reports/`. Les mentions `runtime_hybrid_render` ou de sortie silencieuse ci-dessous ne doivent plus être utilisées comme statut courant.
+
 ## Conclusion de l’audit
 
 T5 ne doit pas créer une simulation parallèle. Il reprend les invariants déjà éprouvés dans les gabarits précédents :
