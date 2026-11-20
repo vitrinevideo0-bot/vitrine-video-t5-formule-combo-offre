@@ -16,8 +16,8 @@
   "quality": {
     "status": "PASS",
     "report": "T5_RUNTIME_VALIDATION.json",
-    "passed": 19,
-    "total": 19
+    "passed": 20,
+    "total": 20
   },
   "inputs": {
     "merchant_payload_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",

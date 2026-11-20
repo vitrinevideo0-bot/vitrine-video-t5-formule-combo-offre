@@ -134,6 +134,7 @@
       "scene_name": "LE PRIX",
       "data_used": [
         "merchant_payload.offre",
+        "merchant_payload.contenu",
         "merchant_payload.prix"
       ],
       "guide": {

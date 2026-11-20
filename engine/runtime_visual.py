@@ -144,15 +144,30 @@ def _fit_lines(
 
 @lru_cache(maxsize=1)
 def _readability_gradient() -> Image.Image:
-    """Calque bord à bord mis en cache : aucun rectangle de carte."""
+    """Dégradé continu jusqu'au dernier pixel, sans trait ni rupture de teinte."""
     overlay = Image.new("RGBA", (WIDTH, HEIGHT), (0, 0, 0, 0))
     draw = ImageDraw.Draw(overlay)
-    top, bottom = 680, 1160
-    for y in range(top, bottom):
-        p = (y - top) / max(1, bottom - top - 1)
-        alpha = round(8 + 142 * (p ** 1.35))
+    top = 680
+    for y in range(top, HEIGHT):
+        p = (y - top) / max(1, HEIGHT - top - 1)
+        alpha = round(150 * (p ** 1.25))
         draw.line((0, y, WIDTH, y), fill=(6, 5, 4, alpha), width=1)
     return overlay
+
+
+def readability_gradient_evidence() -> dict[str, int | bool]:
+    """Mesure le profil réellement appliqué afin que le QC interdise le retour du trait horizontal."""
+    overlay = _readability_gradient()
+    alpha = [overlay.getpixel((WIDTH // 2, y))[3] for y in range(HEIGHT)]
+    jumps = [abs(current - previous) for previous, current in zip(alpha, alpha[1:])]
+    return {
+        "start_row": 680,
+        "last_row": HEIGHT - 1,
+        "bottom_alpha": alpha[-1],
+        "max_adjacent_alpha_jump": max(jumps),
+        "monotonic_non_decreasing": all(current >= previous for previous, current in zip(alpha, alpha[1:])),
+        "reaches_frame_bottom": alpha[-1] > 0,
+    }
 
 
 def _gradient_overlay(base: Image.Image) -> Image.Image:

@@ -215,12 +215,13 @@ jobs:
 
           Ce candidat remplace entièrement l’ancien runtime à cartes, conservé comme archive rejetée.
 
+          - le formulaire distingue les **six intitulés, questions simples et exemples** approuvés ;
           - les **six réponses** viennent du `merchant_payload` du RenderJob ;
           - les scènes S1, S2, S3 et S4 consomment **quatre captures distinctes**, chacune vérifiée par SHA‑256 ;
           - le manifeste visuel est construit au runtime, puis consommé par le moteur ;
           - rendu exclusivement sur **GitHub Actions** ; Cloudflare ne fait que contrôler, stocker et dispatcher ;
           - 30,000 s, 720 × 1280, 30 i/s, 900 images, H.264, aucune piste audio ;
-          - QC 19/19 : plein cadre sans cartes, texte limité aux six valeurs, trois raccords T1 de huit images, pixels dynamiques, intégrité, durée, stabilité finale et absence de rush brut dans la livraison.
+          - QC 20/20 : plein cadre sans cartes, dégradé continu jusqu’au dernier pixel, texte limité aux six valeurs, trois raccords T1 de huit images, pixels dynamiques, intégrité, durée, stabilité finale et absence de rush brut dans la livraison.
 
           Les valeurs visibles sont la fixture formulaire de validation `Burger Atelier Kandi`. Elles ne sont pas codées dans le moteur : les tests prouvent que changer chaque réponse change les pixels attendus.
           EOF

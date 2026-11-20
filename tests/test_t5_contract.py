@@ -21,13 +21,40 @@ def test_six_owner_approved_questions_are_required_and_bound() -> None:
     questions = load("form/questions_T5.json")
     fields = questions["fields"]
     assert questions["status"] == "owner_approved"
+    assert questions["copy_revision"] == "T5_6_QUESTIONS_SIMPLIFIEES_2026-11-18"
     assert [field["id"] for field in fields] == ["nom", "offre", "contenu", "prix", "whatsapp", "quartier"]
+    assert [field["label"] for field in fields] == [
+        "Nom du restaurant", "Nom de la formule", "Ce qu'il y a dans la formule",
+        "Prix", "Numéro WhatsApp", "Lieu de retrait",
+    ]
+    assert [field["question"] for field in fields] == [
+        "Comment s'appelle ton restaurant ?",
+        "Comment tu appelles cette formule ?",
+        "Dans cette formule, tu mets quoi ? Dis-nous aussi combien il y a de chaque chose.",
+        "Tu vends cette formule à combien ?",
+        "Quel est ton numéro WhatsApp pour que les clients puissent commander ?",
+        "Les clients peuvent venir chercher leur commande où ?",
+    ]
+    assert [field["example"] for field in fields] == [
+        "Burger Atelier Kandi",
+        "Formule Double Burger",
+        "1 double burger\n1 portion de frites\n1 verre de cola",
+        "5 000 FCFA",
+        "+229 01 97 00 00 00",
+        "Kandi, près du marché central",
+    ]
+    assert fields[2]["example_items"] == [
+        "1 double burger", "1 portion de frites", "1 verre de cola"
+    ]
     assert all(field["required"] for field in fields)
     assert [field["json_target"] for field in fields] == [
         "merchant_payload.nom", "merchant_payload.offre", "merchant_payload.contenu",
         "merchant_payload.prix", "merchant_payload.whatsapp", "merchant_payload.quartier",
     ]
-    assert questions["approval"]["selected_option_id"] == "valider_questions"
+    assert [field["used_in_scenes"] for field in fields] == [
+        ["S1", "S4"], ["S1", "S3"], ["S1", "S2", "S3"], ["S3"], ["S4"], ["S4"]
+    ]
+    assert questions["approval"]["selected_option_id"] == "apply_exact_user_copy"
 
 
 def test_owner_copy_and_continuity_rule_are_exact() -> None:
@@ -65,6 +92,13 @@ def test_exact_twelve_screen_flow_and_runtime() -> None:
     expected_states = ["A_GUIDE", "B_RECORDING", "C_REVIEW"] * 4
     assert [screen["state"] for screen in screens] == expected_states
     assert [screen["ordinal"] for screen in screens] == list(range(1, 13))
+    expected_data_used = (
+        [["merchant_payload.nom", "merchant_payload.offre", "merchant_payload.contenu"]] * 3
+        + [["merchant_payload.contenu"]] * 3
+        + [["merchant_payload.offre", "merchant_payload.contenu", "merchant_payload.prix"]] * 3
+        + [["merchant_payload.nom", "merchant_payload.whatsapp", "merchant_payload.quartier"]] * 3
+    )
+    assert [screen["data_used"] for screen in screens] == expected_data_used
     expected_labels = []
     for scene in range(4):
         expected_labels += [
@@ -95,6 +129,17 @@ def test_flow_source_hashes_and_approval_are_current() -> None:
     assert approval["publication_authorized"] is True
     assert sha256(ROOT / approval["screen_copy"]["source"]) == approval["screen_copy"]["sha256"]
     assert sha256(ROOT / approval["questions"]["source"]) == approval["questions"]["sha256"]
+
+
+def test_cloudflare_form_displays_label_question_and_examples_separately() -> None:
+    app = (ROOT / "cloudflare/public/app.js").read_text(encoding="utf-8")
+    styles = (ROOT / "cloudflare/public/styles.css").read_text(encoding="utf-8")
+    assert "escapeHtml(field.label)" in app
+    assert 'class="field-question"' in app and "escapeHtml(field.question)" in app
+    assert 'class="field-example"' in app and "field.example_items" in app
+    assert "<textarea ${commonAttributes}" in app
+    assert ".field-question{" in styles
+    assert ".field-example{" in styles
 
 
 def test_twelve_png_proofs_are_hash_locked_and_not_truncated() -> None:

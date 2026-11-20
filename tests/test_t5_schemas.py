@@ -38,6 +38,11 @@ def test_schemas_reject_static_or_incomplete_variants() -> None:
     with pytest.raises(jsonschema.ValidationError):
         jsonschema.validate(questions, load("schemas/T5_questions.schema.json"))
 
+    altered_copy = load("form/questions_T5.json")
+    altered_copy["fields"][0]["question"] = "Une autre formulation ?"
+    with pytest.raises(jsonschema.ValidationError):
+        jsonschema.validate(altered_copy, load("schemas/T5_questions.schema.json"))
+
     job = load("demo/render_job_runtime_demo.json")
     job["render"]["visual_mode"] = "approved_master_stream_copy"
     with pytest.raises(jsonschema.ValidationError):

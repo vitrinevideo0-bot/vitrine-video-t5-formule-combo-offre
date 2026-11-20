@@ -29,6 +29,7 @@ from engine.runtime_visual import (
     WIDTH,
     apply_transition,
     changed_pixel_count,
+    readability_gradient_evidence,
     render_scene_frame,
 )
 
@@ -378,8 +379,11 @@ def main() -> int:
             "split_screen": False,
             "progress_bars": False,
             "scene_or_technical_labels": False,
+            "horizontal_color_seams": False,
+            "readability_gradient_reaches_frame_bottom": True,
             "visible_text_source": "merchant_payload_exact_values_only",
         },
+        "readability_gradient_evidence": readability_gradient_evidence(),
         "transition_evidence": transition_evidence,
         "field_pixel_evidence": field_evidence,
         "scene_capture_evidence": scene_evidence,

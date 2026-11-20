@@ -1,17 +1,19 @@
 {
   "schema_version": "1.0.0",
   "template_id": "RESTAURATION-T5",
-  "title": "6 questions avant de filmer — T5 Formule, combo ou offre",
+  "title": "6 questions simples avant de filmer — T5 Formule, combo ou offre",
   "status": "owner_approved",
+  "copy_revision": "T5_6_QUESTIONS_SIMPLIFIEES_2026-11-18",
   "additionalProperties": false,
   "fields": [
     {
       "id": "nom",
-      "question": "Comment s'appelle ton restaurant, ton maquis ou ton activité ?",
+      "label": "Nom du restaurant",
+      "question": "Comment s'appelle ton restaurant ?",
       "required": true,
       "minLength": 1,
       "maxLength": 40,
-      "example": "Chez Mariam",
+      "example": "Burger Atelier Kandi",
       "json_target": "merchant_payload.nom",
       "used_in_scenes": [
         "S1",
@@ -20,11 +22,12 @@
     },
     {
       "id": "offre",
-      "question": "Comment s'appelle la formule, le combo ou l'offre que tu veux montrer ?",
+      "label": "Nom de la formule",
+      "question": "Comment tu appelles cette formule ?",
       "required": true,
       "minLength": 1,
       "maxLength": 48,
-      "example": "Formule poulet braisé",
+      "example": "Formule Double Burger",
       "json_target": "merchant_payload.offre",
       "used_in_scenes": [
         "S1",
@@ -33,12 +36,17 @@
     },
     {
       "id": "contenu",
-      "question": "Qu'est-ce qu'il y a dedans ? Écris chaque plat, boisson ou produit avec sa quantité.",
+      "label": "Ce qu'il y a dans la formule",
+      "question": "Dans cette formule, tu mets quoi ? Dis-nous aussi combien il y a de chaque chose.",
       "required": true,
       "minLength": 1,
       "maxLength": 140,
-      "example": "1 poulet braisé, 1 portion d'alloco et 2 jus",
-      "helper": "Écris seulement ce que le client reçoit vraiment.",
+      "example": "1 double burger\n1 portion de frites\n1 verre de cola",
+      "example_items": [
+        "1 double burger",
+        "1 portion de frites",
+        "1 verre de cola"
+      ],
       "json_target": "merchant_payload.contenu",
       "used_in_scenes": [
         "S1",
@@ -48,12 +56,12 @@
     },
     {
       "id": "prix",
-      "question": "Quel est le prix exact de cette formule ?",
+      "label": "Prix",
+      "question": "Tu vends cette formule à combien ?",
       "required": true,
       "minLength": 1,
       "maxLength": 48,
-      "example": "5 000 FCFA pour 2 personnes",
-      "helper": "Ajoute une condition seulement si elle est vraie : taille, nombre de personnes ou période.",
+      "example": "5 000 FCFA",
       "json_target": "merchant_payload.prix",
       "used_in_scenes": [
         "S3"
@@ -61,7 +69,8 @@
     },
     {
       "id": "whatsapp",
-      "question": "Sur quel numéro WhatsApp les clients peuvent-ils commander ?",
+      "label": "Numéro WhatsApp",
+      "question": "Quel est ton numéro WhatsApp pour que les clients puissent commander ?",
       "required": true,
       "minLength": 4,
       "maxLength": 20,
@@ -73,7 +82,8 @@
     },
     {
       "id": "quartier",
-      "question": "Dans quel quartier ou quelle zone peut-on venir chercher la commande ?",
+      "label": "Lieu de retrait",
+      "question": "Les clients peuvent venir chercher leur commande où ?",
       "required": true,
       "minLength": 1,
       "maxLength": 48,
@@ -87,22 +97,22 @@
   "proposal_decision": {
     "question_count": 6,
     "all_six_required": true,
-    "why": "Le nom de l'offre, son contenu exact, son prix, le contact et le lieu sont tous nécessaires pour présenter une formule sans rien inventer.",
+    "why": "Ces six réponses suffisent pour présenter une seule formule sans inventer d'information.",
     "invented_content_forbidden": true
   },
   "approval": {
     "date": "2026-11-18",
-    "decision_channel": "arena_ask_user",
-    "question_id": "validation_questions_t5",
-    "selected_option_id": "valider_questions",
-    "decision": "Valider les 6 questions",
+    "decision_channel": "arena_direct_instruction",
+    "question_id": "t5_simplified_questions_update",
+    "selected_option_id": "apply_exact_user_copy",
+    "decision": "Appliquer les 6 questions simplifiées fournies par le propriétaire",
     "scope": [
-      "nom du commerce",
-      "nom de la formule",
-      "contenu exact avec quantités",
-      "prix exact",
-      "WhatsApp",
-      "lieu de retrait"
+      "Nom du restaurant",
+      "Nom de la formule",
+      "Ce qu'il y a dans la formule",
+      "Prix",
+      "Numéro WhatsApp",
+      "Lieu de retrait"
     ]
   }
 }

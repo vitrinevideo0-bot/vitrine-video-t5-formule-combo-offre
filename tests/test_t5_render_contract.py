@@ -10,6 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from adapter.t5_adapter import build_render_job, captures_from_demo_manifest
+from engine.runtime_visual import HEIGHT, readability_gradient_evidence
 
 
 def load(path: str) -> dict:
@@ -73,12 +74,26 @@ def test_v3_montage_is_full_frame_and_uses_three_exact_eight_frame_transitions()
     assert montage["visual_policy"]["permanent_cards_forbidden"] is True
     assert montage["visual_policy"]["rounded_video_frames_forbidden"] is True
     assert montage["visual_policy"]["technical_or_test_labels_forbidden"] is True
+    assert montage["visual_policy"]["horizontal_color_seams_forbidden"] is True
+    assert montage["visual_policy"]["readability_gradient_must_reach_frame_bottom"] is True
     assert montage["merchant_payload"]["ordered_fields"] == [
         "nom", "offre", "contenu", "prix", "whatsapp", "quartier"
     ]
     assert [item["cut_frame"] for item in montage["transitions"]] == [180, 420, 630]
     assert [item["frames"] for item in montage["transitions"]] == [[176, 183], [416, 423], [626, 633]]
     assert all(item["duration_frames"] == 8 for item in montage["transitions"])
+
+
+def test_readability_gradient_is_continuous_through_the_last_pixel() -> None:
+    evidence = readability_gradient_evidence()
+    assert evidence == {
+        "start_row": 680,
+        "last_row": HEIGHT - 1,
+        "bottom_alpha": 150,
+        "max_adjacent_alpha_jump": 1,
+        "monotonic_non_decreasing": True,
+        "reaches_frame_bottom": True,
+    }
 
 
 def test_rejected_generic_copy_is_absent_from_runtime_engine() -> None:

@@ -40,7 +40,7 @@ tools/build_t5_runtime_visual_inputs.py
         ↓
 engine/render_runtime.py : plein cadre + valeurs saisies + raccords T1
         ↓
-MP4 30 s + QC 19/19 + RenderResult, ou RenderError
+MP4 30 s + QC 20/20 + RenderResult, ou RenderError
 ```
 
 Cloudflare reste uniquement le **plan de contrôle et de stockage**. Le rendu vidéo est interdit sur Cloudflare et exécuté sur **GitHub Actions**.
@@ -115,7 +115,7 @@ python tools/validate_runtime_render.py \
 pytest -q
 ```
 
-Sortie attendue : **30,000 s**, 720 × 1280, 30 i/s, 900 images, H.264/yuv420p, aucune piste audio et QC **19/19**.
+Sortie attendue : **30,000 s**, 720 × 1280, 30 i/s, 900 images, H.264/yuv420p, aucune piste audio et QC **20/20**, avec un dégradé continu jusqu’au dernier pixel du cadre.
 
 ## Archives rejetées
 

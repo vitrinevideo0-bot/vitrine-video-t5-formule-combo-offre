@@ -9,11 +9,11 @@ export const CAPTURE_FLOW_CONTRACT = {
   "sources": {
     "guide": {
       "path": "capture-guide/consignes_T5.json",
-      "sha256": "91d3906b4bec0139c236a2b7dec99d95bdc08035e0702770c776ad581f1602e6"
+      "sha256": "a189f7661bbe56aef363b488faa6c9b1ff86d29623998ed5c512f1b1dc6dad94"
     },
     "questions": {
       "path": "form/questions_T5.json",
-      "sha256": "9426cbdb5e11a0b951f805573660ea7e75ee7789c72a97d9b8a49af9c9eeaeb0"
+      "sha256": "2284c765972e607c5ff75cce5ac39800c258d8cee2262daa61ebe99ee35212cb"
     },
     "approval": "approvals/APPROBATION_QUESTIONS_ET_12_ECRANS_T5_2026-11-18.json"
   },
@@ -535,6 +535,7 @@ export const CAPTURE_FLOW_CONTRACT = {
       "capture_slot": "captures.S3",
       "data_used": [
         "merchant_payload.offre",
+        "merchant_payload.contenu",
         "merchant_payload.prix"
       ],
       "continuity_rule": "Une seule formule par publicité. Le même plat, la même boisson et les mêmes accompagnements restent présents dans les quatre scènes.",
@@ -617,6 +618,7 @@ export const CAPTURE_FLOW_CONTRACT = {
       "capture_slot": "captures.S3",
       "data_used": [
         "merchant_payload.offre",
+        "merchant_payload.contenu",
         "merchant_payload.prix"
       ],
       "continuity_rule": "Une seule formule par publicité. Le même plat, la même boisson et les mêmes accompagnements restent présents dans les quatre scènes.",
@@ -692,6 +694,7 @@ export const CAPTURE_FLOW_CONTRACT = {
       "capture_slot": "captures.S3",
       "data_used": [
         "merchant_payload.offre",
+        "merchant_payload.contenu",
         "merchant_payload.prix"
       ],
       "continuity_rule": "Une seule formule par publicité. Le même plat, la même boisson et les mêmes accompagnements restent présents dans les quatre scènes.",

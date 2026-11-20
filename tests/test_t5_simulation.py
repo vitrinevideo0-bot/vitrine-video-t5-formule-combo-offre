@@ -26,8 +26,16 @@ def test_simulation_is_reproducible_and_embeds_six_plus_twelve(tmp_path: Path) -
     q = re.search(r'<script type="application/json" id="questions">(.*?)</script>', text, re.S)
     f = re.search(r'<script type="application/json" id="flow">(.*?)</script>', text, re.S)
     assert q and f
-    assert len(json.loads(q.group(1))["fields"]) == 6
+    questions = json.loads(q.group(1))
+    assert len(questions["fields"]) == 6
+    assert [field["label"] for field in questions["fields"]] == [
+        "Nom du restaurant", "Nom de la formule", "Ce qu'il y a dans la formule",
+        "Prix", "Numéro WhatsApp", "Lieu de retrait",
+    ]
     assert len(json.loads(f.group(1))["screens"]) == 12
+    assert "esc(f.label)" in text
+    assert 'class="field-question"' in text
+    assert 'class="field-example"' in text
     for copy in [
         "VOICI NOTRE FORMULE !",
         "REGARDE TOUT CE QU'IL Y A DEDANS !",

@@ -3,19 +3,19 @@
   "template_id": "RESTAURATION-T5",
   "version": "3.0.0-full-frame",
   "title": "Formule, combo ou offre — montage complet plein écran",
-  "status": "owner_correction_applied_pending_github_render",
+  "status": "owner_questions_simplified_and_bottom_seam_fix_pending_github_render",
   "approved_sources": {
     "questions": {
       "path": "form/questions_T5.json",
-      "sha256": "9426cbdb5e11a0b951f805573660ea7e75ee7789c72a97d9b8a49af9c9eeaeb0"
+      "sha256": "2284c765972e607c5ff75cce5ac39800c258d8cee2262daa61ebe99ee35212cb"
     },
     "capture_guide": {
       "path": "capture-guide/consignes_T5.json",
-      "sha256": "91d3906b4bec0139c236a2b7dec99d95bdc08035e0702770c776ad581f1602e6"
+      "sha256": "a189f7661bbe56aef363b488faa6c9b1ff86d29623998ed5c512f1b1dc6dad94"
     },
     "capture_flow": {
       "path": "config/T5_CAPTURE_FLOW_V1_0_0.json",
-      "sha256": "3f68ea426c99175639833b419420964c59d7b4ddcd29fdf24fce6be3fc4b5ebc",
+      "sha256": "f04f3d5f4a1990948baf13f0f1c834f499c2373295e22250cbf5262df7429ca7",
       "stable_screens": 12
     },
     "creative_approval": {
@@ -158,6 +158,8 @@
     "technical_or_test_labels_forbidden": true,
     "generic_business_headings_forbidden": true,
     "text_background_boxes_forbidden": true,
+    "horizontal_color_seams_forbidden": true,
+    "readability_gradient_must_reach_frame_bottom": true,
     "allowed_overlays": [
       "exact merchant_payload values",
       "text shadow",

@@ -117,6 +117,16 @@ def main() -> int:
         and visual_policy.get("split_screen") is False
         and visual_policy.get("progress_bars") is False
         and visual_policy.get("scene_or_technical_labels") is False
+        and visual_policy.get("horizontal_color_seams") is False
+        and visual_policy.get("readability_gradient_reaches_frame_bottom") is True
+    )
+    gradient = render_report.get("readability_gradient_evidence", {})
+    gradient_is_continuous = (
+        gradient.get("reaches_frame_bottom") is True
+        and gradient.get("last_row") == int(render_report["output"]["height"]) - 1
+        and gradient.get("bottom_alpha", 0) > 0
+        and gradient.get("monotonic_non_decreasing") is True
+        and gradient.get("max_adjacent_alpha_jump", 999) <= 1
     )
     resolved_path = args.render_report.parent / render_report["resolved_text"]["file"]
     resolved = json.loads(resolved_path.read_text(encoding="utf-8"))
@@ -148,6 +158,7 @@ def main() -> int:
         "four_scenes_consume_declared_captures": captures_are_bound,
         "four_visual_windows_are_distinct": distinct_capture_pixels,
         "rushes_are_full_frame_without_cards": full_frame_policy,
+        "readability_gradient_is_continuous_to_frame_bottom": gradient_is_continuous,
         "visible_text_is_exactly_from_merchant_payload": exact_text_policy,
         "three_t1_transitions_are_exactly_eight_frames": transitions_are_exact,
         "runtime_manifest_is_hash_bound": sha256(args.manifest) == render_report["runtime_manifest"]["sha256"],

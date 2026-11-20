@@ -9,6 +9,7 @@
     "template_id",
     "title",
     "status",
+    "copy_revision",
     "additionalProperties",
     "fields",
     "proposal_decision",
@@ -19,6 +20,7 @@
     "template_id": { "const": "RESTAURATION-T5" },
     "title": { "type": "string", "minLength": 1 },
     "status": { "const": "owner_approved" },
+    "copy_revision": { "const": "T5_6_QUESTIONS_SIMPLIFIEES_2026-11-18" },
     "additionalProperties": { "const": false },
     "fields": {
       "type": "array",
@@ -50,15 +52,19 @@
       "required": ["date", "decision_channel", "question_id", "selected_option_id", "decision", "scope"],
       "properties": {
         "date": { "const": "2026-11-18" },
-        "decision_channel": { "const": "arena_ask_user" },
-        "question_id": { "const": "validation_questions_t5" },
-        "selected_option_id": { "const": "valider_questions" },
-        "decision": { "const": "Valider les 6 questions" },
+        "decision_channel": { "const": "arena_direct_instruction" },
+        "question_id": { "const": "t5_simplified_questions_update" },
+        "selected_option_id": { "const": "apply_exact_user_copy" },
+        "decision": { "const": "Appliquer les 6 questions simplifiées fournies par le propriétaire" },
         "scope": {
-          "type": "array",
-          "minItems": 6,
-          "maxItems": 6,
-          "items": { "type": "string", "minLength": 1 }
+          "const": [
+            "Nom du restaurant",
+            "Nom de la formule",
+            "Ce qu'il y a dans la formule",
+            "Prix",
+            "Numéro WhatsApp",
+            "Lieu de retrait"
+          ]
         }
       },
       "additionalProperties": false
@@ -68,14 +74,20 @@
     "field": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "question", "required", "minLength", "maxLength", "example", "json_target", "used_in_scenes"],
+      "required": ["id", "label", "question", "required", "minLength", "maxLength", "example", "json_target", "used_in_scenes"],
       "properties": {
         "id": { "type": "string" },
+        "label": { "type": "string", "minLength": 1 },
         "question": { "type": "string", "minLength": 1 },
         "required": { "const": true },
         "minLength": { "type": "integer", "minimum": 1 },
         "maxLength": { "type": "integer", "minimum": 4 },
         "example": { "type": "string", "minLength": 1 },
+        "example_items": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
         "helper": { "type": "string", "minLength": 1 },
         "pattern": { "type": "string", "minLength": 1 },
         "json_target": { "type": "string", "pattern": "^merchant_payload\\.[a-z]+$" },
@@ -90,37 +102,80 @@
     "nom": {
       "allOf": [
         { "$ref": "#/$defs/field" },
-        { "properties": { "id": { "const": "nom" }, "json_target": { "const": "merchant_payload.nom" } } }
+        { "properties": {
+          "id": { "const": "nom" },
+          "label": { "const": "Nom du restaurant" },
+          "question": { "const": "Comment s'appelle ton restaurant ?" },
+          "example": { "const": "Burger Atelier Kandi" },
+          "json_target": { "const": "merchant_payload.nom" },
+          "used_in_scenes": { "const": ["S1", "S4"] }
+        } }
       ]
     },
     "offre": {
       "allOf": [
         { "$ref": "#/$defs/field" },
-        { "properties": { "id": { "const": "offre" }, "json_target": { "const": "merchant_payload.offre" } } }
+        { "properties": {
+          "id": { "const": "offre" },
+          "label": { "const": "Nom de la formule" },
+          "question": { "const": "Comment tu appelles cette formule ?" },
+          "example": { "const": "Formule Double Burger" },
+          "json_target": { "const": "merchant_payload.offre" },
+          "used_in_scenes": { "const": ["S1", "S3"] }
+        } }
       ]
     },
     "contenu": {
       "allOf": [
         { "$ref": "#/$defs/field" },
-        { "properties": { "id": { "const": "contenu" }, "json_target": { "const": "merchant_payload.contenu" } } }
+        { "required": ["example_items"], "properties": {
+          "id": { "const": "contenu" },
+          "label": { "const": "Ce qu'il y a dans la formule" },
+          "question": { "const": "Dans cette formule, tu mets quoi ? Dis-nous aussi combien il y a de chaque chose." },
+          "example": { "const": "1 double burger\n1 portion de frites\n1 verre de cola" },
+          "example_items": { "const": ["1 double burger", "1 portion de frites", "1 verre de cola"] },
+          "json_target": { "const": "merchant_payload.contenu" },
+          "used_in_scenes": { "const": ["S1", "S2", "S3"] }
+        } }
       ]
     },
     "prix": {
       "allOf": [
         { "$ref": "#/$defs/field" },
-        { "properties": { "id": { "const": "prix" }, "json_target": { "const": "merchant_payload.prix" } } }
+        { "properties": {
+          "id": { "const": "prix" },
+          "label": { "const": "Prix" },
+          "question": { "const": "Tu vends cette formule à combien ?" },
+          "example": { "const": "5 000 FCFA" },
+          "json_target": { "const": "merchant_payload.prix" },
+          "used_in_scenes": { "const": ["S3"] }
+        } }
       ]
     },
     "whatsapp": {
       "allOf": [
         { "$ref": "#/$defs/field" },
-        { "properties": { "id": { "const": "whatsapp" }, "json_target": { "const": "merchant_payload.whatsapp" } } }
+        { "properties": {
+          "id": { "const": "whatsapp" },
+          "label": { "const": "Numéro WhatsApp" },
+          "question": { "const": "Quel est ton numéro WhatsApp pour que les clients puissent commander ?" },
+          "example": { "const": "+229 01 97 00 00 00" },
+          "json_target": { "const": "merchant_payload.whatsapp" },
+          "used_in_scenes": { "const": ["S4"] }
+        } }
       ]
     },
     "quartier": {
       "allOf": [
         { "$ref": "#/$defs/field" },
-        { "properties": { "id": { "const": "quartier" }, "json_target": { "const": "merchant_payload.quartier" } } }
+        { "properties": {
+          "id": { "const": "quartier" },
+          "label": { "const": "Lieu de retrait" },
+          "question": { "const": "Les clients peuvent venir chercher leur commande où ?" },
+          "example": { "const": "Kandi, près du marché central" },
+          "json_target": { "const": "merchant_payload.quartier" },
+          "used_in_scenes": { "const": ["S4"] }
+        } }
       ]
     }
   }

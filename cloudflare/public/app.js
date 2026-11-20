@@ -63,12 +63,20 @@ function renderForm() {
     const wrapper = document.createElement('div');
     wrapper.className = 'field';
     const inputMode = field.id === 'whatsapp' ? 'tel' : 'text';
+    const describedBy = `field-question-${field.id} field-example-${field.id}`;
+    const commonAttributes = `id="field-${field.id}" name="${field.id}" inputmode="${inputMode}" minlength="${field.minLength}" maxlength="${field.maxLength}" ${field.pattern ? `pattern="${escapeHtml(field.pattern)}"` : ''} placeholder="${escapeHtml(field.example || '')}" aria-describedby="${describedBy}" ${field.required ? 'required' : ''}`;
+    const control = field.id === 'contenu'
+      ? `<textarea ${commonAttributes} rows="3"></textarea>`
+      : `<input ${commonAttributes}>`;
+    const example = Array.isArray(field.example_items)
+      ? `<ul>${field.example_items.map((item) => `<li>${escapeHtml(item)}</li>`).join('')}</ul>`
+      : `<span>${escapeHtml(field.example || '')}</span>`;
     wrapper.innerHTML = `
-      <span class="field-index">${String(index + 1).padStart(2, '0')}</span>
-      <label for="field-${field.id}">${escapeHtml(field.question)}</label>
-      <input id="field-${field.id}" name="${field.id}" inputmode="${inputMode}"
-        minlength="${field.minLength}" maxlength="${field.maxLength}"
-        placeholder="${escapeHtml(field.example || '')}" ${field.required ? 'required' : ''}>
+      <span class="field-index">QUESTION ${String(index + 1).padStart(2, '0')}</span>
+      <label for="field-${field.id}">${escapeHtml(field.label)}${field.required ? ' *' : ''}</label>
+      <p class="field-question" id="field-question-${field.id}">${escapeHtml(field.question)}</p>
+      ${control}
+      <div class="field-example" id="field-example-${field.id}"><strong>Exemple :</strong>${example}</div>
       ${field.helper ? `<small>${escapeHtml(field.helper)}</small>` : ''}`;
     fields.append(wrapper);
   });

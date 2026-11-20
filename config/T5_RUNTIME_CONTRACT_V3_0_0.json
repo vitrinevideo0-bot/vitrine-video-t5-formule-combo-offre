@@ -37,6 +37,8 @@
     "rounded_video_frames": false,
     "scene_labels": false,
     "technical_labels": false,
+    "horizontal_color_seams": false,
+    "readability_gradient_reaches_frame_bottom": true,
     "final_stable_start_frame": 810,
     "audio_streams": 0
   },
