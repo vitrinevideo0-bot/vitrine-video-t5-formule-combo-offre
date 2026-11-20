@@ -25,12 +25,12 @@ PAYLOAD = {
     "quartier": "Kandi, près du marché central",
 }
 CASES = [
-    ("nom", "S1", "Autre Restaurant"),
-    ("offre", "S1", "Autre Formule"),
-    ("contenu", "S2", "2 burgers, 2 frites et 2 colas"),
-    ("prix", "S3", "7 500 FCFA"),
-    ("whatsapp", "S4", "+229 01 00 11 22 33"),
-    ("quartier", "S4", "Autre lieu de retrait"),
+    ("nom", "S1", 42, "Autre Restaurant"),
+    ("offre", "S1", 94, "Autre Formule"),
+    ("contenu", "S2", 120, "2 burgers, 2 frites et 2 colas"),
+    ("prix", "S3", 180, "7 500 FCFA"),
+    ("whatsapp", "S4", 112, "+229 01 00 11 22 33"),
+    ("quartier", "S4", 172, "Autre lieu de retrait"),
 ]
 
 
@@ -38,18 +38,33 @@ def intersects(a: tuple[int, int, int, int], b: tuple[int, int, int, int] | None
     return bool(b) and max(a[0], b[0]) < min(a[2], b[2]) and max(a[1], b[1]) < min(a[3], b[3])
 
 
-@pytest.mark.parametrize(("field", "scene", "replacement"), CASES)
-def test_each_form_answer_changes_pixels_in_its_declared_block(field: str, scene: str, replacement: str) -> None:
+@pytest.mark.parametrize(("field", "scene", "proof_frame", "replacement"), CASES)
+def test_each_form_answer_changes_pixels_in_its_motion_proof_block(
+    field: str, scene: str, proof_frame: int, replacement: str
+) -> None:
     source = Image.new("RGB", (720, 1280), "#9d5c35")
-    original, active = render_scene_frame(source, scene, 120, PAYLOAD)
+    original, active = render_scene_frame(source, scene, proof_frame, PAYLOAD)
     modified_payload = deepcopy(PAYLOAD)
     modified_payload[field] = replacement
-    modified, modified_active = render_scene_frame(source, scene, 120, modified_payload)
+    modified, modified_active = render_scene_frame(source, scene, proof_frame, modified_payload)
     count, bbox = changed_pixel_count(original, modified)
     assert field in active
     assert active == modified_active
     assert count > 100
     assert intersects(FIELD_BOXES[scene][field], bbox)
+
+
+def test_s1_motion_shows_only_the_current_field_instead_of_the_old_three_field_stack() -> None:
+    source = Image.new("RGB", (720, 1280), "#9d5c35")
+    baseline, _ = render_scene_frame(source, "S1", 94, PAYLOAD)
+    changed_hidden = deepcopy(PAYLOAD)
+    changed_hidden["nom"] = "Nom invisible à cet instant"
+    hidden_variant, _ = render_scene_frame(source, "S1", 94, changed_hidden)
+    assert ImageChops.difference(baseline, hidden_variant).getbbox() is None
+    changed_visible = deepcopy(PAYLOAD)
+    changed_visible["offre"] = "Autre formule visible"
+    visible_variant, _ = render_scene_frame(source, "S1", 94, changed_visible)
+    assert ImageChops.difference(baseline, visible_variant).getbbox() is not None
 
 
 def test_substituting_one_capture_changes_only_its_scene_window() -> None:

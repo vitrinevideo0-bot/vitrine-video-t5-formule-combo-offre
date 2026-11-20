@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from adapter.t5_adapter import build_render_job, captures_from_demo_manifest
-from engine.runtime_visual import HEIGHT, readability_gradient_evidence
+from engine.runtime_visual import HEIGHT, motion_design_evidence, readability_gradient_evidence, text_motion_state
 
 
 def load(path: str) -> dict:
@@ -64,6 +64,10 @@ def test_every_answer_and_capture_has_an_explicit_runtime_target() -> None:
         "captures.S1", "captures.S2", "captures.S3", "captures.S4"
     ]
     assert [item["duration_ms"] for item in contract["scene_bindings"]] == [6000, 8000, 7000, 9000]
+    assert contract["text_motion_contract"] == "config/T5_TEXT_MOTION_V1_0_0.json"
+    assert contract["visual_contract"]["text_motion"] == "character_by_character_staggered"
+    assert contract["visual_contract"]["font_family"] == "Manrope"
+    assert contract["visual_contract"]["static_text_stack"] is False
     assert contract["runtime_order"][3]["render_plane"] == "github_actions"
 
 
@@ -76,6 +80,10 @@ def test_v3_montage_is_full_frame_and_uses_three_exact_eight_frame_transitions()
     assert montage["visual_policy"]["technical_or_test_labels_forbidden"] is True
     assert montage["visual_policy"]["horizontal_color_seams_forbidden"] is True
     assert montage["visual_policy"]["readability_gradient_must_reach_frame_bottom"] is True
+    assert montage["visual_policy"]["static_text_stack_forbidden"] is True
+    assert montage["visual_policy"]["character_by_character_reveal_required"] is True
+    assert montage["visual_policy"]["font_family"] == "Manrope"
+    assert montage["visual_policy"]["max_simultaneous_text_fields"] == 2
     assert montage["merchant_payload"]["ordered_fields"] == [
         "nom", "offre", "contenu", "prix", "whatsapp", "quartier"
     ]
@@ -94,6 +102,48 @@ def test_readability_gradient_is_continuous_through_the_last_pixel() -> None:
         "monotonic_non_decreasing": True,
         "reaches_frame_bottom": True,
     }
+
+
+def test_motion_design_is_character_staggered_left_aligned_and_font_bound() -> None:
+    evidence = motion_design_evidence()
+    assert evidence["font"]["family"] == "Manrope"
+    assert evidence["font"]["license"] == "OFL-1.1"
+    assert evidence["font"]["sha256"] == hashlib.sha256(
+        (ROOT / evidence["font"]["file"]).read_bytes()
+    ).hexdigest()
+    assert evidence["reveal_unit"] == "character"
+    assert evidence["sequence"] == "staggered_one_field_after_another"
+    assert evidence["alignment"] == "left"
+    assert evidence["static_all_fields_from_first_frame"] is False
+    assert evidence["text_background_boxes"] is False
+    assert evidence["max_simultaneous_fields"] == 2
+    assert evidence["scene_max_simultaneous_fields"] == {"S1": 1, "S2": 1, "S3": 1, "S4": 2}
+    assert evidence["stable_tail"] == {
+        "start_frame": 180,
+        "end_frame": 269,
+        "visible_fields": ["whatsapp", "quartier"],
+    }
+    montage = load("montage/T5_MONTAGE_COMPLET_V3_0_0.json")
+    for source_name in ("text_motion", "motion_font", "motion_typography_approval"):
+        source = montage["approved_sources"][source_name]
+        assert hashlib.sha256((ROOT / source["path"]).read_bytes()).hexdigest() == source["sha256"]
+
+
+def test_motion_state_reveals_characters_and_never_restores_the_three_field_stack() -> None:
+    payload = load("demo/reponses_runtime_demo.json")
+    start = text_motion_state("S1", "nom", 10, payload["nom"])
+    complete = text_motion_state("S1", "nom", 35, payload["nom"])
+    assert start["phase"] == "type_on"
+    assert 0 < start["visible_characters"] < start["total_characters"]
+    assert complete["visible_characters"] == complete["total_characters"]
+    assert text_motion_state("S1", "offre", 35, payload["offre"])["phase"] == "hidden"
+    assert text_motion_state("S1", "nom", 94, payload["nom"])["phase"] == "hidden"
+    assert text_motion_state("S1", "offre", 94, payload["offre"])["phase"] == "hold"
+    final_states = {
+        field: text_motion_state("S4", field, 180, payload[field])["phase"]
+        for field in ("nom", "whatsapp", "quartier")
+    }
+    assert final_states == {"nom": "hidden", "whatsapp": "hold", "quartier": "hold"}
 
 
 def test_rejected_generic_copy_is_absent_from_runtime_engine() -> None:

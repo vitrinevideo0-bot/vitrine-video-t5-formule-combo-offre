@@ -73,6 +73,10 @@ def main() -> int:
         raise SystemExit("T5 must render on GitHub Actions, never on Cloudflare")
 
     contract = json.loads((ROOT / job["render"]["runtime_contract"]).read_text(encoding="utf-8"))
+    motion_contract_path = ROOT / contract["text_motion_contract"]
+    motion_contract = json.loads(motion_contract_path.read_text(encoding="utf-8"))
+    if motion_contract["animation"]["reveal_unit"] != "character":
+        raise SystemExit("T5 text motion must reveal merchant values character by character")
     fields_by_scene = {item["scene"]: item["text_fields"] for item in contract["scene_bindings"]}
     scenes: list[dict[str, Any]] = []
     for slot in SLOTS:
@@ -130,6 +134,10 @@ def main() -> int:
         "purpose": "Only the four SHA-256 verified captures in this manifest may feed the T5 runtime renderer.",
         "runtime_contract": job["render"]["runtime_contract"],
         "runtime_contract_sha256": sha256(ROOT / job["render"]["runtime_contract"]),
+        "text_motion_contract": contract["text_motion_contract"],
+        "text_motion_contract_sha256": sha256(motion_contract_path),
+        "font_file": motion_contract["font"]["file"],
+        "font_sha256": sha256(ROOT / motion_contract["font"]["file"]),
         "merchant_payload_sha256": canonical_sha256(job["merchant_payload"]),
         "output_contract": {
             "width": 720, "height": 1280, "fps": 30, "frames": 900,

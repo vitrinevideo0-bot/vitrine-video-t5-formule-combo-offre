@@ -24,11 +24,13 @@ if str(ROOT) not in sys.path:
 
 from engine.runtime_visual import (
     FIELD_BOXES,
+    FIELD_PIXEL_PROOFS,
     HEIGHT,
     SCENE_FIELDS,
     WIDTH,
     apply_transition,
     changed_pixel_count,
+    motion_design_evidence,
     readability_gradient_evidence,
     render_scene_frame,
 )
@@ -38,15 +40,7 @@ SCENE_FRAMES = {"S1": 180, "S2": 240, "S3": 210, "S4": 270}
 TRANSITION_DIRECTIONS = ("left", "right", "left")
 TRANSITION_CUTS = (180, 420, 630)
 OUTPUT_FILENAME = "VIDEO_T5_FORMULE_PLEIN_ECRAN_V3_A_VALIDER.mp4"
-PROOF_FRAME = 120
-FIELD_PROOF_SCENE = {
-    "nom": "S1",
-    "offre": "S1",
-    "contenu": "S2",
-    "prix": "S3",
-    "whatsapp": "S4",
-    "quartier": "S4",
-}
+SCENE_PROOF_FRAME = 120
 
 
 def load_json(path: Path) -> dict[str, Any]:
@@ -169,15 +163,16 @@ def changed_field_evidence(
     scene: str,
     payload: Mapping[str, str],
     field: str,
+    proof_frame: int,
 ) -> dict[str, Any]:
-    original, _ = render_scene_frame(source, scene, PROOF_FRAME, payload, SCENE_FRAMES[scene])
+    original, _ = render_scene_frame(source, scene, proof_frame, payload, SCENE_FRAMES[scene])
     changed = deepcopy(dict(payload))
     changed[field] = f"X {payload[field]}"
-    variant, _ = render_scene_frame(source, scene, PROOF_FRAME, changed, SCENE_FRAMES[scene])
+    variant, _ = render_scene_frame(source, scene, proof_frame, changed, SCENE_FRAMES[scene])
     count, bbox = changed_pixel_count(original, variant)
     return {
         "scene": scene,
-        "proof_local_frame": PROOF_FRAME,
+        "proof_local_frame": proof_frame,
         "target_box": list(FIELD_BOXES[scene][field]),
         "changed_pixels": count,
         "difference_bbox": list(bbox) if bbox else None,
@@ -209,20 +204,20 @@ def scene_generator(
             raise RuntimeError(f"Runtime text fields diverge for {slot}")
         if local_index in proof_indices:
             proof_images[(slot, local_index)] = rendered.copy()
-        if local_index == PROOF_FRAME:
+        if local_index == SCENE_PROOF_FRAME:
             scene_evidence[slot] = {
                 "capture_sha256": scene["sha256"],
                 "capture_file": scene["local_file"],
-                "proof_local_frame": PROOF_FRAME,
+                "proof_local_frame": SCENE_PROOF_FRAME,
                 "full_frame_pixels_sha256": pixels_sha256(rendered),
                 # Kept for RenderResult V2 compatibility; the hash now covers the full-frame render.
                 "hero_pixels_sha256": pixels_sha256(rendered),
                 "rush_fills_frame": True,
                 "text_fields": list(active),
             }
-            for field, proof_scene in FIELD_PROOF_SCENE.items():
-                if proof_scene == slot:
-                    field_evidence[field] = changed_field_evidence(source, slot, payload, field)
+        for field, (proof_scene, proof_frame) in FIELD_PIXEL_PROOFS.items():
+            if proof_scene == slot and local_index == proof_frame:
+                field_evidence[field] = changed_field_evidence(source, slot, payload, field, proof_frame)
         yield local_index, rendered
 
 
@@ -270,6 +265,9 @@ def main() -> int:
         "values": payload,
         "visible_text_policy": "exact_merchant_payload_values_only",
         "static_business_copy": [],
+        "text_motion_contract": "config/T5_TEXT_MOTION_V1_0_0.json",
+        "font_family": "Manrope",
+        "reveal_unit": "character",
         "scene_values": {
             slot: {field: payload[field] for field in SCENE_FIELDS[slot]}
             for slot in SLOTS
@@ -381,9 +379,14 @@ def main() -> int:
             "scene_or_technical_labels": False,
             "horizontal_color_seams": False,
             "readability_gradient_reaches_frame_bottom": True,
+            "kinetic_text_motion": True,
+            "static_text_stack": False,
+            "max_simultaneous_text_fields": 2,
+            "font_family": "Manrope",
             "visible_text_source": "merchant_payload_exact_values_only",
         },
         "readability_gradient_evidence": readability_gradient_evidence(),
+        "text_motion_evidence": motion_design_evidence(),
         "transition_evidence": transition_evidence,
         "field_pixel_evidence": field_evidence,
         "scene_capture_evidence": scene_evidence,

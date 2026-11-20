@@ -1,58 +1,140 @@
 #!/usr/bin/env python3
-"""Primitives visuelles T5 V3 : rush plein écran et texte exact du merchant_payload.
+"""Primitives visuelles T5 V3 : rush plein écran et typographie motion issue du JSON.
 
 Aucun titre éditorial, carte, cadre vidéo, barre de progression ou libellé de scène
-n'est produit ici. Les seules chaînes brûlées viennent du RenderJob.
+n'est produit ici. Les seuls glyphes brûlés sont des caractères des valeurs exactes
+du RenderJob, révélés selon config/T5_TEXT_MOTION_V1_0_0.json.
 """
 from __future__ import annotations
 
 from functools import lru_cache
+import hashlib
+import json
+import math
 from pathlib import Path
-from typing import Mapping
+from typing import Any, Mapping
 import re
 
 from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
 
+ROOT = Path(__file__).resolve().parents[1]
 WIDTH, HEIGHT = 720, 1280
-FONT_REGULAR = Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf")
-FONT_BOLD = Path("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf")
+TEXT_MOTION_CONFIG_PATH = ROOT / "config/T5_TEXT_MOTION_V1_0_0.json"
+TEXT_MOTION: dict[str, Any] = json.loads(TEXT_MOTION_CONFIG_PATH.read_text(encoding="utf-8"))
+FONT_FILE = ROOT / TEXT_MOTION["font"]["file"]
+FONT_LICENSE_FILE = ROOT / TEXT_MOTION["font"]["license_file"]
 
 SCENE_FIELDS: dict[str, tuple[str, ...]] = {
-    "S1": ("nom", "offre", "contenu"),
-    "S2": ("contenu",),
-    "S3": ("offre", "contenu", "prix"),
-    "S4": ("nom", "whatsapp", "quartier"),
+    scene: tuple(field["id"] for field in scene_contract["fields"])
+    for scene, scene_contract in TEXT_MOTION["scenes"].items()
 }
-
-# Zones de texte transparentes, exprimées dans le plein cadre 720 x 1280.
+FIELD_SPECS: dict[str, dict[str, dict[str, Any]]] = {
+    scene: {field["id"]: field for field in scene_contract["fields"]}
+    for scene, scene_contract in TEXT_MOTION["scenes"].items()
+}
 FIELD_BOXES: dict[str, dict[str, tuple[int, int, int, int]]] = {
-    "S1": {
-        "nom": (52, 758, 668, 820),
-        "offre": (52, 832, 668, 928),
-        "contenu": (52, 942, 668, 1074),
-    },
-    "S2": {
-        "contenu": (52, 872, 668, 1074),
-    },
-    "S3": {
-        "offre": (52, 750, 668, 826),
-        "contenu": (52, 840, 668, 952),
-        "prix": (52, 972, 668, 1082),
-    },
-    "S4": {
-        "nom": (52, 758, 668, 820),
-        "whatsapp": (52, 838, 668, 932),
-        "quartier": (52, 948, 668, 1056),
-    },
+    scene: {field_id: tuple(spec["box"]) for field_id, spec in fields.items()}
+    for scene, fields in FIELD_SPECS.items()
+}
+FIELD_PIXEL_PROOFS: dict[str, tuple[str, int]] = {
+    field: (proof["scene"], int(proof["frame"]))
+    for field, proof in TEXT_MOTION["field_pixel_proofs"].items()
 }
 
-SCENE_TEXT_STYLE: dict[str, dict[str, tuple[int, int]]] = {
-    # (taille préférée, taille minimale) — la réduction permet toujours d'afficher la valeur entière.
-    "S1": {"nom": (34, 24), "offre": (50, 32), "contenu": (31, 22)},
-    "S2": {"contenu": (42, 24)},
-    "S3": {"offre": (36, 24), "contenu": (28, 20), "prix": (58, 40)},
-    "S4": {"nom": (34, 24), "whatsapp": (43, 30), "quartier": (31, 22)},
-}
+
+def _sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _validate_motion_contract() -> None:
+    expected_frames = {"S1": 180, "S2": 240, "S3": 210, "S4": 270}
+    if set(SCENE_FIELDS) != set(expected_frames):
+        raise RuntimeError("T5 text motion contract must define S1, S2, S3 and S4")
+    if not FONT_FILE.is_file() or not FONT_LICENSE_FILE.is_file():
+        raise RuntimeError("The contract-bound Manrope font and its OFL license are required")
+    maximum_active = 0
+    for scene, total in expected_frames.items():
+        contract = TEXT_MOTION["scenes"][scene]
+        if int(contract["scene_frames"]) != total:
+            raise RuntimeError(f"Text motion scene length diverges for {scene}")
+        for field in contract["fields"]:
+            start = int(field["start_frame"])
+            type_end = int(field["type_on_end_frame"])
+            hold_end = int(field["hold_end_frame"])
+            end = int(field["end_frame"])
+            if not (0 <= start < type_end <= hold_end <= end <= total):
+                raise RuntimeError(f"Invalid kinetic text interval for {scene}.{field['id']}")
+            x0, y0, x1, y1 = map(int, field["box"])
+            if not (0 <= x0 < x1 <= WIDTH and 0 <= y0 < y1 <= HEIGHT):
+                raise RuntimeError(f"Invalid kinetic text box for {scene}.{field['id']}")
+        for frame in range(total):
+            active = sum(
+                int(field["start_frame"]) <= frame < int(field["end_frame"])
+                for field in contract["fields"]
+            )
+            maximum_active = max(maximum_active, active)
+    if maximum_active > int(TEXT_MOTION["animation"]["max_simultaneous_fields"]):
+        raise RuntimeError("The motion schedule exceeds the approved simultaneous-field limit")
+    for field, (scene, proof_frame) in FIELD_PIXEL_PROOFS.items():
+        spec = FIELD_SPECS[scene][field]
+        if not (int(spec["type_on_end_frame"]) <= proof_frame < int(spec["hold_end_frame"])):
+            raise RuntimeError(f"Pixel proof frame must show the complete value for {field}")
+    tail = TEXT_MOTION["scenes"]["S4"]["stable_tail"]
+    if tail != {"start_frame": 180, "end_frame": 269, "visible_fields": ["whatsapp", "quartier"]}:
+        raise RuntimeError("The final three-second stable motion state must remain contract-bound")
+
+
+_validate_motion_contract()
+
+
+def motion_design_evidence() -> dict[str, Any]:
+    scene_maximums: dict[str, int] = {}
+    schedules: dict[str, list[dict[str, Any]]] = {}
+    for scene, contract in TEXT_MOTION["scenes"].items():
+        maximum = 0
+        for frame in range(int(contract["scene_frames"])):
+            maximum = max(
+                maximum,
+                sum(
+                    int(field["start_frame"]) <= frame < int(field["end_frame"])
+                    for field in contract["fields"]
+                ),
+            )
+        scene_maximums[scene] = maximum
+        schedules[scene] = [
+            {
+                "field": field["id"],
+                "start_frame": field["start_frame"],
+                "type_on_end_frame": field["type_on_end_frame"],
+                "hold_end_frame": field["hold_end_frame"],
+                "end_frame": field["end_frame"],
+            }
+            for field in contract["fields"]
+        ]
+    animation = TEXT_MOTION["animation"]
+    return {
+        "contract": {
+            "file": str(TEXT_MOTION_CONFIG_PATH.relative_to(ROOT)),
+            "sha256": _sha256(TEXT_MOTION_CONFIG_PATH),
+            "revision": TEXT_MOTION["revision"],
+        },
+        "font": {
+            "family": TEXT_MOTION["font"]["family"],
+            "file": TEXT_MOTION["font"]["file"],
+            "sha256": _sha256(FONT_FILE),
+            "license": TEXT_MOTION["font"]["license"],
+            "license_file": TEXT_MOTION["font"]["license_file"],
+        },
+        "reveal_unit": animation["reveal_unit"],
+        "sequence": animation["sequence"],
+        "alignment": animation["alignment"],
+        "static_all_fields_from_first_frame": animation["static_all_fields_from_first_frame"],
+        "text_background_boxes": animation["text_background_boxes"],
+        "max_simultaneous_fields": animation["max_simultaneous_fields"],
+        "scene_max_simultaneous_fields": scene_maximums,
+        "field_schedules": schedules,
+        "stable_tail": TEXT_MOTION["scenes"]["S4"]["stable_tail"],
+    }
 
 
 def _resample() -> int:
@@ -60,12 +142,11 @@ def _resample() -> int:
 
 
 @lru_cache(maxsize=128)
-def load_font(size: int, bold: bool = False) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
-    path = FONT_BOLD if bold else FONT_REGULAR
-    try:
-        return ImageFont.truetype(str(path), size)
-    except OSError:
-        return ImageFont.load_default()
+def load_font(size: int, weight: int = 400) -> ImageFont.FreeTypeFont:
+    font = ImageFont.truetype(str(FONT_FILE), size)
+    if hasattr(font, "set_variation_by_axes"):
+        font.set_variation_by_axes([int(weight)])
+    return font
 
 
 def cover(source: Image.Image, size: tuple[int, int] = (WIDTH, HEIGHT)) -> Image.Image:
@@ -81,7 +162,6 @@ def cover(source: Image.Image, size: tuple[int, int] = (WIDTH, HEIGHT)) -> Image
 
 def _cover_with_motion(source: Image.Image, progress: float, mode: str) -> Image.Image:
     progress = max(0.0, min(1.0, progress))
-    # Un mouvement discret dynamise même une capture stable, sans la placer dans une carte.
     motion_progress = min(progress, 0.66) if mode == "lock" else progress
     if mode == "pull":
         zoom = 1.055 - 0.04 * motion_progress
@@ -100,45 +180,66 @@ def _cover_with_motion(source: Image.Image, progress: float, mode: str) -> Image
     return base.crop((left, top, left + crop_w, top + crop_h)).resize((WIDTH, HEIGHT), _resample())
 
 
+def _normalize(value: str) -> str:
+    return " ".join(str(value).split())
+
+
 def _tokens(value: str) -> list[str]:
-    return re.findall(r"\S+", " ".join(value.split()))
+    return re.findall(r"\S+", _normalize(value))
 
 
-def _fit_lines(
-    draw: ImageDraw.ImageDraw,
+def _tracked_width(value: str, font: ImageFont.FreeTypeFont, tracking: float) -> float:
+    if not value:
+        return 0.0
+    return sum(float(font.getlength(character)) for character in value) + tracking * max(0, len(value) - 1)
+
+
+def _wrap_lines(value: str, font: ImageFont.FreeTypeFont, max_width: int, tracking: float) -> list[str]:
+    words = _tokens(value) or [""]
+    lines: list[str] = []
+    current = words[0]
+    for word in words[1:]:
+        candidate = f"{current} {word}"
+        if _tracked_width(candidate, font, tracking) <= max_width:
+            current = candidate
+        else:
+            lines.append(current)
+            current = word
+    lines.append(current)
+    return lines
+
+
+@lru_cache(maxsize=256)
+def _layout_text(
     value: str,
-    *,
     max_width: int,
     max_height: int,
     preferred_size: int,
     minimum_size: int,
-    bold: bool,
+    weight: int,
     max_lines: int,
-) -> tuple[list[str], ImageFont.ImageFont, int]:
-    words = _tokens(value)
-    if not words:
-        words = [""]
-    fallback: tuple[list[str], ImageFont.ImageFont, int] | None = None
+    tracking: float,
+    line_spacing: int,
+) -> tuple[tuple[str, ...], int, int, int]:
+    normalized = _normalize(value)
+    fallback: tuple[tuple[str, ...], int, int, int] | None = None
     for size in range(preferred_size, minimum_size - 1, -1):
-        font = load_font(size, bold)
-        spacing = max(5, round(size * 0.2))
-        lines: list[str] = []
-        current = words[0]
-        for word in words[1:]:
-            candidate = f"{current} {word}"
-            if draw.textbbox((0, 0), candidate, font=font, stroke_width=1)[2] <= max_width:
-                current = candidate
-            else:
-                lines.append(current)
-                current = word
-        lines.append(current)
-        fallback = (lines, font, spacing)
-        bbox = draw.multiline_textbbox((0, 0), "\n".join(lines), font=font, spacing=spacing, stroke_width=1)
-        if len(lines) <= max_lines and bbox[2] <= max_width and bbox[3] <= max_height:
-            return lines, font, spacing
+        font = load_font(size, weight)
+        lines = _wrap_lines(normalized, font, max_width, tracking)
+        line_bbox = font.getbbox("Ag", anchor="lt")
+        line_height = max(1, line_bbox[3] - line_bbox[1])
+        total_height = line_height * len(lines) + line_spacing * max(0, len(lines) - 1)
+        fallback = (tuple(lines), size, line_height, total_height)
+        if (
+            len(lines) <= max_lines
+            and max((_tracked_width(line, font, tracking) for line in lines), default=0) <= max_width
+            and total_height <= max_height
+        ):
+            return fallback
     if fallback is None:
-        font = load_font(minimum_size, bold)
-        return [" ".join(words)], font, max(4, round(minimum_size * 0.18))
+        font = load_font(minimum_size, weight)
+        line_height = max(1, font.getbbox("Ag", anchor="lt")[3])
+        return ((normalized,), minimum_size, line_height, line_height)
     return fallback
 
 
@@ -156,7 +257,6 @@ def _readability_gradient() -> Image.Image:
 
 
 def readability_gradient_evidence() -> dict[str, int | bool]:
-    """Mesure le profil réellement appliqué afin que le QC interdise le retour du trait horizontal."""
     overlay = _readability_gradient()
     alpha = [overlay.getpixel((WIDTH // 2, y))[3] for y in range(HEIGHT)]
     jumps = [abs(current - previous) for previous, current in zip(alpha, alpha[1:])]
@@ -171,45 +271,164 @@ def readability_gradient_evidence() -> dict[str, int | bool]:
 
 
 def _gradient_overlay(base: Image.Image) -> Image.Image:
-    """Assombrit seulement le bord inférieur; aucune carte rectangulaire n'est dessinée."""
     return Image.alpha_composite(base.convert("RGBA"), _readability_gradient()).convert("RGB")
 
 
-def _draw_exact_value(
+def _smoothstep(value: float) -> float:
+    value = max(0.0, min(1.0, value))
+    return value * value * (3.0 - 2.0 * value)
+
+
+def text_motion_state(scene: str, field: str, local_frame: int, value: str) -> dict[str, Any]:
+    spec = FIELD_SPECS[scene][field]
+    start = int(spec["start_frame"])
+    type_end = int(spec["type_on_end_frame"])
+    hold_end = int(spec["hold_end_frame"])
+    end = int(spec["end_frame"])
+    total_characters = len(_normalize(value))
+    if local_frame < start or local_frame >= end or total_characters == 0:
+        return {
+            "phase": "hidden",
+            "visible_characters": 0,
+            "total_characters": total_characters,
+            "alpha": 0,
+            "y_offset": 0,
+        }
+    reveal_duration = max(1, type_end - start)
+    reveal_progress = min(1.0, (local_frame - start + 1) / reveal_duration)
+    visible_characters = min(total_characters, max(1, math.ceil(total_characters * reveal_progress)))
+    entry_frames = int(TEXT_MOTION["animation"]["entry_fade_frames"])
+    entry_progress = min(1.0, (local_frame - start + 1) / max(1, entry_frames))
+    entry_eased = _smoothstep(entry_progress)
+    alpha_factor = entry_eased
+    y_offset = float(TEXT_MOTION["animation"]["entry_rise_pixels"]) * (1.0 - entry_eased)
+    phase = "type_on" if local_frame < type_end else "hold"
+    if hold_end < end and local_frame >= hold_end:
+        exit_progress = (local_frame - hold_end + 1) / max(1, end - hold_end)
+        exit_eased = _smoothstep(exit_progress)
+        alpha_factor *= 1.0 - exit_eased
+        y_offset -= float(TEXT_MOTION["animation"]["exit_rise_pixels"]) * exit_eased
+        phase = "exit"
+    return {
+        "phase": phase,
+        "visible_characters": visible_characters,
+        "total_characters": total_characters,
+        "alpha": max(0, min(255, round(255 * alpha_factor))),
+        "y_offset": round(y_offset, 3),
+    }
+
+
+def _hex_rgb(value: str) -> tuple[int, int, int]:
+    value = value.lstrip("#")
+    return tuple(int(value[index:index + 2], 16) for index in (0, 2, 4))
+
+
+def _draw_characters(
+    draw: ImageDraw.ImageDraw,
+    lines: tuple[str, ...],
+    *,
+    visible_characters: int,
+    font: ImageFont.FreeTypeFont,
+    x: float,
+    y: float,
+    line_height: int,
+    line_spacing: int,
+    tracking: float,
+    fill: tuple[int, int, int, int],
+    stroke_width: int = 0,
+    stroke_fill: tuple[int, int, int, int] | None = None,
+) -> None:
+    remaining = visible_characters
+    for line_index, line in enumerate(lines):
+        if remaining <= 0:
+            break
+        cursor_x = x
+        visible_line = line[:remaining]
+        for character in visible_line:
+            draw.text(
+                (cursor_x, y + line_index * (line_height + line_spacing)),
+                character,
+                font=font,
+                anchor="lt",
+                fill=fill,
+                stroke_width=stroke_width,
+                stroke_fill=stroke_fill,
+            )
+            cursor_x += float(font.getlength(character)) + tracking
+        remaining -= len(line)
+
+
+def _draw_kinetic_value(
     frame: Image.Image,
     value: str,
-    box: tuple[int, int, int, int],
-    *,
-    preferred_size: int,
-    minimum_size: int,
-    bold: bool,
-    accent: bool = False,
+    spec: Mapping[str, Any],
+    state: Mapping[str, Any],
 ) -> None:
-    draw = ImageDraw.Draw(frame)
-    x0, y0, x1, y1 = box
-    lines, font, spacing = _fit_lines(
-        draw,
-        value,
-        max_width=x1 - x0,
-        max_height=y1 - y0,
-        preferred_size=preferred_size,
-        minimum_size=minimum_size,
-        bold=bold,
-        max_lines=3,
+    if int(state["alpha"]) <= 0 or int(state["visible_characters"]) <= 0:
+        return
+    x0, y0, x1, y1 = map(int, spec["box"])
+    box_width, box_height = x1 - x0, y1 - y0
+    tracking = float(spec["tracking"])
+    line_spacing = int(spec["line_spacing"])
+    lines, size, line_height, total_height = _layout_text(
+        _normalize(value),
+        box_width,
+        box_height,
+        int(spec["preferred_size"]),
+        int(spec["minimum_size"]),
+        int(spec["weight"]),
+        int(spec["max_lines"]),
+        tracking,
+        line_spacing,
     )
-    text = "\n".join(lines)
-    bbox = draw.multiline_textbbox((0, 0), text, font=font, spacing=spacing, stroke_width=1)
-    y = y0 + max(0, (y1 - y0 - (bbox[3] - bbox[1])) // 2)
-    fill = (255, 229, 117) if accent else (255, 255, 255)
-    # Ombre/contour uniquement : il ne s'agit pas d'un texte commercial ajouté.
-    draw.multiline_text(
-        (x0 + 3, y + 4), text, font=font, fill=(0, 0, 0), spacing=spacing,
-        stroke_width=3, stroke_fill=(0, 0, 0),
+    font = load_font(size, int(spec["weight"]))
+    style = TEXT_MOTION["render_style"]
+    blur = int(style["shadow_blur_radius"])
+    shadow_offset_x, shadow_offset_y = map(int, style["shadow_offset"])
+    padding = max(12, blur * 2 + max(abs(shadow_offset_x), abs(shadow_offset_y)) + 3)
+    layer_size = (box_width + padding * 2, box_height + padding * 2)
+    alpha = int(state["alpha"])
+    text_rgb = _hex_rgb(style["accent_fill"] if spec["accent"] else style["fill"])
+    shadow_rgb = _hex_rgb(style["shadow"])
+    text_y = padding + max(0, (box_height - total_height) / 2) + float(state["y_offset"])
+    text_x = float(padding)
+
+    shadow_layer = Image.new("RGBA", layer_size, (0, 0, 0, 0))
+    shadow_draw = ImageDraw.Draw(shadow_layer)
+    _draw_characters(
+        shadow_draw,
+        lines,
+        visible_characters=int(state["visible_characters"]),
+        font=font,
+        x=text_x + shadow_offset_x,
+        y=text_y + shadow_offset_y,
+        line_height=line_height,
+        line_spacing=line_spacing,
+        tracking=tracking,
+        fill=(*shadow_rgb, round(int(style["shadow_alpha"]) * alpha / 255)),
     )
-    draw.multiline_text(
-        (x0, y), text, font=font, fill=fill, spacing=spacing,
-        stroke_width=1, stroke_fill=(20, 16, 12),
+    if blur:
+        shadow_layer = shadow_layer.filter(ImageFilter.GaussianBlur(radius=blur))
+
+    text_layer = Image.new("RGBA", layer_size, (0, 0, 0, 0))
+    text_draw = ImageDraw.Draw(text_layer)
+    stroke_alpha = round(int(style["stroke_alpha"]) * alpha / 255)
+    _draw_characters(
+        text_draw,
+        lines,
+        visible_characters=int(state["visible_characters"]),
+        font=font,
+        x=text_x,
+        y=text_y,
+        line_height=line_height,
+        line_spacing=line_spacing,
+        tracking=tracking,
+        fill=(*text_rgb, alpha),
+        stroke_width=int(style["stroke_width"]),
+        stroke_fill=(*shadow_rgb, stroke_alpha),
     )
+    composed = Image.alpha_composite(shadow_layer, text_layer)
+    frame.paste(composed, (x0 - padding, y0 - padding), composed)
 
 
 def render_scene_frame(
@@ -219,24 +438,19 @@ def render_scene_frame(
     merchant_payload: Mapping[str, str],
     scene_frames: int | None = None,
 ) -> tuple[Image.Image, tuple[str, ...]]:
-    """Rend une image plein cadre. Retourne aussi les champs effectivement brûlés."""
+    """Rend une image plein cadre et applique le planning typographique du JSON."""
     fields = SCENE_FIELDS[scene]
-    denominator = max(1, (scene_frames or 270) - 1)
+    configured_frames = int(TEXT_MOTION["scenes"][scene]["scene_frames"])
+    if scene_frames is not None and int(scene_frames) != configured_frames:
+        raise ValueError(f"Scene frame count diverges from text motion contract for {scene}")
+    denominator = max(1, configured_frames - 1)
     progress = max(0.0, min(1.0, local_frame / denominator))
     mode = "pull" if scene == "S2" else "lock" if scene == "S4" else "push"
-    frame = _cover_with_motion(source, progress, mode)
-    frame = _gradient_overlay(frame)
+    frame = _gradient_overlay(_cover_with_motion(source, progress, mode))
     for field in fields:
-        preferred, minimum = SCENE_TEXT_STYLE[scene][field]
-        _draw_exact_value(
-            frame,
-            str(merchant_payload[field]),
-            FIELD_BOXES[scene][field],
-            preferred_size=preferred,
-            minimum_size=minimum,
-            bold=field in {"offre", "prix", "whatsapp"},
-            accent=field in {"prix", "whatsapp"},
-        )
+        value = str(merchant_payload[field])
+        state = text_motion_state(scene, field, local_frame, value)
+        _draw_kinetic_value(frame, value, FIELD_SPECS[scene][field], state)
     return frame, fields
 
 
@@ -267,7 +481,6 @@ def apply_transition(
     else:
         canvas.paste(previous_frame, (shift, 0))
         canvas.paste(next_frame, (shift - WIDTH, 0))
-    # Flou horizontal maximal au milieu, simulant le whip sans masquer les rushs.
     blur = round(5.0 * (1.0 - abs(2.0 * p - 1.0)))
     if blur:
         canvas = canvas.filter(ImageFilter.GaussianBlur(radius=blur))

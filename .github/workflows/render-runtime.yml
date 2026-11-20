@@ -187,9 +187,15 @@ jobs:
           cp .tmp/t5-runtime/render-job.json release/T5_RENDER_JOB.json
           cp .tmp/t5-runtime/runtime-manifest.json release/T5_RUNTIME_CAPTURE_MANIFEST.json
           cp config/T5_RUNTIME_CONTRACT_V3_0_0.json release/
+          cp config/T5_TEXT_MOTION_V1_0_0.json release/
           cp schemas/T5_render_job.schema.json release/
           cp schemas/T5_render_result.schema.json release/
           cp schemas/T5_render_error.schema.json release/
+          cp schemas/T5_text_motion.schema.json release/
+          cp 'assets/fonts/manrope/Manrope[wght].ttf' release/Manrope-variable-wght.ttf
+          cp assets/fonts/manrope/OFL.txt release/MANROPE_OFL.txt
+          cp assets/fonts/manrope/METADATA.pb release/MANROPE_METADATA.pb
+          cp approvals/APPROBATION_TYPOGRAPHIE_MOTION_T5_2026-11-18.json release/
           cp rushes/manifest.json release/T5_DEMO_SOURCE_PROVENANCE.json
           cp docs/LICENCE_RUSH_DEMO_V3.md release/
           if find release -maxdepth 1 -type f \( -name 'S[1-4]*.mp4' -o -name '*.mov' -o -name '*.webm' \) | grep -q .; then
@@ -217,11 +223,12 @@ jobs:
 
           - le formulaire distingue les **six intitulés, questions simples et exemples** approuvés ;
           - les **six réponses** viennent du `merchant_payload` du RenderJob ;
+          - la typographie **Manrope** est révélée caractère par caractère, champ après champ, avec au maximum deux champs simultanés ;
           - les scènes S1, S2, S3 et S4 consomment **quatre captures distinctes**, chacune vérifiée par SHA‑256 ;
           - le manifeste visuel est construit au runtime, puis consommé par le moteur ;
           - rendu exclusivement sur **GitHub Actions** ; Cloudflare ne fait que contrôler, stocker et dispatcher ;
           - 30,000 s, 720 × 1280, 30 i/s, 900 images, H.264, aucune piste audio ;
-          - QC 20/20 : plein cadre sans cartes, dégradé continu jusqu’au dernier pixel, texte limité aux six valeurs, trois raccords T1 de huit images, pixels dynamiques, intégrité, durée, stabilité finale et absence de rush brut dans la livraison.
+          - QC 21/21 : plein cadre sans cartes, motion design typographique lié au JSON, dégradé continu jusqu’au dernier pixel, texte limité aux six valeurs, trois raccords T1 de huit images, pixels dynamiques, intégrité, durée, stabilité finale et absence de rush brut dans la livraison.
 
           Les valeurs visibles sont la fixture formulaire de validation `Burger Atelier Kandi`. Elles ne sont pas codées dans le moteur : les tests prouvent que changer chaque réponse change les pixels attendus.
           EOF

@@ -22,10 +22,12 @@ Le moteur V3 remplace entièrement l’ancien montage à cartes :
 - aucune carte permanente, fenêtre vidéo arrondie, grille, mosaïque, barre de progression ou interface n’est dessinée ;
 - aucun titre générique ni libellé technique n’est brûlé dans la publicité ;
 - les seuls textes visibles sont les valeurs exactes de `merchant_payload` ;
+- les valeurs arrivent en **motion design**, caractère par caractère et champ après champ, alignées à gauche ;
+- la police embarquée est **Manrope** sous licence OFL‑1.1 ; une scène ne montre jamais plus de deux champs simultanément ;
 - les raccords occupent exactement huit images aux coupes **180, 420 et 630** ;
 - la fin est stable sur les images **810 à 899**.
 
-Le contrat complet est `montage/T5_MONTAGE_COMPLET_V3_0_0.json`. Les liaisons exécutables sont dans `config/T5_RUNTIME_CONTRACT_V3_0_0.json`.
+Le contrat complet est `montage/T5_MONTAGE_COMPLET_V3_0_0.json`. Les liaisons exécutables sont dans `config/T5_RUNTIME_CONTRACT_V3_0_0.json` et toute la chorégraphie typographique est pilotée par `config/T5_TEXT_MOTION_V1_0_0.json`.
 
 ```text
 formulaire Cloudflare : 6 réponses + 12 écrans de capture
@@ -38,9 +40,9 @@ GitHub Actions télécharge et revérifie les captures
         ↓
 tools/build_t5_runtime_visual_inputs.py
         ↓
-engine/render_runtime.py : plein cadre + valeurs saisies + raccords T1
+engine/render_runtime.py : plein cadre + Manrope animée caractère par caractère + raccords T1
         ↓
-MP4 30 s + QC 20/20 + RenderResult, ou RenderError
+MP4 30 s + QC 21/21 + RenderResult, ou RenderError
 ```
 
 Cloudflare reste uniquement le **plan de contrôle et de stockage**. Le rendu vidéo est interdit sur Cloudflare et exécuté sur **GitHub Actions**.
@@ -74,9 +76,12 @@ Les URL, dimensions, durées, tailles et SHA‑256 sont dans `rushes/manifest.js
 - `form/questions_T5.json` — les six questions ;
 - `capture-guide/consignes_T5.json` — les instructions des quatre captures ;
 - `config/T5_CAPTURE_FLOW_V1_0_0.json` — les douze écrans A/B/C ;
+- `config/T5_TEXT_MOTION_V1_0_0.json` — police, alignement et planning caractère par caractère ;
+- `assets/fonts/manrope/` — police Manrope embarquée, métadonnées et licence OFL‑1.1 ;
 - `montage/T5_MONTAGE_COMPLET_V3_0_0.json` — JSON complet de montage ;
 - `adapter/t5_adapter.py` — six réponses + quatre captures → RenderJob ;
 - `schemas/T5_render_job.schema.json` — contrat d’entrée ;
+- `schemas/T5_text_motion.schema.json` — schéma strict de la chorégraphie typographique ;
 - `tools/build_t5_runtime_visual_inputs.py` — vérification SHA‑256 et manifeste runtime ;
 - `engine/runtime_visual.py` — plein cadre, valeurs dynamiques et raccords ;
 - `engine/render_runtime.py` — rendu des 900 images ;
@@ -115,7 +120,7 @@ python tools/validate_runtime_render.py \
 pytest -q
 ```
 
-Sortie attendue : **30,000 s**, 720 × 1280, 30 i/s, 900 images, H.264/yuv420p, aucune piste audio et QC **20/20**, avec un dégradé continu jusqu’au dernier pixel du cadre.
+Sortie attendue : **30,000 s**, 720 × 1280, 30 i/s, 900 images, H.264/yuv420p, aucune piste audio et QC **21/21**, avec typographie Manrope animée depuis le JSON et dégradé continu jusqu’au dernier pixel du cadre.
 
 ## Archives rejetées
 

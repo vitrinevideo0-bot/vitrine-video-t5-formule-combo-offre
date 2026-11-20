@@ -3,6 +3,7 @@
   "template_id": "RESTAURATION-T5",
   "template_version": "3.0.0-full-frame",
   "montage_contract": "montage/T5_MONTAGE_COMPLET_V3_0_0.json",
+  "text_motion_contract": "config/T5_TEXT_MOTION_V1_0_0.json",
   "runtime_order": [
     {"id": "MERCHANT_INPUT", "source": "form/questions_T5.json", "required_fields": 6},
     {"id": "GUIDED_CAPTURE", "source": "config/T5_CAPTURE_FLOW_V1_0_0.json", "stable_screens": 12},
@@ -39,6 +40,11 @@
     "technical_labels": false,
     "horizontal_color_seams": false,
     "readability_gradient_reaches_frame_bottom": true,
+    "text_motion": "character_by_character_staggered",
+    "text_alignment": "left",
+    "font_family": "Manrope",
+    "static_text_stack": false,
+    "max_simultaneous_text_fields": 2,
     "final_stable_start_frame": 810,
     "audio_streams": 0
   },
@@ -56,6 +62,8 @@
     "generic_business_copy_burned_into_video",
     "permanent_card_layout",
     "rounded_video_window",
+    "static_all_fields_from_first_frame",
+    "more_than_two_simultaneous_text_fields",
     "implicit_rush_path_in_engine",
     "cloudflare_video_rendering",
     "simulation_as_delivery"

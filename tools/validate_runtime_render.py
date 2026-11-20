@@ -119,6 +119,10 @@ def main() -> int:
         and visual_policy.get("scene_or_technical_labels") is False
         and visual_policy.get("horizontal_color_seams") is False
         and visual_policy.get("readability_gradient_reaches_frame_bottom") is True
+        and visual_policy.get("kinetic_text_motion") is True
+        and visual_policy.get("static_text_stack") is False
+        and visual_policy.get("max_simultaneous_text_fields") == 2
+        and visual_policy.get("font_family") == "Manrope"
     )
     gradient = render_report.get("readability_gradient_evidence", {})
     gradient_is_continuous = (
@@ -128,12 +132,40 @@ def main() -> int:
         and gradient.get("monotonic_non_decreasing") is True
         and gradient.get("max_adjacent_alpha_jump", 999) <= 1
     )
+    motion = render_report.get("text_motion_evidence", {})
+    motion_contract = motion.get("contract", {})
+    motion_font = motion.get("font", {})
+    motion_contract_path = ROOT / str(motion_contract.get("file", "missing"))
+    motion_font_path = ROOT / str(motion_font.get("file", "missing"))
+    kinetic_text_is_contract_bound = (
+        motion_contract_path.is_file()
+        and motion_font_path.is_file()
+        and motion_contract.get("sha256") == sha256(motion_contract_path)
+        and motion_font.get("sha256") == sha256(motion_font_path)
+        and motion_font.get("family") == "Manrope"
+        and motion_font.get("license") == "OFL-1.1"
+        and motion.get("reveal_unit") == "character"
+        and motion.get("sequence") == "staggered_one_field_after_another"
+        and motion.get("alignment") == "left"
+        and motion.get("static_all_fields_from_first_frame") is False
+        and motion.get("text_background_boxes") is False
+        and motion.get("max_simultaneous_fields") == 2
+        and motion.get("scene_max_simultaneous_fields") == {"S1": 1, "S2": 1, "S3": 1, "S4": 2}
+        and motion.get("stable_tail") == {
+            "start_frame": 180,
+            "end_frame": 269,
+            "visible_fields": ["whatsapp", "quartier"],
+        }
+    )
     resolved_path = args.render_report.parent / render_report["resolved_text"]["file"]
     resolved = json.loads(resolved_path.read_text(encoding="utf-8"))
     exact_text_policy = (
         visual_policy.get("visible_text_source") == "merchant_payload_exact_values_only"
         and resolved.get("values") == job["merchant_payload"]
         and resolved.get("static_business_copy") == []
+        and resolved.get("text_motion_contract") == "config/T5_TEXT_MOTION_V1_0_0.json"
+        and resolved.get("font_family") == "Manrope"
+        and resolved.get("reveal_unit") == "character"
     )
     transitions = render_report.get("transition_evidence", [])
     transitions_are_exact = (
@@ -159,6 +191,7 @@ def main() -> int:
         "four_visual_windows_are_distinct": distinct_capture_pixels,
         "rushes_are_full_frame_without_cards": full_frame_policy,
         "readability_gradient_is_continuous_to_frame_bottom": gradient_is_continuous,
+        "kinetic_text_is_character_staggered_and_contract_bound": kinetic_text_is_contract_bound,
         "visible_text_is_exactly_from_merchant_payload": exact_text_policy,
         "three_t1_transitions_are_exactly_eight_frames": transitions_are_exact,
         "runtime_manifest_is_hash_bound": sha256(args.manifest) == render_report["runtime_manifest"]["sha256"],

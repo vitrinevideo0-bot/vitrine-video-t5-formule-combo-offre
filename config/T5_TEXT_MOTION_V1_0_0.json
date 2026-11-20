@@ -1,0 +1,241 @@
+{
+  "schema_version": "1.0.0",
+  "contract_id": "t5_text_motion_v1_0_0",
+  "template_id": "RESTAURATION-T5",
+  "status": "owner_requested_motion_design",
+  "revision": "T5_TYPOGRAPHIE_MOTION_2026-11-18",
+  "design_intent": "Afficher les réponses une à une avec une révélation caractère par caractère, une composition alignée et une typographie plus esthétique, sans surcharger l'image.",
+  "font": {
+    "family": "Manrope",
+    "source": "Google Fonts",
+    "license": "OFL-1.1",
+    "file": "assets/fonts/manrope/Manrope[wght].ttf",
+    "license_file": "assets/fonts/manrope/OFL.txt",
+    "metadata_file": "assets/fonts/manrope/METADATA.pb",
+    "weights": {
+      "regular": 400,
+      "medium": 500,
+      "semibold": 600,
+      "extrabold": 800
+    }
+  },
+  "animation": {
+    "reveal_unit": "character",
+    "sequence": "staggered_one_field_after_another",
+    "alignment": "left",
+    "entry": "type_on_with_soft_rise",
+    "exit": "soft_fade_up",
+    "entry_rise_pixels": 18,
+    "exit_rise_pixels": 10,
+    "entry_fade_frames": 8,
+    "exit_fade_frames": 8,
+    "max_simultaneous_fields": 2,
+    "static_all_fields_from_first_frame": false,
+    "text_background_boxes": false,
+    "preserve_exact_merchant_value": true,
+    "frame_intervals": "start_inclusive_end_exclusive"
+  },
+  "render_style": {
+    "fill": "#FFFFFF",
+    "accent_fill": "#FFE570",
+    "shadow": "#000000",
+    "shadow_alpha": 150,
+    "shadow_blur_radius": 5,
+    "shadow_offset": [0, 4],
+    "stroke_width": 1,
+    "stroke_alpha": 155
+  },
+  "field_pixel_proofs": {
+    "nom": {"scene": "S1", "frame": 42},
+    "offre": {"scene": "S1", "frame": 94},
+    "contenu": {"scene": "S2", "frame": 120},
+    "prix": {"scene": "S3", "frame": 180},
+    "whatsapp": {"scene": "S4", "frame": 112},
+    "quartier": {"scene": "S4", "frame": 172}
+  },
+  "scenes": {
+    "S1": {
+      "scene_frames": 180,
+      "fields": [
+        {
+          "id": "nom",
+          "start_frame": 10,
+          "type_on_end_frame": 36,
+          "hold_end_frame": 48,
+          "end_frame": 56,
+          "box": [56, 850, 664, 930],
+          "preferred_size": 32,
+          "minimum_size": 24,
+          "weight": 600,
+          "max_lines": 1,
+          "tracking": 0.3,
+          "line_spacing": 8,
+          "accent": false
+        },
+        {
+          "id": "offre",
+          "start_frame": 58,
+          "type_on_end_frame": 88,
+          "hold_end_frame": 100,
+          "end_frame": 108,
+          "box": [56, 835, 664, 955],
+          "preferred_size": 48,
+          "minimum_size": 32,
+          "weight": 800,
+          "max_lines": 2,
+          "tracking": -0.2,
+          "line_spacing": 8,
+          "accent": false
+        },
+        {
+          "id": "contenu",
+          "start_frame": 110,
+          "type_on_end_frame": 160,
+          "hold_end_frame": 180,
+          "end_frame": 180,
+          "box": [56, 830, 664, 1060],
+          "preferred_size": 30,
+          "minimum_size": 22,
+          "weight": 500,
+          "max_lines": 3,
+          "tracking": 0.1,
+          "line_spacing": 12,
+          "accent": false
+        }
+      ]
+    },
+    "S2": {
+      "scene_frames": 240,
+      "fields": [
+        {
+          "id": "contenu",
+          "start_frame": 16,
+          "type_on_end_frame": 82,
+          "hold_end_frame": 240,
+          "end_frame": 240,
+          "box": [56, 835, 664, 1070],
+          "preferred_size": 36,
+          "minimum_size": 23,
+          "weight": 600,
+          "max_lines": 3,
+          "tracking": 0.1,
+          "line_spacing": 13,
+          "accent": false
+        }
+      ]
+    },
+    "S3": {
+      "scene_frames": 210,
+      "fields": [
+        {
+          "id": "offre",
+          "start_frame": 10,
+          "type_on_end_frame": 40,
+          "hold_end_frame": 52,
+          "end_frame": 60,
+          "box": [56, 840, 664, 950],
+          "preferred_size": 42,
+          "minimum_size": 30,
+          "weight": 800,
+          "max_lines": 2,
+          "tracking": -0.2,
+          "line_spacing": 8,
+          "accent": false
+        },
+        {
+          "id": "contenu",
+          "start_frame": 62,
+          "type_on_end_frame": 122,
+          "hold_end_frame": 132,
+          "end_frame": 140,
+          "box": [56, 830, 664, 1060],
+          "preferred_size": 29,
+          "minimum_size": 21,
+          "weight": 500,
+          "max_lines": 3,
+          "tracking": 0.1,
+          "line_spacing": 11,
+          "accent": false
+        },
+        {
+          "id": "prix",
+          "start_frame": 142,
+          "type_on_end_frame": 170,
+          "hold_end_frame": 210,
+          "end_frame": 210,
+          "box": [56, 830, 664, 970],
+          "preferred_size": 64,
+          "minimum_size": 44,
+          "weight": 800,
+          "max_lines": 1,
+          "tracking": -0.3,
+          "line_spacing": 8,
+          "accent": true
+        }
+      ]
+    },
+    "S4": {
+      "scene_frames": 270,
+      "fields": [
+        {
+          "id": "nom",
+          "start_frame": 12,
+          "type_on_end_frame": 40,
+          "hold_end_frame": 54,
+          "end_frame": 62,
+          "box": [56, 820, 664, 900],
+          "preferred_size": 32,
+          "minimum_size": 24,
+          "weight": 600,
+          "max_lines": 1,
+          "tracking": 0.3,
+          "line_spacing": 8,
+          "accent": false
+        },
+        {
+          "id": "whatsapp",
+          "start_frame": 64,
+          "type_on_end_frame": 104,
+          "hold_end_frame": 270,
+          "end_frame": 270,
+          "box": [56, 838, 664, 940],
+          "preferred_size": 44,
+          "minimum_size": 30,
+          "weight": 800,
+          "max_lines": 1,
+          "tracking": 0.1,
+          "line_spacing": 8,
+          "accent": true
+        },
+        {
+          "id": "quartier",
+          "start_frame": 122,
+          "type_on_end_frame": 166,
+          "hold_end_frame": 270,
+          "end_frame": 270,
+          "box": [56, 946, 664, 1055],
+          "preferred_size": 30,
+          "minimum_size": 22,
+          "weight": 500,
+          "max_lines": 2,
+          "tracking": 0.1,
+          "line_spacing": 10,
+          "accent": false
+        }
+      ],
+      "stable_tail": {
+        "start_frame": 180,
+        "end_frame": 269,
+        "visible_fields": ["whatsapp", "quartier"]
+      }
+    }
+  },
+  "approval": {
+    "date": "2026-11-18",
+    "timezone": "Africa/Lagos",
+    "decision_channel": "arena_direct_instruction",
+    "reference_image": "image-30.png",
+    "decision": "Remplacer l'empilement statique par une typographie motion design, alignée, révélée caractère par caractère, avec une police plus esthétique.",
+    "publication_target": "github_main_and_new_server_render"
+  }
+}
