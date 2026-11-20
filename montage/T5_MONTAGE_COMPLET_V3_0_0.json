@@ -81,7 +81,11 @@
     ],
     "video_codec": "h264",
     "pixel_format": "yuv420p",
-    "audio_mode": "silent_no_audio_stream"
+    "audio_mode": "owner_approved_afrofire_voice_b_complete",
+    "audio_contract": "config/T5_AUDIO_MIX_V1_0_0.json",
+    "audio_codec": "aac",
+    "audio_sample_rate_hz": 48000,
+    "audio_channels": 2
   },
   "scenes": [
     {

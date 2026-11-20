@@ -1,0 +1,166 @@
+name: T5 — plan de contrôle Cloudflare
+
+on:
+  pull_request:
+    paths:
+      - 'cloudflare/**'
+      - 'config/T5_CAPTURE_FLOW_V1_0_0.json'
+      - 'config/T5_AUDIO_MIX_V1_0_0.json'
+      - 'form/questions_T5.json'
+      - 'demo/render_job_runtime_demo.json'
+      - 'demo/render_result_runtime_example.json'
+      - 'schemas/**'
+      - 'tools/build_t5_cloudflare_contracts.py'
+      - 'tools/finalize_t5_render_result.py'
+      - '.github/workflows/cloudflare-control-plane.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'cloudflare/**'
+      - 'config/T5_CAPTURE_FLOW_V1_0_0.json'
+      - 'config/T5_AUDIO_MIX_V1_0_0.json'
+      - 'form/questions_T5.json'
+      - 'demo/render_job_runtime_demo.json'
+      - 'demo/render_result_runtime_example.json'
+      - 'schemas/**'
+      - 'tools/build_t5_cloudflare_contracts.py'
+      - 'tools/finalize_t5_render_result.py'
+      - '.github/workflows/cloudflare-control-plane.yml'
+  workflow_dispatch:
+    inputs:
+      deploy:
+        description: Déployer réellement le Worker, R2 et l’application des 12 écrans
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  validate-worker-and-capture-app:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+          cache: pip
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: cloudflare/package-lock.json
+
+      - name: Installer les dépendances verrouillées
+        run: |
+          python -m pip install -r requirements.txt
+          npm ci --prefix cloudflare
+
+      - name: Prouver la synchronisation formulaire, 12 écrans et mix complet
+        run: |
+          python tools/build_t5_cloudflare_contracts.py --check
+          python adapter/t5_adapter.py \
+            --render-job-id t5-runtime-demo-0001 \
+            --answers demo/reponses_runtime_demo.json \
+            --captures rushes/manifest.json \
+            --control-plane github_actions_fixture \
+            --output /tmp/T5_RENDER_JOB.json
+          cmp demo/render_job_runtime_demo.json /tmp/T5_RENDER_JOB.json
+
+      - name: Type-check et dry-build du Worker
+        working-directory: cloudflare
+        run: |
+          npm audit --audit-level=high
+          npm test
+          node --check public/app.js
+
+      - name: Intégration — formulaire, 12 écrans, R2, Afrofire, voice-11, dispatch, sortie et callback
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/t5-wrangler-control-plane
+          python cloudflare/test/mock_github_api.py --port 8791 >/tmp/t5-mock-github.log 2>&1 &
+          MOCK_PID=$!
+          (
+            cd cloudflare
+            npx wrangler dev --local --ip 127.0.0.1 --port 8788 \
+              --persist-to /tmp/t5-wrangler-control-plane \
+              --var CLIENT_API_TOKEN:test-client \
+              --var CALLBACK_TOKEN:test-callback \
+              --var GITHUB_TOKEN:test-github \
+              --var GITHUB_API_BASE:http://127.0.0.1:8791 \
+              --var PUBLIC_API_BASE:http://127.0.0.1:8788
+          ) >/tmp/t5-wrangler.log 2>&1 &
+          WORKER_PID=$!
+          trap 'kill "$WORKER_PID" "$MOCK_PID" 2>/dev/null || true; cat /tmp/t5-wrangler.log; cat /tmp/t5-mock-github.log' EXIT
+          python - <<'PY'
+          import time, urllib.request
+          for _ in range(120):
+              try:
+                  with urllib.request.urlopen('http://127.0.0.1:8788/health', timeout=1) as response:
+                      if response.status == 200:
+                          break
+              except Exception:
+                  time.sleep(0.25)
+          else:
+              raise SystemExit('Wrangler did not become ready')
+          PY
+          python cloudflare/test/control_plane_integration.py --base http://127.0.0.1:8788
+
+  deploy-worker:
+    if: github.event_name == 'workflow_dispatch' && inputs.deploy
+    needs: validate-worker-and-capture-app
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: t5-cloudflare-production
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      GITHUB_DISPATCH_TOKEN: ${{ secrets.GITHUB_DISPATCH_TOKEN }}
+      CALLBACK_TOKEN: ${{ secrets.CLOUDFLARE_CALLBACK_TOKEN }}
+      CLIENT_API_TOKEN: ${{ secrets.T5_CLIENT_API_TOKEN }}
+      PUBLIC_API_BASE: ${{ vars.T5_PUBLIC_API_BASE }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: cloudflare/package-lock.json
+
+      - name: Exiger les prérequis de production
+        run: |
+          set -eu
+          test -n "$CLOUDFLARE_API_TOKEN"
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test -n "$GITHUB_DISPATCH_TOKEN"
+          test -n "$CALLBACK_TOKEN"
+          test -n "$CLIENT_API_TOKEN"
+          test -n "$PUBLIC_API_BASE"
+          case "$PUBLIC_API_BASE" in https://*) ;; *) echo 'T5_PUBLIC_API_BASE doit être une URL HTTPS' >&2; exit 1;; esac
+
+      - run: npm ci --prefix cloudflare
+
+      - name: Provisionner R2 et installer les secrets Worker
+        working-directory: cloudflare
+        run: |
+          npx wrangler r2 bucket create t5-formule-media || true
+          npx wrangler r2 bucket create t5-formule-media-preview || true
+          printf '%s' "$GITHUB_DISPATCH_TOKEN" | npx wrangler secret put GITHUB_TOKEN
+          printf '%s' "$CALLBACK_TOKEN" | npx wrangler secret put CALLBACK_TOKEN
+          printf '%s' "$CLIENT_API_TOKEN" | npx wrangler secret put CLIENT_API_TOKEN
+
+      - name: Déployer le plan de contrôle et l’application exécutable des 12 écrans
+        working-directory: cloudflare
+        run: npx wrangler deploy --var "PUBLIC_API_BASE:$PUBLIC_API_BASE"
+
+      - name: Vérifier le Worker réellement déployé
+        run: |
+          curl --fail --silent --show-error "$PUBLIC_API_BASE/health" > /tmp/t5-health.json
+          jq -e '.status == "ok" and .control_plane == "cloudflare_worker" and .render_plane == "github_actions" and .audio_mode == "owner_approved_afrofire_voice_b_complete"' /tmp/t5-health.json
+          curl --fail --silent --show-error "$PUBLIC_API_BASE/v1/contracts/audio-mix" \
+            | jq -e '.music.selection_choice == "4" and .music.title == "Afrofire" and .voice.voice_id == "voice-11"'

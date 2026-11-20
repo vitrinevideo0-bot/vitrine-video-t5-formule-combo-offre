@@ -20,89 +20,538 @@
     "scene_capture_bindings"
   ],
   "properties": {
-    "schema_version": {"const": "1.0.0"},
-    "status": {"const": "COMPLETED"},
-    "job_id": {"$ref": "#/$defs/id"},
-    "idempotency_key": {"$ref": "#/$defs/id"},
-    "template_id": {"const": "RESTAURATION-T5"},
-    "template_version": {"const": "3.0.0-full-frame"},
-    "profile_used": {"const": "T5_GITHUB_ACTIONS_FULL_FRAME_V3"},
-    "control_plane": {"enum": ["cloudflare_worker", "github_actions_fixture"]},
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "status": {
+      "enum": [
+        "VISUAL_COMPLETED",
+        "COMPLETED"
+      ]
+    },
+    "job_id": {
+      "$ref": "#/$defs/id"
+    },
+    "idempotency_key": {
+      "$ref": "#/$defs/id"
+    },
+    "template_id": {
+      "const": "RESTAURATION-T5"
+    },
+    "template_version": {
+      "const": "3.0.0-full-frame"
+    },
+    "profile_used": {
+      "enum": [
+        "T5_GITHUB_ACTIONS_FULL_FRAME_V3",
+        "T5_GITHUB_ACTIONS_COMPLETE_V1"
+      ]
+    },
+    "control_plane": {
+      "enum": [
+        "cloudflare_worker",
+        "github_actions_fixture"
+      ]
+    },
     "output": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["uri", "file", "sha256", "bytes"],
+      "required": [
+        "uri",
+        "file",
+        "sha256",
+        "bytes"
+      ],
       "properties": {
-        "uri": {"type": "string", "pattern": "^output/runtime/[A-Za-z0-9._-]+/VIDEO_T5_FORMULE_PLEIN_ECRAN_V3_A_VALIDER\\.mp4$"},
-        "file": {"const": "VIDEO_T5_FORMULE_PLEIN_ECRAN_V3_A_VALIDER.mp4"},
-        "sha256": {"$ref": "#/$defs/sha256"},
-        "bytes": {"type": "integer", "minimum": 1}
+        "uri": {
+          "type": "string",
+          "pattern": "^output/runtime/[A-Za-z0-9._-]+/VIDEO_T5_FORMULE_PLEIN_ECRAN_V3_A_VALIDER\\.mp4$"
+        },
+        "file": {
+          "const": "VIDEO_T5_FORMULE_PLEIN_ECRAN_V3_A_VALIDER.mp4"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "bytes": {
+          "type": "integer",
+          "minimum": 1
+        }
       }
     },
     "quality": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["status", "report", "passed", "total"],
+      "required": [
+        "status",
+        "report",
+        "passed",
+        "total"
+      ],
       "properties": {
-        "status": {"const": "PASS"},
-        "report": {"const": "T5_RUNTIME_VALIDATION.json"},
-        "passed": {"type": "integer", "minimum": 1},
-        "total": {"type": "integer", "minimum": 1}
+        "status": {
+          "const": "PASS"
+        },
+        "report": {
+          "const": "T5_RUNTIME_VALIDATION.json"
+        },
+        "passed": {
+          "const": 21
+        },
+        "total": {
+          "const": 21
+        }
       }
     },
     "inputs": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["merchant_payload_sha256", "capture_sha256", "runtime_manifest_sha256", "resolved_text_sha256"],
+      "required": [
+        "merchant_payload_sha256",
+        "capture_sha256",
+        "runtime_manifest_sha256",
+        "resolved_text_sha256"
+      ],
       "properties": {
-        "merchant_payload_sha256": {"$ref": "#/$defs/sha256"},
+        "merchant_payload_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
         "capture_sha256": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["S1", "S2", "S3", "S4"],
+          "required": [
+            "S1",
+            "S2",
+            "S3",
+            "S4"
+          ],
           "properties": {
-            "S1": {"$ref": "#/$defs/sha256"},
-            "S2": {"$ref": "#/$defs/sha256"},
-            "S3": {"$ref": "#/$defs/sha256"},
-            "S4": {"$ref": "#/$defs/sha256"}
+            "S1": {
+              "$ref": "#/$defs/sha256"
+            },
+            "S2": {
+              "$ref": "#/$defs/sha256"
+            },
+            "S3": {
+              "$ref": "#/$defs/sha256"
+            },
+            "S4": {
+              "$ref": "#/$defs/sha256"
+            }
           }
         },
-        "runtime_manifest_sha256": {"$ref": "#/$defs/sha256"},
-        "resolved_text_sha256": {"$ref": "#/$defs/sha256"}
+        "runtime_manifest_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "resolved_text_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "audio_contract_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "music_source_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "voice_manifest_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "voice_clip_source_sha256": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "S1",
+            "S2",
+            "S3",
+            "S4"
+          ],
+          "properties": {
+            "S1": {
+              "$ref": "#/$defs/sha256"
+            },
+            "S2": {
+              "$ref": "#/$defs/sha256"
+            },
+            "S3": {
+              "$ref": "#/$defs/sha256"
+            },
+            "S4": {
+              "$ref": "#/$defs/sha256"
+            }
+          }
+        }
       }
     },
-    "rendered_fields": {"const": ["nom", "offre", "contenu", "prix", "whatsapp", "quartier"]},
+    "rendered_fields": {
+      "const": [
+        "nom",
+        "offre",
+        "contenu",
+        "prix",
+        "whatsapp",
+        "quartier"
+      ]
+    },
     "scene_capture_bindings": {
       "type": "array",
       "minItems": 4,
       "maxItems": 4,
       "prefixItems": [
-        {"$ref": "#/$defs/bindingS1"},
-        {"$ref": "#/$defs/bindingS2"},
-        {"$ref": "#/$defs/bindingS3"},
-        {"$ref": "#/$defs/bindingS4"}
+        {
+          "$ref": "#/$defs/bindingS1"
+        },
+        {
+          "$ref": "#/$defs/bindingS2"
+        },
+        {
+          "$ref": "#/$defs/bindingS3"
+        },
+        {
+          "$ref": "#/$defs/bindingS4"
+        }
       ],
       "items": false
+    },
+    "audio_quality": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "report",
+        "passed",
+        "total"
+      ],
+      "properties": {
+        "status": {
+          "const": "PASS"
+        },
+        "report": {
+          "const": "T5_COMPLETE_AUDIO_RENDER_REPORT.json"
+        },
+        "passed": {
+          "const": 26
+        },
+        "total": {
+          "const": 26
+        }
+      }
+    },
+    "audio_state_commit_allowed": {
+      "const": true
+    },
+    "audio": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "music",
+        "voice",
+        "final_mix",
+        "visual_bitstream_copy"
+      ],
+      "properties": {
+        "mode": {
+          "const": "owner_approved_afrofire_voice_b_complete"
+        },
+        "music": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "selected_choice",
+            "pixabay_id",
+            "title",
+            "artist",
+            "source_sha256",
+            "source_bundled"
+          ],
+          "properties": {
+            "selected_choice": {
+              "const": "4"
+            },
+            "pixabay_id": {
+              "const": 300338
+            },
+            "title": {
+              "const": "Afrofire"
+            },
+            "artist": {
+              "const": "DPStudioMusic"
+            },
+            "source_sha256": {
+              "$ref": "#/$defs/sha256"
+            },
+            "source_bundled": {
+              "const": false
+            }
+          }
+        },
+        "voice": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "selected_option",
+            "voice_id",
+            "manifest_sha256",
+            "clip_source_sha256"
+          ],
+          "properties": {
+            "selected_option": {
+              "const": "B_masculine"
+            },
+            "voice_id": {
+              "const": "voice-11"
+            },
+            "manifest_sha256": {
+              "$ref": "#/$defs/sha256"
+            },
+            "clip_source_sha256": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "S1",
+                "S2",
+                "S3",
+                "S4"
+              ],
+              "properties": {
+                "S1": {
+                  "$ref": "#/$defs/sha256"
+                },
+                "S2": {
+                  "$ref": "#/$defs/sha256"
+                },
+                "S3": {
+                  "$ref": "#/$defs/sha256"
+                },
+                "S4": {
+                  "$ref": "#/$defs/sha256"
+                }
+              }
+            }
+          }
+        },
+        "final_mix": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "audio_codec",
+            "sample_rate_hz",
+            "channels",
+            "integrated_lufs",
+            "true_peak_dbtp",
+            "duration_s",
+            "one_audio_stream"
+          ],
+          "properties": {
+            "audio_codec": {
+              "const": "aac"
+            },
+            "sample_rate_hz": {
+              "const": 48000
+            },
+            "channels": {
+              "const": 2
+            },
+            "integrated_lufs": {
+              "type": "number",
+              "minimum": -16.6,
+              "maximum": -15.4
+            },
+            "true_peak_dbtp": {
+              "type": "number",
+              "maximum": -1.0
+            },
+            "duration_s": {
+              "const": 30.0
+            },
+            "one_audio_stream": {
+              "const": true
+            }
+          }
+        },
+        "visual_bitstream_copy": {
+          "const": true
+        }
+      }
     }
   },
   "$defs": {
-    "id": {"type": "string", "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{7,127}$"},
-    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "id": {
+      "type": "string",
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{7,127}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
     "binding": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["scene", "capture_slot", "capture_sha256", "timeline_start_frame", "timeline_end_frame"],
+      "required": [
+        "scene",
+        "capture_slot",
+        "capture_sha256",
+        "timeline_start_frame",
+        "timeline_end_frame"
+      ],
       "properties": {
-        "scene": {"type": "string"},
-        "capture_slot": {"type": "string"},
-        "capture_sha256": {"$ref": "#/$defs/sha256"},
-        "timeline_start_frame": {"type": "integer", "minimum": 0},
-        "timeline_end_frame": {"type": "integer", "minimum": 0}
+        "scene": {
+          "type": "string"
+        },
+        "capture_slot": {
+          "type": "string"
+        },
+        "capture_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "timeline_start_frame": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "timeline_end_frame": {
+          "type": "integer",
+          "minimum": 0
+        }
       }
     },
-    "bindingS1": {"allOf": [{"$ref": "#/$defs/binding"}, {"properties": {"scene": {"const": "S1"}, "capture_slot": {"const": "S1"}, "timeline_start_frame": {"const": 0}, "timeline_end_frame": {"const": 179}}}]},
-    "bindingS2": {"allOf": [{"$ref": "#/$defs/binding"}, {"properties": {"scene": {"const": "S2"}, "capture_slot": {"const": "S2"}, "timeline_start_frame": {"const": 180}, "timeline_end_frame": {"const": 419}}}]},
-    "bindingS3": {"allOf": [{"$ref": "#/$defs/binding"}, {"properties": {"scene": {"const": "S3"}, "capture_slot": {"const": "S3"}, "timeline_start_frame": {"const": 420}, "timeline_end_frame": {"const": 629}}}]},
-    "bindingS4": {"allOf": [{"$ref": "#/$defs/binding"}, {"properties": {"scene": {"const": "S4"}, "capture_slot": {"const": "S4"}, "timeline_start_frame": {"const": 630}, "timeline_end_frame": {"const": 899}}}]}
-  }
+    "bindingS1": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/binding"
+        },
+        {
+          "properties": {
+            "scene": {
+              "const": "S1"
+            },
+            "capture_slot": {
+              "const": "S1"
+            },
+            "timeline_start_frame": {
+              "const": 0
+            },
+            "timeline_end_frame": {
+              "const": 179
+            }
+          }
+        }
+      ]
+    },
+    "bindingS2": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/binding"
+        },
+        {
+          "properties": {
+            "scene": {
+              "const": "S2"
+            },
+            "capture_slot": {
+              "const": "S2"
+            },
+            "timeline_start_frame": {
+              "const": 180
+            },
+            "timeline_end_frame": {
+              "const": 419
+            }
+          }
+        }
+      ]
+    },
+    "bindingS3": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/binding"
+        },
+        {
+          "properties": {
+            "scene": {
+              "const": "S3"
+            },
+            "capture_slot": {
+              "const": "S3"
+            },
+            "timeline_start_frame": {
+              "const": 420
+            },
+            "timeline_end_frame": {
+              "const": 629
+            }
+          }
+        }
+      ]
+    },
+    "bindingS4": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/binding"
+        },
+        {
+          "properties": {
+            "scene": {
+              "const": "S4"
+            },
+            "capture_slot": {
+              "const": "S4"
+            },
+            "timeline_start_frame": {
+              "const": 630
+            },
+            "timeline_end_frame": {
+              "const": 899
+            }
+          }
+        }
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "COMPLETED"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "required": [
+          "audio_quality",
+          "audio",
+          "audio_state_commit_allowed"
+        ],
+        "properties": {
+          "profile_used": {
+            "const": "T5_GITHUB_ACTIONS_COMPLETE_V1"
+          },
+          "inputs": {
+            "required": [
+              "merchant_payload_sha256",
+              "capture_sha256",
+              "runtime_manifest_sha256",
+              "resolved_text_sha256",
+              "audio_contract_sha256",
+              "music_source_sha256",
+              "voice_manifest_sha256",
+              "voice_clip_source_sha256"
+            ]
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "status": {
+            "const": "VISUAL_COMPLETED"
+          },
+          "profile_used": {
+            "const": "T5_GITHUB_ACTIONS_FULL_FRAME_V3"
+          }
+        }
+      }
+    }
+  ]
 }

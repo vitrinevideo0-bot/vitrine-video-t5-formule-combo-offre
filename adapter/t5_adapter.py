@@ -18,10 +18,20 @@ SLOTS = ("S1", "S2", "S3", "S4")
 FIELDS = ("nom", "offre", "contenu", "prix", "whatsapp", "quartier")
 ID_PATTERN = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9._-]{7,127}$")
 OUTPUT_FILENAME = "VIDEO_T5_FORMULE_PLEIN_ECRAN_V3_A_VALIDER.mp4"
+AUDIO_CONFIG = ROOT / "config/T5_AUDIO_MIX_V1_0_0.json"
+VOICE_MANIFEST = ROOT / "audio/voice/t5-voice-v1/manifest.json"
 
 
 def load_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def file_sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for block in iter(lambda: stream.read(1 << 20), b""):
+            digest.update(block)
+    return digest.hexdigest()
 
 
 def canonical_sha256(value: Any) -> str:
@@ -90,6 +100,44 @@ def captures_from_demo_manifest(manifest: dict[str, Any], render_job_id: str) ->
     }
 
 
+def complete_audio_contract() -> dict[str, Any]:
+    config = load_json(AUDIO_CONFIG)
+    music = config["music"]
+    voice = config["voice"]
+    clips = voice["clips"]
+    return {
+        "mode": "owner_approved_afrofire_voice_b_complete",
+        "contract": str(AUDIO_CONFIG.relative_to(ROOT)),
+        "contract_sha256": file_sha256(AUDIO_CONFIG),
+        "music": {
+            "selection_mode": "fixed_owner_approved",
+            "selected_choice": music["selection_choice"],
+            "pixabay_id": music["pixabay_id"],
+            "title": music["title"],
+            "artist": music["artist"],
+            "source_url": music["official_download_url"],
+            "source_sha256": music["source_sha256"],
+            "source_bytes": music["source_bytes"],
+            "license": music["license"],
+            "source_bundled": music["source_bundled"],
+            "standalone_redistribution_forbidden": music["standalone_redistribution_forbidden"],
+        },
+        "voice": {
+            "source_mode": "owner_approved_registered_clips",
+            "selected_option": voice["selected_option"],
+            "voice_id": voice["voice_id"],
+            "language": voice["language"],
+            "manifest": voice["manifest"],
+            "manifest_sha256": file_sha256(VOICE_MANIFEST),
+            "clip_source_sha256": {
+                f"S{clip['scene']}": clip["source_sha256"] for clip in clips
+            },
+        },
+        "mix_contract": config["mix_contract"],
+        "state_update_policy": "after_completed_audio_qc_pass_only",
+    }
+
+
 def build_render_job(
     *,
     render_job_id: str,
@@ -111,6 +159,7 @@ def build_render_job(
         "template_version": "3.0.0-full-frame",
         "merchant_payload": payload,
         "captures": verified_captures,
+        "audio": complete_audio_contract(),
         "render": {
             "visual_mode": "runtime_full_frame_render",
             "runtime_capture_manifest_required": True,
@@ -124,7 +173,7 @@ def build_render_job(
             "frames": 900,
             "duration_s": 30.0,
             "scene_durations_s": [6, 8, 7, 9],
-            "audio_mode": "silent_no_audio_stream",
+            "audio_mode": "owner_approved_afrofire_voice_b_complete",
             "production_render_plane": "github_actions",
         },
         "output": {

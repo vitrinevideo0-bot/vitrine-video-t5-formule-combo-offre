@@ -77,6 +77,16 @@ def test_schemas_reject_static_or_incomplete_variants() -> None:
     with pytest.raises(jsonschema.ValidationError):
         jsonschema.validate(job, load("schemas/T5_render_job.schema.json"))
 
+    silent_job = load("demo/render_job_runtime_demo.json")
+    silent_job["render"]["audio_mode"] = "silent_no_audio_stream"
+    with pytest.raises(jsonschema.ValidationError):
+        jsonschema.validate(silent_job, load("schemas/T5_render_job.schema.json"))
+
+    wrong_voice_job = load("demo/render_job_runtime_demo.json")
+    wrong_voice_job["audio"]["voice"]["voice_id"] = "voice-10"
+    with pytest.raises(jsonschema.ValidationError):
+        jsonschema.validate(wrong_voice_job, load("schemas/T5_render_job.schema.json"))
+
     rushes = load("rushes/manifest.json")
     rushes["license"]["raw_media_published_as_artifact"] = True
     with pytest.raises(jsonschema.ValidationError):
@@ -86,3 +96,13 @@ def test_schemas_reject_static_or_incomplete_variants() -> None:
     del result["inputs"]["capture_sha256"]["S4"]
     with pytest.raises(jsonschema.ValidationError):
         jsonschema.validate(result, load("schemas/T5_render_result.schema.json"))
+
+    no_audio_result = load("demo/render_result_runtime_example.json")
+    del no_audio_result["audio_quality"]
+    with pytest.raises(jsonschema.ValidationError):
+        jsonschema.validate(no_audio_result, load("schemas/T5_render_result.schema.json"))
+
+    wrong_profile_result = load("demo/render_result_runtime_example.json")
+    wrong_profile_result["profile_used"] = "T5_GITHUB_ACTIONS_FULL_FRAME_V3"
+    with pytest.raises(jsonschema.ValidationError):
+        jsonschema.validate(wrong_profile_result, load("schemas/T5_render_result.schema.json"))

@@ -45,6 +45,8 @@ Le fichier musical Pixabay intégral n’est jamais versionné ni publié. GitHu
 
 Le contrat reproductible est `config/T5_AUDIO_MIX_V1_0_0.json`; l’approbation propriétaire est `approvals/APPROBATION_MUSIQUE_ET_VOIX_T5_2026-11-18.json`.
 
+Le RenderJob transporte désormais ce contrat complet : empreinte du contrat, identité et SHA‑256 d’Afrofire, manifeste et quatre empreintes de la voix `voice-11`, paramètres de mix et politique de commit. Le Worker refuse un callback `COMPLETED` qui n’atteste pas à la fois le QC visuel, le QC audio, le MP4 vérifié dans R2 et ces mêmes sources. L’état audio R2 n’est incrémenté qu’après ce callback complet et son rejeu reste idempotent.
+
 ```text
 formulaire Cloudflare : 6 réponses + 12 écrans de capture
         ↓
@@ -58,13 +60,15 @@ tools/build_t5_runtime_visual_inputs.py
         ↓
 engine/render_runtime.py : plein cadre + sous-titres Playfair centrés et stables + raccords T1
         ↓
-MP4 visuel silencieux + QC 21/21
+MP4 visuel silencieux + QC 21/21 + résultat intermédiaire VISUAL_COMPLETED
         ↓
 téléchargement éphémère et contrôle SHA-256 d’Afrofire
         ↓
 audio/scripts/build_t5_complete_audio.py : voix B + ducking + mastering + mux bit-exact vidéo
         ↓
-MP4 complet 30 s + QC audio/vidéo + RenderResult, ou RenderError
+tools/finalize_t5_render_result.py : liaison des preuves audio et visuelles
+        ↓
+MP4 complet 30 s + QC audio/vidéo 26/26 + RenderResult COMPLETED, ou RenderError
 ```
 
 Cloudflare reste uniquement le **plan de contrôle et de stockage**. Le rendu vidéo est interdit sur Cloudflare et exécuté sur **GitHub Actions**.
@@ -111,9 +115,11 @@ Les URL, dimensions, durées, tailles et SHA‑256 sont dans `rushes/manifest.js
 - `tools/build_t5_runtime_visual_inputs.py` — vérification SHA‑256 et manifeste runtime ;
 - `engine/runtime_visual.py` — plein cadre, valeurs dynamiques et raccords ;
 - `engine/render_runtime.py` — rendu des 900 images ;
-- `tools/validate_runtime_render.py` — QC et RenderResult ;
-- `cloudflare/` — formulaire, captures, R2, dispatch GitHub et callbacks ;
+- `tools/validate_runtime_render.py` — QC visuel et résultat intermédiaire non terminal ;
+- `tools/finalize_t5_render_result.py` — RenderResult final lié au QC 21/21, au mix 26/26 et aux sources audio approuvées ;
+- `cloudflare/` — formulaire, captures, R2, contrat audio, dispatch GitHub, stockage de sortie, état audio transactionnel et callbacks ;
 - `.github/workflows/render-runtime.yml` — rendu serveur reproductible ;
+- `.github/workflows/cloudflare-control-plane.yml` — validation systématique et déploiement Cloudflare conditionnel sur secrets de production ;
 - `simulation/T5_12_ECRANS_EXECUTABLE.html` — simulation du parcours, jamais une livraison vidéo.
 
 ## Reproduire localement
@@ -142,7 +148,7 @@ python tools/validate_runtime_render.py \
   --manifest .tmp/t5-runtime-manifest.json \
   --render-report output/runtime/t5-runtime-demo-0001/T5_RUNTIME_RENDER_REPORT.json \
   --validation output/runtime/t5-runtime-demo-0001/T5_RUNTIME_VALIDATION.json \
-  --result output/runtime/t5-runtime-demo-0001/T5_RENDER_RESULT.json
+  --result output/runtime/t5-runtime-demo-0001/T5_VISUAL_RENDER_RESULT.json
 mv output/runtime/t5-runtime-demo-0001/VIDEO_T5_FORMULE_PLEIN_ECRAN_V3_A_VALIDER.mp4 \
   output/runtime/t5-runtime-demo-0001/T5_VISUEL_SILENCIEUX_QC_21_21.mp4
 curl --fail --location \
@@ -154,6 +160,13 @@ python audio/scripts/build_t5_complete_audio.py \
   --music-source /tmp/afrofire-source.mp3 \
   --config config/T5_AUDIO_MIX_V1_0_0.json \
   --output-dir output/runtime/t5-runtime-demo-0001
+python tools/finalize_t5_render_result.py \
+  --visual-result output/runtime/t5-runtime-demo-0001/T5_VISUAL_RENDER_RESULT.json \
+  --render-job demo/render_job_runtime_demo.json \
+  --audio-config config/T5_AUDIO_MIX_V1_0_0.json \
+  --audio-report output/runtime/t5-runtime-demo-0001/T5_COMPLETE_AUDIO_RENDER_REPORT.json \
+  --video output/runtime/t5-runtime-demo-0001/VIDEO_T5_FORMULE_PLEIN_ECRAN_V3_A_VALIDER.mp4 \
+  --output output/runtime/t5-runtime-demo-0001/T5_RENDER_RESULT.json
 rm /tmp/afrofire-source.mp3
 pytest -q
 ```

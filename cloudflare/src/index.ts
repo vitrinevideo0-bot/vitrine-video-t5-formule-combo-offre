@@ -1,3 +1,8 @@
+import {
+  AUDIO_MIX_CONTRACT,
+  AUDIO_MIX_CONTRACT_SHA256,
+  T5_VOICE_MANIFEST_SHA256,
+} from "./audio_mix_contract";
 import { CAPTURE_FLOW_CONTRACT } from "./capture_flow_contract";
 import { FORM_CONTRACT } from "./form_contract";
 
@@ -62,6 +67,14 @@ interface StoredJob {
   error?: unknown;
 }
 
+interface AudioState {
+  schema_version: "1.0.0";
+  selected_music_id: "afrofire-300338";
+  selected_voice_id: "voice-11";
+  last_successful_render_job_id: string | null;
+  successful_render_count: number;
+}
+
 const SLOTS: CaptureSlot[] = ["S1", "S2", "S3", "S4"];
 const FIELDS = ["nom", "offre", "contenu", "prix", "whatsapp", "quartier"] as const;
 const DURATIONS: Record<CaptureSlot, number> = { S1: 6000, S2: 8000, S3: 7000, S4: 9000 };
@@ -69,6 +82,7 @@ const ALLOWED_MIME = new Set(["video/mp4", "video/webm", "video/quicktime"]);
 const MAX_CAPTURE_BYTES = 250 * 1024 * 1024;
 const MAX_OUTPUT_BYTES = 500 * 1024 * 1024;
 const OUTPUT_FILE = "VIDEO_T5_FORMULE_PLEIN_ECRAN_V3_A_VALIDER.mp4";
+const AUDIO_STATE_KEY = "audio/t5-last-success.json";
 
 function json(data: unknown, status = 200): Response {
   return Response.json(data, { status, headers: { "cache-control": "no-store" } });
@@ -129,6 +143,57 @@ async function sha256Text(text: string): Promise<string> {
   return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
+function initialAudioState(): AudioState {
+  return {
+    schema_version: "1.0.0",
+    selected_music_id: "afrofire-300338",
+    selected_voice_id: "voice-11",
+    last_successful_render_job_id: null,
+    successful_render_count: 0,
+  };
+}
+
+function validateAudioState(state: AudioState): AudioState {
+  if (
+    state.schema_version !== "1.0.0"
+    || state.selected_music_id !== "afrofire-300338"
+    || state.selected_voice_id !== "voice-11"
+    || !Number.isInteger(state.successful_render_count)
+    || state.successful_render_count < 0
+    || (state.last_successful_render_job_id !== null && !validId(state.last_successful_render_job_id))
+  ) throw new Error("État audio T5 persistant invalide.");
+  return state;
+}
+
+async function readAudioState(env: Env): Promise<AudioState> {
+  const object = await env.T5_MEDIA.get(AUDIO_STATE_KEY);
+  return object ? validateAudioState(await object.json<AudioState>()) : initialAudioState();
+}
+
+async function commitAudioSuccess(env: Env, jobId: string): Promise<void> {
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const object = await env.T5_MEDIA.get(AUDIO_STATE_KEY);
+    const current = object ? validateAudioState(await object.json<AudioState>()) : initialAudioState();
+    if (current.last_successful_render_job_id === jobId) return;
+    const updated: AudioState = {
+      ...current,
+      last_successful_render_job_id: jobId,
+      successful_render_count: current.successful_render_count + 1,
+    };
+    const written = await env.T5_MEDIA.put(AUDIO_STATE_KEY, JSON.stringify(updated), {
+      onlyIf: object ? { etagMatches: object.etag } : { etagDoesNotMatch: "*" },
+      httpMetadata: { contentType: "application/json" },
+      customMetadata: {
+        selected_music_id: updated.selected_music_id,
+        selected_voice_id: updated.selected_voice_id,
+        last_successful_render_job_id: jobId,
+      },
+    });
+    if (written) return;
+  }
+  throw new Error("Conflit concurrent persistant sur l'état audio T5.");
+}
+
 async function readJob(env: Env, jobId: string): Promise<StoredJob | null> {
   const object = await env.T5_MEDIA.get(jobKey(jobId));
   return object ? await object.json<StoredJob>() : null;
@@ -170,6 +235,37 @@ function buildRenderJob(state: StoredJob): Record<string, unknown> {
     template_version: "3.0.0-full-frame",
     merchant_payload: state.merchant_payload,
     captures,
+    audio: {
+      mode: "owner_approved_afrofire_voice_b_complete",
+      contract: "config/T5_AUDIO_MIX_V1_0_0.json",
+      contract_sha256: AUDIO_MIX_CONTRACT_SHA256,
+      music: {
+        selection_mode: "fixed_owner_approved",
+        selected_choice: AUDIO_MIX_CONTRACT.music.selection_choice,
+        pixabay_id: AUDIO_MIX_CONTRACT.music.pixabay_id,
+        title: AUDIO_MIX_CONTRACT.music.title,
+        artist: AUDIO_MIX_CONTRACT.music.artist,
+        source_url: AUDIO_MIX_CONTRACT.music.official_download_url,
+        source_sha256: AUDIO_MIX_CONTRACT.music.source_sha256,
+        source_bytes: AUDIO_MIX_CONTRACT.music.source_bytes,
+        license: AUDIO_MIX_CONTRACT.music.license,
+        source_bundled: AUDIO_MIX_CONTRACT.music.source_bundled,
+        standalone_redistribution_forbidden: AUDIO_MIX_CONTRACT.music.standalone_redistribution_forbidden,
+      },
+      voice: {
+        source_mode: "owner_approved_registered_clips",
+        selected_option: AUDIO_MIX_CONTRACT.voice.selected_option,
+        voice_id: AUDIO_MIX_CONTRACT.voice.voice_id,
+        language: AUDIO_MIX_CONTRACT.voice.language,
+        manifest: AUDIO_MIX_CONTRACT.voice.manifest,
+        manifest_sha256: T5_VOICE_MANIFEST_SHA256,
+        clip_source_sha256: Object.fromEntries(
+          AUDIO_MIX_CONTRACT.voice.clips.map((clip) => [`S${clip.scene}`, clip.source_sha256]),
+        ),
+      },
+      mix_contract: AUDIO_MIX_CONTRACT.mix_contract,
+      state_update_policy: "after_completed_audio_qc_pass_only",
+    },
     render: {
       visual_mode: "runtime_full_frame_render",
       runtime_capture_manifest_required: true,
@@ -183,7 +279,7 @@ function buildRenderJob(state: StoredJob): Record<string, unknown> {
       frames: 900,
       duration_s: 30.0,
       scene_durations_s: [6, 8, 7, 9],
-      audio_mode: "silent_no_audio_stream",
+      audio_mode: "owner_approved_afrofire_voice_b_complete",
       production_render_plane: "github_actions",
     },
     output: { uri: outputUri(state.job_id), filename: OUTPUT_FILE },
@@ -332,7 +428,7 @@ async function uploadOutput(request: Request, env: Env, jobId: string): Promise<
   const object = await env.T5_MEDIA.put(outputKey(jobId), request.body, {
     sha256: expectedSha,
     httpMetadata: { contentType: "video/mp4" },
-    customMetadata: { job_id: jobId, artifact: "t5_runtime_video" },
+    customMetadata: { job_id: jobId, artifact: "t5_complete_audio_video" },
   });
   if (!object.checksums.sha256) return fail(500, "T5_R2_CHECKSUM_MISSING", "R2 n'a pas confirmé le checksum.", true);
   const actualSha = [...new Uint8Array(object.checksums.sha256)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
@@ -354,22 +450,43 @@ async function validateCallbackPayload(state: StoredJob, status: string, body: R
     const result = record(body.result);
     const output = record(result?.output);
     const quality = record(result?.quality);
+    const audioQuality = record(result?.audio_quality);
+    const resultAudio = record(result?.audio);
+    const resultMusic = record(resultAudio?.music);
+    const resultVoice = record(resultAudio?.voice);
+    const resultVoiceAudioClips = record(resultVoice?.clip_source_sha256);
+    const finalMix = record(resultAudio?.final_mix);
     const inputs = record(result?.inputs);
     const captureSha = record(inputs?.capture_sha256);
+    const resultVoiceClips = record(inputs?.voice_clip_source_sha256);
     const job = record(state.job);
-    if (!result || result.schema_version !== "1.0.0" || result.status !== "COMPLETED") return "RenderResult absent ou invalide.";
+    const jobRender = record(job?.render);
+    const jobAudio = record(job?.audio);
+    const jobMusic = record(jobAudio?.music);
+    const jobVoice = record(jobAudio?.voice);
+    const jobVoiceClips = record(jobVoice?.clip_source_sha256);
+    if (!result || result.schema_version !== "1.0.0" || result.status !== "COMPLETED") return "RenderResult complet absent ou invalide.";
     if (result.job_id !== state.job_id || result.idempotency_key !== state.idempotency_key) return "RenderResult rattaché à un autre job.";
-    if (result.template_id !== "RESTAURATION-T5" || result.template_version !== "3.0.0-full-frame" || result.profile_used !== "T5_GITHUB_ACTIONS_FULL_FRAME_V3") return "Profil T5 du RenderResult invalide.";
+    if (result.template_id !== "RESTAURATION-T5" || result.template_version !== "3.0.0-full-frame" || result.profile_used !== "T5_GITHUB_ACTIONS_COMPLETE_V1") return "Profil complet T5 du RenderResult invalide.";
     if (result.control_plane !== "cloudflare_worker") return "Plan de contrôle du RenderResult invalide.";
     if (!output || output.uri !== outputUri(state.job_id) || output.file !== OUTPUT_FILE || !validSha(output.sha256)) return "Sortie RenderResult invalide.";
     if (!state.output || state.output.uri !== output.uri || state.output.sha256 !== output.sha256 || state.output.bytes !== output.bytes) return "Le RenderResult ne désigne pas le MP4 vérifié dans R2.";
-    if (!quality || quality.status !== "PASS") return "Le contrôle qualité n'est pas PASS.";
+    if (!quality || quality.status !== "PASS" || quality.passed !== 21 || quality.total !== 21 || !audioQuality || audioQuality.status !== "PASS" || audioQuality.passed !== 26 || audioQuality.total !== 26) return "Les contrôles visuel 21/21 et audio 26/26 doivent être PASS.";
     if (!inputs || inputs.merchant_payload_sha256 !== await sha256Text(canonicalStringify(state.merchant_payload))) return "Les réponses du résultat divergent du RenderJob.";
     if (!captureSha || SLOTS.some((slot) => captureSha[slot] !== state.captures[slot]?.sha256)) return "Les captures du résultat divergent du RenderJob.";
     if (!validSha(inputs.runtime_manifest_sha256) || !validSha(inputs.resolved_text_sha256)) return "La provenance runtime du résultat est incomplète.";
+    if (!job || jobRender?.visual_mode !== "runtime_full_frame_render" || jobRender.audio_mode !== "owner_approved_afrofire_voice_b_complete") return "Le RenderJob stocké n'autorise pas le rendu complet.";
+    if (!jobAudio || !jobMusic || !jobVoice || !jobVoiceClips) return "Le contrat audio du RenderJob est incomplet.";
+    if (inputs.audio_contract_sha256 !== jobAudio.contract_sha256 || inputs.music_source_sha256 !== jobMusic.source_sha256 || inputs.voice_manifest_sha256 !== jobVoice.manifest_sha256) return "La provenance audio diverge du RenderJob.";
+    if (!resultVoiceClips || SLOTS.some((slot) => resultVoiceClips[slot] !== jobVoiceClips[slot])) return "Les sources voix du résultat divergent du RenderJob.";
+    if (!resultAudio || resultAudio.mode !== jobAudio.mode || resultAudio.visual_bitstream_copy !== true) return "L'attestation du mix complet est invalide.";
+    if (!resultMusic || resultMusic.pixabay_id !== jobMusic.pixabay_id || resultMusic.source_sha256 !== jobMusic.source_sha256 || resultMusic.source_bundled !== false) return "Afrofire n'est pas attestée conformément au RenderJob.";
+    if (!resultVoice || resultVoice.voice_id !== jobVoice.voice_id || resultVoice.manifest_sha256 !== jobVoice.manifest_sha256 || !resultVoiceAudioClips || SLOTS.some((slot) => resultVoiceAudioClips[slot] !== jobVoiceClips[slot])) return "La voix B n'est pas attestée conformément au RenderJob.";
+    if (!finalMix || finalMix.audio_codec !== "aac" || finalMix.sample_rate_hz !== 48000 || finalMix.channels !== 2 || finalMix.one_audio_stream !== true) return "Le flux audio final est invalide.";
+    if (typeof finalMix.integrated_lufs !== "number" || finalMix.integrated_lufs < -16.6 || finalMix.integrated_lufs > -15.4 || typeof finalMix.true_peak_dbtp !== "number" || finalMix.true_peak_dbtp > -1.0) return "Les mesures audio finales sont hors contrat.";
+    if (result.audio_state_commit_allowed !== true) return "Le RenderResult interdit le commit audio transactionnel.";
     if (JSON.stringify(result.rendered_fields) !== JSON.stringify(FIELDS)) return "Les six champs rendus ne sont pas attestés.";
     if (!Array.isArray(result.scene_capture_bindings) || result.scene_capture_bindings.length !== 4) return "Les quatre liaisons scène/capture manquent.";
-    if (!job || record(job.render)?.visual_mode !== "runtime_full_frame_render") return "Le RenderJob stocké n'autorise pas ce rendu.";
   }
   if (status === "FAILED") {
     const error = record(body.error);
@@ -393,7 +510,14 @@ async function callback(request: Request, env: Env, jobId: string): Promise<Resp
   if (invalid) return fail(422, "T5_INVALID_CALLBACK_PAYLOAD", invalid);
   state.status = status as JobStatus;
   state.github = { run_id: body.github_run_id, run_url: body.github_run_url };
-  if (status === "COMPLETED") state.result = body.result;
+  if (status === "COMPLETED") {
+    try {
+      await commitAudioSuccess(env, state.job_id);
+    } catch (error) {
+      return fail(409, "T5_AUDIO_STATE_CONFLICT", error instanceof Error ? error.message : "Conflit d'état audio.", true);
+    }
+    state.result = body.result;
+  }
   if (status === "FAILED") state.error = body.error;
   await writeJob(env, state);
   return json({ job_id: jobId, status: state.status });
@@ -427,10 +551,22 @@ async function handle(request: Request, env: Env): Promise<Response> {
   const url = new URL(request.url);
   const parts = url.pathname.split("/").filter(Boolean);
   if (request.method === "GET" && url.pathname === "/health") {
-    return json({ status: "ok", service: "t5-formule-control-plane", control_plane: "cloudflare_worker", render_plane: "github_actions", cloudflare_rendering: false });
+    return json({
+      status: "ok",
+      service: "t5-formule-control-plane",
+      control_plane: "cloudflare_worker",
+      render_plane: "github_actions",
+      cloudflare_rendering: false,
+      audio_mode: "owner_approved_afrofire_voice_b_complete",
+    });
   }
   if (request.method === "GET" && url.pathname === "/v1/contracts/form") return json(FORM_CONTRACT);
   if (request.method === "GET" && url.pathname === "/v1/contracts/capture-flow") return json(CAPTURE_FLOW_CONTRACT);
+  if (request.method === "GET" && url.pathname === "/v1/contracts/audio-mix") return json(AUDIO_MIX_CONTRACT);
+  if (request.method === "GET" && url.pathname === "/v1/audio-state") {
+    if (!(await authorized(request, env.CALLBACK_TOKEN))) return fail(401, "T5_UNAUTHORIZED", "Authentification requise.");
+    return json(await readAudioState(env));
+  }
   if (request.method === "POST" && url.pathname === "/v1/jobs") {
     if (!(await authorized(request, env.CLIENT_API_TOKEN))) return fail(401, "T5_UNAUTHORIZED", "Jeton client requis.");
     return createJob(request, env);

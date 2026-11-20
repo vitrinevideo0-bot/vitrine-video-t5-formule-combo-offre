@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
 
@@ -10,13 +11,23 @@ ROOT = Path(__file__).resolve().parents[1]
 TARGETS = {
     ROOT / "cloudflare/src/form_contract.ts": ("FORM_CONTRACT", ROOT / "form/questions_T5.json"),
     ROOT / "cloudflare/src/capture_flow_contract.ts": ("CAPTURE_FLOW_CONTRACT", ROOT / "config/T5_CAPTURE_FLOW_V1_0_0.json"),
+    ROOT / "cloudflare/src/audio_mix_contract.ts": ("AUDIO_MIX_CONTRACT", ROOT / "config/T5_AUDIO_MIX_V1_0_0.json"),
 }
+VOICE_MANIFEST = ROOT / "audio/voice/t5-voice-v1/manifest.json"
+
+
+def sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def rendered(name: str, source: Path) -> str:
     value = json.loads(source.read_text(encoding="utf-8"))
     payload = json.dumps(value, ensure_ascii=False, indent=2)
-    return f"// Generated from {source.relative_to(ROOT)}; do not edit.\nexport const {name} = {payload} as const;\n"
+    content = f"// Generated from {source.relative_to(ROOT)}; do not edit.\nexport const {name} = {payload} as const;\n"
+    if name == "AUDIO_MIX_CONTRACT":
+        content += f'export const AUDIO_MIX_CONTRACT_SHA256 = "{sha256(source)}" as const;\n'
+        content += f'export const T5_VOICE_MANIFEST_SHA256 = "{sha256(VOICE_MANIFEST)}" as const;\n'
+    return content
 
 
 def main() -> int:

@@ -279,7 +279,7 @@ def main() -> int:
     ]
     result = {
         "schema_version": "1.0.0",
-        "status": "COMPLETED",
+        "status": "VISUAL_COMPLETED",
         "job_id": job["job_id"],
         "idempotency_key": job["idempotency_key"],
         "template_id": "RESTAURATION-T5",

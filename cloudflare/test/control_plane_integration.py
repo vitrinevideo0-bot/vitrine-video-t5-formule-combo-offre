@@ -46,11 +46,25 @@ def main() -> None:
     assert health == {
         "status": "ok", "service": "t5-formule-control-plane",
         "control_plane": "cloudflare_worker", "render_plane": "github_actions", "cloudflare_rendering": False,
+        "audio_mode": "owner_approved_afrofire_voice_b_complete",
     }
     assert as_json(call(args.base, "/v1/contracts/form")[0]) == json.loads((ROOT / "form/questions_T5.json").read_text())
     flow = as_json(call(args.base, "/v1/contracts/capture-flow")[0])
     assert flow == json.loads((ROOT / "config/T5_CAPTURE_FLOW_V1_0_0.json").read_text())
     assert flow["counts"]["stable_capture_screens"] == 12
+    audio_contract = as_json(call(args.base, "/v1/contracts/audio-mix")[0])
+    assert audio_contract == json.loads((ROOT / "config/T5_AUDIO_MIX_V1_0_0.json").read_text())
+    assert audio_contract["music"]["selection_choice"] == "4"
+    assert audio_contract["music"]["title"] == "Afrofire"
+    assert audio_contract["voice"]["voice_id"] == "voice-11"
+    initial_audio_state = as_json(call(args.base, "/v1/audio-state", headers={"authorization": f"Bearer {args.callback_token}"})[0])
+    assert initial_audio_state == {
+        "schema_version": "1.0.0",
+        "selected_music_id": "afrofire-300338",
+        "selected_voice_id": "voice-11",
+        "last_successful_render_job_id": None,
+        "successful_render_count": 0,
+    }
     root = call(args.base, "/")[0].decode("utf-8").lower()
     assert "6 questions" in root and "12 écrans" in root
 
@@ -98,6 +112,13 @@ def main() -> None:
     assert job["merchant_payload"] == merchant
     assert job["render"]["visual_mode"] == "runtime_full_frame_render"
     assert job["render"]["production_render_plane"] == "github_actions"
+    assert job["render"]["audio_mode"] == "owner_approved_afrofire_voice_b_complete"
+    assert job["audio"]["music"]["selected_choice"] == "4"
+    assert job["audio"]["music"]["pixabay_id"] == 300338
+    assert job["audio"]["music"]["source_bundled"] is False
+    assert job["audio"]["voice"]["selected_option"] == "B_masculine"
+    assert job["audio"]["voice"]["voice_id"] == "voice-11"
+    assert job["audio"]["state_update_policy"] == "after_completed_audio_qc_pass_only"
     assert job["control_plane"] == "cloudflare_worker" and job["cloudflare_rendering_forbidden"] is True
     for slot in SLOTS:
         payload, response_headers, _ = call(args.base, f"/v1/jobs/{job_id}/captures/{slot}", headers=callback)
@@ -119,7 +140,7 @@ def main() -> None:
     result = {
         "schema_version": "1.0.0", "status": "COMPLETED", "job_id": job_id, "idempotency_key": idem,
         "template_id": "RESTAURATION-T5", "template_version": "3.0.0-full-frame",
-        "profile_used": "T5_GITHUB_ACTIONS_FULL_FRAME_V3", "control_plane": "cloudflare_worker",
+        "profile_used": "T5_GITHUB_ACTIONS_COMPLETE_V1", "control_plane": "cloudflare_worker",
         "output": {"uri": job["output"]["uri"], "file": job["output"]["filename"], "sha256": rendered_sha, "bytes": len(rendered)},
         "quality": {"status": "PASS", "report": "T5_RUNTIME_VALIDATION.json", "passed": 21, "total": 21},
         "inputs": {
@@ -127,9 +148,33 @@ def main() -> None:
             "capture_sha256": {slot: media_sha for slot in SLOTS},
             "runtime_manifest_sha256": "a" * 64,
             "resolved_text_sha256": "b" * 64,
+            "audio_contract_sha256": job["audio"]["contract_sha256"],
+            "music_source_sha256": job["audio"]["music"]["source_sha256"],
+            "voice_manifest_sha256": job["audio"]["voice"]["manifest_sha256"],
+            "voice_clip_source_sha256": job["audio"]["voice"]["clip_source_sha256"],
         },
         "rendered_fields": ["nom", "offre", "contenu", "prix", "whatsapp", "quartier"],
         "scene_capture_bindings": bindings,
+        "audio_quality": {"status": "PASS", "report": "T5_COMPLETE_AUDIO_RENDER_REPORT.json", "passed": 26, "total": 26},
+        "audio": {
+            "mode": job["audio"]["mode"],
+            "music": {
+                "selected_choice": "4", "pixabay_id": 300338, "title": "Afrofire", "artist": "DPStudioMusic",
+                "source_sha256": job["audio"]["music"]["source_sha256"], "source_bundled": False,
+            },
+            "voice": {
+                "selected_option": "B_masculine", "voice_id": "voice-11",
+                "manifest_sha256": job["audio"]["voice"]["manifest_sha256"],
+                "clip_source_sha256": job["audio"]["voice"]["clip_source_sha256"],
+            },
+            "final_mix": {
+                "audio_codec": "aac", "sample_rate_hz": 48000, "channels": 2,
+                "integrated_lufs": -16.1, "true_peak_dbtp": -1.89, "duration_s": 30.0,
+                "one_audio_stream": True,
+            },
+            "visual_bitstream_copy": True,
+        },
+        "audio_state_commit_allowed": True,
     }
     Draft202012Validator(json.loads((ROOT / "schemas/T5_render_result.schema.json").read_text())).validate(result)
     invalid = as_json(call(
@@ -138,9 +183,27 @@ def main() -> None:
         headers={**callback, "content-type": "application/json"}, expected=422,
     )[0])
     assert invalid["code"] == "T5_INVALID_CALLBACK_PAYLOAD"
+    wrong_audio = json.loads(json.dumps(result))
+    wrong_audio["inputs"]["music_source_sha256"] = "0" * 64
+    rejected_audio = as_json(call(
+        args.base, f"/v1/jobs/{job_id}/events", method="POST",
+        body=json.dumps({"status": "COMPLETED", "result": wrong_audio}).encode(),
+        headers={**callback, "content-type": "application/json"}, expected=422,
+    )[0])
+    assert rejected_audio["code"] == "T5_INVALID_CALLBACK_PAYLOAD"
+    assert as_json(call(args.base, "/v1/audio-state", headers=callback)[0]) == initial_audio_state
     event = {"status": "COMPLETED", "github_run_id": "123", "github_run_url": "https://github.com/example/actions/runs/123", "result": result}
     completed = as_json(call(args.base, f"/v1/jobs/{job_id}/events", method="POST", body=json.dumps(event).encode(), headers={**callback, "content-type": "application/json"})[0])
     assert completed == {"job_id": job_id, "status": "COMPLETED"}
+    replayed = as_json(call(args.base, f"/v1/jobs/{job_id}/events", method="POST", body=json.dumps(event).encode(), headers={**callback, "content-type": "application/json"})[0])
+    assert replayed == {"job_id": job_id, "status": "COMPLETED"}
+    assert as_json(call(args.base, "/v1/audio-state", headers=callback)[0]) == {
+        "schema_version": "1.0.0",
+        "selected_music_id": "afrofire-300338",
+        "selected_voice_id": "voice-11",
+        "last_successful_render_job_id": job_id,
+        "successful_render_count": 1,
+    }
     status = as_json(call(args.base, f"/v1/jobs/{job_id}")[0])
     assert status["status"] == "COMPLETED" and status["output_ready"] is True
     output, output_headers, _ = call(args.base, f"/v1/jobs/{job_id}/output", headers=client)

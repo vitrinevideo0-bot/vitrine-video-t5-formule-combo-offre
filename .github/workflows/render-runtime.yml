@@ -90,7 +90,12 @@ jobs:
           assert job['render']['visual_mode']=='runtime_full_frame_render'
           assert job['render']['render_business_text'] is True
           assert job['render']['production_render_plane']=='github_actions'
-          print('T5_RENDER_JOB_SCHEMA_PASS', job['job_id'], job['control_plane'])
+          assert job['render']['audio_mode']=='owner_approved_afrofire_voice_b_complete'
+          assert job['audio']['music']['pixabay_id']==300338
+          assert job['audio']['music']['selected_choice']=='4'
+          assert job['audio']['voice']['voice_id']=='voice-11'
+          assert job['audio']['voice']['selected_option']=='B_masculine'
+          print('T5_RENDER_JOB_SCHEMA_PASS', job['job_id'], job['control_plane'], job['render']['audio_mode'])
           PY
 
       - name: Télécharger les quatre captures sans les publier et vérifier chaque SHA-256
@@ -145,15 +150,15 @@ jobs:
             --manifest .tmp/t5-runtime/runtime-manifest.json \
             --render-report "$OUTDIR/T5_RUNTIME_RENDER_REPORT.json" \
             --validation "$OUTDIR/T5_RUNTIME_VALIDATION.json" \
-            --result "$OUTDIR/T5_RENDER_RESULT.json"
+            --result "$OUTDIR/T5_VISUAL_RENDER_RESULT.json"
 
       - name: Télécharger Afrofire depuis la source officielle et verrouiller son intégrité
         run: |
           set -euo pipefail
           mkdir -p .tmp/t5-runtime/audio
-          MUSIC_URL="$(jq -r '.music.official_download_url' config/T5_AUDIO_MIX_V1_0_0.json)"
-          MUSIC_SHA="$(jq -r '.music.source_sha256' config/T5_AUDIO_MIX_V1_0_0.json)"
-          MUSIC_BYTES="$(jq -r '.music.source_bytes' config/T5_AUDIO_MIX_V1_0_0.json)"
+          MUSIC_URL="$(jq -r '.audio.music.source_url' .tmp/t5-runtime/render-job.json)"
+          MUSIC_SHA="$(jq -r '.audio.music.source_sha256' .tmp/t5-runtime/render-job.json)"
+          MUSIC_BYTES="$(jq -r '.audio.music.source_bytes' .tmp/t5-runtime/render-job.json)"
           curl --fail --location --retry 5 --retry-all-errors \
             "$MUSIC_URL" --output .tmp/t5-runtime/audio/afrofire-source.mp3
           echo "$MUSIC_SHA  .tmp/t5-runtime/audio/afrofire-source.mp3" | sha256sum --check --strict
@@ -172,20 +177,15 @@ jobs:
             --output-dir "$OUTDIR"
           jq -e '.status == "PASS" and .summary.failed == 0' \
             "$OUTDIR/T5_COMPLETE_AUDIO_RENDER_REPORT.json"
-          python - <<'PY'
-          import json, os
-          from pathlib import Path
-          from jsonschema import Draft202012Validator
-          outdir = Path('output/runtime') / os.environ['T5_JOB_ID']
-          report = json.loads((outdir / 'T5_COMPLETE_AUDIO_RENDER_REPORT.json').read_text())
-          result_path = outdir / 'T5_RENDER_RESULT.json'
-          result = json.loads(result_path.read_text())
-          result['output']['sha256'] = report['final_video']['sha256']
-          result['output']['bytes'] = report['final_video']['bytes']
-          schema = json.loads(Path('schemas/T5_render_result.schema.json').read_text())
-          Draft202012Validator(schema).validate(result)
-          result_path.write_text(json.dumps(result, ensure_ascii=False, indent=2) + '\n')
-          PY
+          python tools/finalize_t5_render_result.py \
+            --visual-result "$OUTDIR/T5_VISUAL_RENDER_RESULT.json" \
+            --render-job .tmp/t5-runtime/render-job.json \
+            --audio-config config/T5_AUDIO_MIX_V1_0_0.json \
+            --audio-report "$OUTDIR/T5_COMPLETE_AUDIO_RENDER_REPORT.json" \
+            --video "$OUTDIR/VIDEO_T5_FORMULE_PLEIN_ECRAN_V3_A_VALIDER.mp4" \
+            --output "$OUTDIR/T5_RENDER_RESULT.json"
+          jq -e '.status == "COMPLETED" and .profile_used == "T5_GITHUB_ACTIONS_COMPLETE_V1" and .audio_quality.status == "PASS" and .audio_state_commit_allowed == true' \
+            "$OUTDIR/T5_RENDER_RESULT.json"
           rm -f .tmp/t5-runtime/audio/afrofire-source.mp3
           test ! -e .tmp/t5-runtime/audio/afrofire-source.mp3
           test ! -e "$OUTDIR/afrofire-source.mp3"
@@ -252,6 +252,7 @@ jobs:
           cp "$OUTDIR/T5_RUNTIME_PLANCHE_12_IMAGES.jpg" release/
           cp "$OUTDIR/T5_RUNTIME_RENDER_REPORT.json" release/
           cp "$OUTDIR/T5_RUNTIME_VALIDATION.json" release/
+          cp "$OUTDIR/T5_VISUAL_RENDER_RESULT.json" release/
           cp "$OUTDIR/T5_RENDER_RESULT.json" release/
           cp "$OUTDIR/T5_RESOLVED_TEXT.json" release/
           cp .tmp/t5-runtime/render-job.json release/T5_RENDER_JOB.json

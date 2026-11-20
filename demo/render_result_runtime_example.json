@@ -5,7 +5,7 @@
   "idempotency_key": "t5-runtime-example-0001",
   "template_id": "RESTAURATION-T5",
   "template_version": "3.0.0-full-frame",
-  "profile_used": "T5_GITHUB_ACTIONS_FULL_FRAME_V3",
+  "profile_used": "T5_GITHUB_ACTIONS_COMPLETE_V1",
   "control_plane": "cloudflare_worker",
   "output": {
     "uri": "output/runtime/t5-runtime-example-0001/VIDEO_T5_FORMULE_PLEIN_ECRAN_V3_A_VALIDER.mp4",
@@ -28,7 +28,16 @@
       "S4": "4444444444444444444444444444444444444444444444444444444444444444"
     },
     "runtime_manifest_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
-    "resolved_text_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+    "resolved_text_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "audio_contract_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "music_source_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+    "voice_manifest_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "voice_clip_source_sha256": {
+      "S1": "5555555555555555555555555555555555555555555555555555555555555555",
+      "S2": "6666666666666666666666666666666666666666666666666666666666666666",
+      "S3": "7777777777777777777777777777777777777777777777777777777777777777",
+      "S4": "8888888888888888888888888888888888888888888888888888888888888888"
+    }
   },
   "rendered_fields": [
     "nom",
@@ -67,5 +76,44 @@
       "timeline_start_frame": 630,
       "timeline_end_frame": 899
     }
-  ]
+  ],
+  "audio_quality": {
+    "status": "PASS",
+    "report": "T5_COMPLETE_AUDIO_RENDER_REPORT.json",
+    "passed": 26,
+    "total": 26
+  },
+  "audio": {
+    "mode": "owner_approved_afrofire_voice_b_complete",
+    "music": {
+      "selected_choice": "4",
+      "pixabay_id": 300338,
+      "title": "Afrofire",
+      "artist": "DPStudioMusic",
+      "source_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "source_bundled": false
+    },
+    "voice": {
+      "selected_option": "B_masculine",
+      "voice_id": "voice-11",
+      "manifest_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "clip_source_sha256": {
+        "S1": "5555555555555555555555555555555555555555555555555555555555555555",
+        "S2": "6666666666666666666666666666666666666666666666666666666666666666",
+        "S3": "7777777777777777777777777777777777777777777777777777777777777777",
+        "S4": "8888888888888888888888888888888888888888888888888888888888888888"
+      }
+    },
+    "final_mix": {
+      "audio_codec": "aac",
+      "sample_rate_hz": 48000,
+      "channels": 2,
+      "integrated_lufs": -16.1,
+      "true_peak_dbtp": -1.89,
+      "duration_s": 30.0,
+      "one_audio_stream": true
+    },
+    "visual_bitstream_copy": true
+  },
+  "audio_state_commit_allowed": true
 }
