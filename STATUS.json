@@ -4,8 +4,8 @@
   "template_name": "Formule, combo ou offre",
   "updated_on": "2026-11-18",
   "workflow": {
-    "status_number": 5,
-    "status": "Owner-approved questions and 12-screen copy implemented locally; first silent montage passes local validation and awaits GitHub server validation plus owner review",
+    "status_number": 6,
+    "status": "Owner-approved T5 implementation is public; repository CI and the GitHub first-montage render both pass; candidate 1 awaits owner review",
     "completion_percent_claimed": null
   },
   "owner_decisions": {
@@ -24,6 +24,7 @@
     "twelve_screen_flow": true,
     "twelve_png_proofs": true,
     "standalone_simulation": true,
+    "json_schemas": true,
     "licensed_demo_rush_manifest": true,
     "first_silent_montage_renderer": true,
     "first_silent_montage_validator": true,
@@ -45,21 +46,28 @@
     "raw_rush_published": false
   },
   "server_validation": {
-    "repository_created": false,
-    "repository_public": false,
-    "implementation_commit": null,
-    "ci_run_id": null,
-    "render_run_id": null,
-    "release_tag": null,
-    "first_montage_sha256": null
+    "repository_created": true,
+    "repository_public": true,
+    "repository_url": "https://github.com/vitrinevideo0-bot/vitrine-video-t5-formule-combo-offre",
+    "implementation_commit": "3e628ab1e036befa70772cd14fc5bf4aa1e9643e",
+    "ci_run_id": 44716635345,
+    "ci_conclusion": "success",
+    "render_run_id": 44716734789,
+    "render_conclusion": "success",
+    "release_tag": "t5-first-montage-v1-candidate-1",
+    "release_url": "https://github.com/vitrinevideo0-bot/vitrine-video-t5-formule-combo-offre/releases/tag/t5-first-montage-v1-candidate-1",
+    "first_montage_sha256": "493495e8449487ccf3b4ee3b72eef1f558658409b2ab0f5017d72d3836f1a266",
+    "release_sha256s_verified_after_download": true,
+    "first_montage_validation": "PASS_12_OF_12",
+    "raw_rush_in_release": false
   },
   "claims": {
     "implemented": true,
-    "github_published": false,
+    "github_published": true,
     "first_montage_owner_approved": false,
     "audio_implemented": false,
     "cloudflare_deployed": false,
     "production_ready": false
   },
-  "next_decision": "Owner judges the first silent montage before voice, music, final merchant data or production integration."
+  "next_decision": "Owner judges first silent montage candidate 1 before voice, music, final merchant data or production integration."
 }

@@ -59,3 +59,12 @@ python tools/validate_first_montage.py
 ```
 
 Format contrôlé du candidat : 30,000 s, 720 × 1280, 30 i/s, 900 images, H.264/yuv420p, sans piste audio, trois transitions T1 et fin stable pendant trois secondes.
+
+## Publication vérifiée
+
+- dépôt public : https://github.com/vitrinevideo0-bot/vitrine-video-t5-formule-combo-offre ;
+- CI de l’implémentation : https://github.com/vitrinevideo0-bot/vitrine-video-t5-formule-combo-offre/actions/runs/44716635345 ;
+- rendu et validation sur GitHub : https://github.com/vitrinevideo0-bot/vitrine-video-t5-formule-combo-offre/actions/runs/44716734789 ;
+- pré‑Release du candidat : https://github.com/vitrinevideo0-bot/vitrine-video-t5-formule-combo-offre/releases/tag/t5-first-montage-v1-candidate-1.
+
+Le SHA‑256 du MP4 produit par GitHub est `493495e8449487ccf3b4ee3b72eef1f558658409b2ab0f5017d72d3836f1a266`. Les six fichiers de preuve et le MP4 de la pré‑Release ont été retéléchargés et vérifiés avec `SHA256SUMS.txt`.
