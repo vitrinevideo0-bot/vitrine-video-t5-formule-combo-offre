@@ -19,3 +19,7 @@ Dernier gabarit de la série restauration. Il doit expliquer sans ambiguïté ce
 Format cible à confirmer après validation créative : 30 s, vertical 720 × 1280, 30 i/s, 900 images.
 
 Le reverse engineering V1 est dans `research/REVERSE_ENGINEERING_V1.md`. La décision attendue est décrite dans `docs/LOT_RESTAURATION_T5_V1_DIRECTION_A_VALIDER.md`.
+
+## Proposition à voir avant publication
+
+Les six questions simples, les quatre scènes et le texte des douze écrans sont regroupés dans `docs/PROPOSITION_QUESTIONS_SCENES_12_ECRANS_T5_A_VALIDER.md`. Les JSON de travail se trouvent dans `proposals/`. Ils restent locaux et non exécutables tant que le propriétaire ne les a pas validés.
