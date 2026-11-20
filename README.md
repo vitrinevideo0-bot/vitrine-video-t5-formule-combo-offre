@@ -1,70 +1,103 @@
 # Vitrine Vidéo — RESTAURATION‑T5 · Formule, combo et offre
 
-Cinquième gabarit restauration : présenter une seule formule, montrer ce qu’elle contient, afficher son prix réel puis expliquer comment commander.
+T5 présente **une seule formule** en quatre scènes : la formule complète, son contenu, son prix, puis la commande.
 
-## Décisions propriétaire
+## Règles propriétaire conservées
 
 - référence vidéo : **V1 — Combo individuel complet** ;
-- référence de transition : **T1 — dish swipe / camera whip** ;
-- règle de continuité : **une seule formule par publicité ; le même plat, la même boisson et les mêmes accompagnements restent présents dans les quatre scènes** ;
-- six questions approuvées : nom, offre, contenu exact, prix, WhatsApp et quartier ;
-- texte corrigé des douze écrans fourni par le propriétaire.
+- transitions : **T1 — dish swipe** ;
+- une seule formule par publicité ;
+- le même plat, la même boisson et les mêmes accompagnements restent présents dans les quatre scènes ;
+- six réponses obligatoires : nom du commerce, nom de l’offre, contenu exact avec quantités, prix exact, WhatsApp et lieu de retrait ;
+- quatre scènes de **6 s, 8 s, 7 s et 9 s** ;
+- douze écrans de capture, exactement trois états par scène : **A / Guide**, **B / Enregistrement**, **C / Vérification**.
 
-Les vidéos de référence ne sont ni copiées, ni versionnées, ni redistribuées. Leur usage se limite au reverse engineering documenté dans `research/REVERSE_ENGINEERING_V1.md`.
+Les textes approuvés restent dans `form/questions_T5.json` et `capture-guide/consignes_T5.json`.
 
-## Parcours approuvé
+## Architecture runtime V2
 
-| Scène | Durée | Titre |
-|---|---:|---|
-| S1 | 6 s | LA FORMULE |
-| S2 | 8 s | CE QU’IL Y A DANS LA FORMULE |
-| S3 | 7 s | LE PRIX |
-| S4 | 9 s | COMMANDER |
+```text
+formulaire Cloudflare (6 réponses)
+        ↓
+RenderJob RESTAURATION‑T5
+        ↓
+4 captures S1…S4 stockées dans R2 et vérifiées par SHA‑256
+        ↓ repository_dispatch
+GitHub Actions télécharge et revérifie chaque capture
+        ↓
+outils/build_t5_runtime_visual_inputs.py
+        ↓
+manifest runtime explicite S1→S1, S2→S2, S3→S3, S4→S4
+        ↓
+engine/render_runtime.py
+        ↓
+MP4 30 s + QC + RenderResult, ou RenderError
+```
 
-Chaque scène possède trois états : **A / Guide**, **B / Enregistrement**, **C / Vérification**. Le décompte 3‑2‑1 est transitoire et ne compte pas comme un treizième écran.
+Cloudflare est uniquement le **plan de contrôle et de stockage**. Le rendu vidéo est interdit sur Cloudflare et exécuté exclusivement sur **GitHub Actions**.
 
-## Questions, JSON et preuves
+### Liaisons métier
 
-- `form/questions_T5.json` — six réponses obligatoires reliées à `merchant_payload` ;
-- `capture-guide/consignes_T5.json` — texte approuvé et règle de continuité ;
-- `config/T5_CAPTURE_FLOW_V1_0_0.json` — contrat exécutable des douze écrans ;
-- `ui-screens/manifest.json` — douze PNG 720 × 1280 et leur planche ;
-- `simulation/T5_12_ECRANS_EXECUTABLE.html` — simulation autonome ;
-- `schemas/` — schémas JSON 2020‑12 des questions, du flow, du rush et du RenderJob ;
-- `docs/CONTRAT_QUESTIONS_12_ECRANS_T5.md` — lecture humaine complète.
+| Réponse | Pixels rendus |
+|---|---|
+| `merchant_payload.nom` | S1 et S4 |
+| `merchant_payload.offre` | S1 et S3 |
+| `merchant_payload.contenu` | S1, S2 et S3 |
+| `merchant_payload.prix` | S3 |
+| `merchant_payload.whatsapp` | S4 |
+| `merchant_payload.quartier` | S4 |
 
-## Premier montage silencieux à juger
+Les tests changent chaque valeur séparément et exigent une différence dans le bloc de pixels déclaré. Un second test remplace une capture à la fois et exige que seule la fenêtre de sa scène change.
 
-Le premier candidat utilise un seul rush vertical Pexels de démonstration montrant le même gâteau et le même cappuccino. Les quatre scènes sont dérivées de cette source afin de ne jamais changer de formule.
+## Quatre prises de validation cohérentes
 
-- source et licence : `rushes/manifest.json` et `docs/LICENCE_RUSH_DEMO.md` ;
-- RenderJob : `demo/render_job_silent_demo.json` ;
-- moteur : `engine/render_first_montage.py` ;
-- validation : `tools/validate_first_montage.py` ;
-- workflow serveur : `.github/workflows/render-first-montage.yml`.
+La fixture serveur utilise quatre vidéos Pexels distinctes d’Artem Podrez, issues du même tournage apparent : `4731057`, `4731063`, `4731066` et `4731132`. Les fichiers inspectés montrent le même double burger, la même portion de frites et le même verre de cola.
 
-Le rush brut est hash‑verrouillé, mais il n’est jamais suivi par Git ni publié. Le montage porte la mention **DÉMO — DONNÉES À REMPLACER**. Il est silencieux ; la musique et la voix ne seront traitées qu’après jugement de cette structure.
+- manifeste, URLs, tailles et SHA‑256 : `rushes/manifest.json` ;
+- provenance et licence : `docs/LICENCE_RUSH_DEMO_V2.md` ;
+- médias bruts : téléchargés seulement dans le cache du runner, jamais commités et jamais publiés dans les artefacts ou Releases.
 
-## Contrôles locaux
+## Fichiers principaux
+
+- `adapter/t5_adapter.py` — six réponses + quatre captures → RenderJob ;
+- `schemas/T5_render_job.schema.json` — contrat d’entrée runtime ;
+- `tools/build_t5_runtime_visual_inputs.py` — vérification des médias et manifeste runtime ;
+- `engine/runtime_visual.py` — composition des textes provenant du `merchant_payload` ;
+- `engine/render_runtime.py` — montage des quatre scènes ;
+- `tools/validate_runtime_render.py` — QC technique, preuve des pixels et RenderResult ;
+- `schemas/T5_render_result.schema.json` et `schemas/T5_render_error.schema.json` — contrats de sortie ;
+- `cloudflare/` — formulaire réel, enregistrement des douze écrans, R2, dispatch GitHub, callbacks et téléchargement ;
+- `.github/workflows/render-runtime.yml` — rendu manuel reproductible ou `repository_dispatch` ;
+- `config/T5_RUNTIME_CONTRACT_V2_0_0.json` — liaisons champs/scènes/captures ;
+- `simulation/T5_12_ECRANS_EXECUTABLE.html` — simulation de parcours uniquement, jamais considérée comme une livraison vidéo.
+
+## Reproduire localement
 
 ```bash
 python -m pip install -r requirements.txt
-python tools/build_t5_capture_flow.py
-python tools/generate_t5_ui_screens.py
-python tools/build_t5_simulation.py
+python adapter/t5_adapter.py \
+  --render-job-id t5-runtime-demo-0001 \
+  --answers demo/reponses_runtime_demo.json \
+  --captures rushes/manifest.json \
+  --control-plane github_actions_fixture \
+  --output demo/render_job_runtime_demo.json
+python tools/fetch_t5_demo_captures.py
+python tools/build_t5_runtime_visual_inputs.py \
+  --render-job demo/render_job_runtime_demo.json \
+  --capture-dir rushes/cache-v2 \
+  --manifest .tmp/t5-runtime-manifest.json
+python engine/render_runtime.py \
+  --render-job demo/render_job_runtime_demo.json \
+  --manifest .tmp/t5-runtime-manifest.json \
+  --capture-dir rushes/cache-v2 \
+  --output-dir output/runtime/t5-runtime-demo-0001
 pytest -q
-python tools/fetch_t5_rush.py
-python engine/render_first_montage.py
-python tools/validate_first_montage.py
 ```
 
-Format contrôlé du candidat : 30,000 s, 720 × 1280, 30 i/s, 900 images, H.264/yuv420p, sans piste audio, trois transitions T1 et fin stable pendant trois secondes.
+Sortie attendue : 30,000 s, 720 × 1280, 30 i/s, 900 images, H.264/yuv420p, aucune piste audio, trois transitions T1 et appel à l’action stable pendant les trois dernières secondes.
 
-## Publication vérifiée
+## Ancien candidat rejeté
 
-- dépôt public : https://github.com/vitrinevideo0-bot/vitrine-video-t5-formule-combo-offre ;
-- CI de l’implémentation : https://github.com/vitrinevideo0-bot/vitrine-video-t5-formule-combo-offre/actions/runs/44716635345 ;
-- rendu et validation sur GitHub : https://github.com/vitrinevideo0-bot/vitrine-video-t5-formule-combo-offre/actions/runs/44716734789 ;
-- pré‑Release du candidat : https://github.com/vitrinevideo0-bot/vitrine-video-t5-formule-combo-offre/releases/tag/t5-first-montage-v1-candidate-1.
+La pré‑Release `t5-first-montage-v1-candidate-1` est **rejetée et conservée uniquement comme archive d’audit**. Elle recyclait un rush café/gâteau et des libellés génériques. Son titre et ses notes GitHub portent désormais explicitement la mention « REJETÉ — ARCHIVE UNIQUEMENT ».
 
-Le SHA‑256 du MP4 produit par GitHub est `493495e8449487ccf3b4ee3b72eef1f558658409b2ab0f5017d72d3836f1a266`. Les six fichiers de preuve et le MP4 de la pré‑Release ont été retéléchargés et vérifiés avec `SHA256SUMS.txt`.
+Elle ne doit pas être utilisée comme référence créative ou architecturale.

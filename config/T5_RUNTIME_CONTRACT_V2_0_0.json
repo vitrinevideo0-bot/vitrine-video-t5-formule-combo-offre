@@ -1,0 +1,52 @@
+{
+  "schema_version": "2.0.0",
+  "template_id": "RESTAURATION-T5",
+  "template_version": "2.0.0-runtime",
+  "runtime_order": [
+    {"id": "MERCHANT_INPUT", "source": "form/questions_T5.json", "required_fields": 6},
+    {"id": "GUIDED_CAPTURE", "source": "config/T5_CAPTURE_FLOW_V1_0_0.json", "stable_screens": 12},
+    {"id": "VERIFIED_CAPTURE_MANIFEST", "capture_slots": ["S1", "S2", "S3", "S4"], "integrity": "sha256"},
+    {"id": "GITHUB_DYNAMIC_RENDER", "render_plane": "github_actions", "cloudflare_rendering": false},
+    {"id": "RENDER_RESULT_OR_ERROR", "success_contract": "schemas/T5_render_result.schema.json", "error_contract": "schemas/T5_render_error.schema.json"}
+  ],
+  "scene_bindings": [
+    {"scene": "S1", "timeline_start_ms": 0, "duration_ms": 6000, "capture": "captures.S1", "text_fields": ["nom", "offre", "contenu"]},
+    {"scene": "S2", "timeline_start_ms": 6000, "duration_ms": 8000, "capture": "captures.S2", "text_fields": ["contenu"]},
+    {"scene": "S3", "timeline_start_ms": 14000, "duration_ms": 7000, "capture": "captures.S3", "text_fields": ["offre", "contenu", "prix"]},
+    {"scene": "S4", "timeline_start_ms": 21000, "duration_ms": 9000, "capture": "captures.S4", "text_fields": ["nom", "whatsapp", "quartier"]}
+  ],
+  "merchant_bindings": [
+    {"source": "merchant_payload.nom", "targets": ["S1.MERCHANT", "S4.MERCHANT"]},
+    {"source": "merchant_payload.offre", "targets": ["S1.OFFER", "S3.OFFER"]},
+    {"source": "merchant_payload.contenu", "targets": ["S1.CONTENTS", "S2.CONTENTS", "S3.CONTENTS"]},
+    {"source": "merchant_payload.prix", "targets": ["S3.PRICE"]},
+    {"source": "merchant_payload.whatsapp", "targets": ["S4.WHATSAPP"]},
+    {"source": "merchant_payload.quartier", "targets": ["S4.PICKUP"]}
+  ],
+  "visual_contract": {
+    "width": 720,
+    "height": 1280,
+    "fps": 30,
+    "frames": 900,
+    "duration_ms": 30000,
+    "scene_durations_ms": [6000, 8000, 7000, 9000],
+    "hero_media_box": [30, 138, 690, 526],
+    "text_box": [42, 565, 678, 1190],
+    "full_formula_visible_in_hero_frame": true,
+    "final_stable_start_frame": 810,
+    "audio_streams": 0
+  },
+  "transition_contract": {
+    "reference": "T1",
+    "family": "dish_swipe",
+    "duration_frames": 8,
+    "boundaries": [180, 420, 630]
+  },
+  "forbidden_shortcuts": [
+    "hard_coded_business_values",
+    "implicit_rush_path_in_engine",
+    "single_rush_reused_for_all_scenes",
+    "cloudflare_video_rendering",
+    "simulation_as_delivery"
+  ]
+}

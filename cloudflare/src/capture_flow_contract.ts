@@ -1,0 +1,1032 @@
+// Generated from config/T5_CAPTURE_FLOW_V1_0_0.json; do not edit.
+export const CAPTURE_FLOW_CONTRACT = {
+  "schema_version": "1.0.0",
+  "contract_id": "restauration_t5_formule_combo_offre_capture_flow_v1_0_0",
+  "template_id": "RESTAURATION-T5",
+  "template_version": "1.0.0",
+  "status": "owner_approved_executable_contract",
+  "copy_revision": "T5_12_ECRANS_CORRIGES_2026-11-18",
+  "sources": {
+    "guide": {
+      "path": "capture-guide/consignes_T5.json",
+      "sha256": "91d3906b4bec0139c236a2b7dec99d95bdc08035e0702770c776ad581f1602e6"
+    },
+    "questions": {
+      "path": "form/questions_T5.json",
+      "sha256": "9426cbdb5e11a0b951f805573660ea7e75ee7789c72a97d9b8a49af9c9eeaeb0"
+    },
+    "approval": "approvals/APPROBATION_QUESTIONS_ET_12_ECRANS_T5_2026-11-18.json"
+  },
+  "counts": {
+    "merchant_questions": 6,
+    "scenes": 4,
+    "states_per_scene": 3,
+    "stable_capture_screens": 12
+  },
+  "scene_durations_ms": [
+    6000,
+    8000,
+    7000,
+    9000
+  ],
+  "continuity_rules": {
+    "one_offer_per_ad": true,
+    "same_dish_drink_and_sides_across_all_scenes": true,
+    "source_text": "Une seule formule par publicité. Le même plat, la même boisson et les mêmes accompagnements restent présents dans les quatre scènes."
+  },
+  "transient_states": [
+    {
+      "id": "COUNTDOWN_3_2_1",
+      "counted_in_12_stable_screens": false,
+      "sequence": [
+        3,
+        2,
+        1
+      ],
+      "trigger": "START_RECORDING",
+      "then": "B_RECORDING",
+      "must_not_be_written_into_capture": true
+    }
+  ],
+  "runtime_rules": {
+    "camera_required": true,
+    "microphone_requested": true,
+    "speech_optional": true,
+    "playback_audio_enabled": true,
+    "source_speed": 1.0,
+    "video_orientation": "vertical",
+    "automatic_subtitles": false,
+    "retake_deletes_previous_capture": true
+  },
+  "screens": [
+    {
+      "scene_id": "S1",
+      "scene_index": 1,
+      "scene_total": 4,
+      "capture_duration_ms": 6000,
+      "capture_slot": "captures.S1",
+      "data_used": [
+        "merchant_payload.nom",
+        "merchant_payload.offre",
+        "merchant_payload.contenu"
+      ],
+      "continuity_rule": "Une seule formule par publicité. Le même plat, la même boisson et les mêmes accompagnements restent présents dans les quatre scènes.",
+      "ordinal": 1,
+      "screen_id": "T5_CAPTURE_S1_A_GUIDE",
+      "route_key": "t5.capture.s1.guide",
+      "state": "A_GUIDE",
+      "display_state": "A / GUIDE",
+      "bindings": {
+        "title": "capture-guide/consignes_T5.json#/scenes/0/guide/title",
+        "instruction": "capture-guide/consignes_T5.json#/scenes/0/guide/instruction",
+        "film_list": "capture-guide/consignes_T5.json#/scenes/0/guide/film_list",
+        "avoid_list": "capture-guide/consignes_T5.json#/scenes/0/guide/avoid_list",
+        "required_action": "capture-guide/consignes_T5.json#/scenes/0/guide/required_action",
+        "optional_example": "capture-guide/consignes_T5.json#/scenes/0/guide/optional_example",
+        "speech_note": "capture-guide/consignes_T5.json#/speech_note"
+      },
+      "resolved_text": {
+        "screen_label": "ÉCRAN 01 — A / GUIDE",
+        "scene_counter": "SCÈNE 1 SUR 4 — 6 SECONDES",
+        "title": "VOICI NOTRE FORMULE !",
+        "guide_section_title": "CE QUE TU VAS FILMER",
+        "instruction": "Montre toute ta formule. On doit voir le plat, la boisson et tout ce qui est vendu ensemble.",
+        "film_section_title": "À FILMER",
+        "film_list": [
+          "Le plat et la boisson.",
+          "Tout ce qui est dans la formule.",
+          "Le plateau bien présenté."
+        ],
+        "avoid_section_title": "À ÉVITER",
+        "avoid_list": [
+          "Oublier un élément.",
+          "Cacher le plat ou la boisson.",
+          "Filmer sur une table sale."
+        ],
+        "action_section_title": "CE QUE TU DOIS FAIRE",
+        "required_action": "Mets toute ta formule sur la table. Pose ton téléphone devant et montre tout en même temps. Ne touche plus au plateau pendant que tu filmes.",
+        "speech_section_title": "TU PEUX PARLER PENDANT QUE TU FILMES",
+        "speech_note": "Tu peux parler en fon, yoruba, français, anglais ou dans une autre langue que tu maîtrises. Tu peux aussi ne pas parler si tu préfères.",
+        "example_section_title": "EXEMPLE DE PHRASE (FACULTATIF)",
+        "optional_example": "« Voici notre formule du jour ! Tout est prêt pour toi. »",
+        "primary_action": "COMMENCER À FILMER"
+      },
+      "visible_components": [
+        "screen_label",
+        "scene_counter",
+        "title",
+        "what_to_film",
+        "film_list",
+        "avoid_list",
+        "required_action",
+        "speech_note",
+        "optional_example",
+        "start_recording_button"
+      ],
+      "forbidden_components": [
+        "recording_timer",
+        "review_actions",
+        "automatic_subtitles"
+      ],
+      "actions": [
+        {
+          "event": "START_RECORDING",
+          "label": "COMMENCER À FILMER",
+          "effects": [
+            "request_camera_permission",
+            "request_microphone_permission",
+            "run_COUNTDOWN_3_2_1"
+          ],
+          "next_screen_id": "T5_CAPTURE_S1_B_RECORDING"
+        }
+      ],
+      "proof_png": "ui-screens/T5_CAPTURE_S1_A_GUIDE.png"
+    },
+    {
+      "scene_id": "S1",
+      "scene_index": 1,
+      "scene_total": 4,
+      "capture_duration_ms": 6000,
+      "capture_slot": "captures.S1",
+      "data_used": [
+        "merchant_payload.nom",
+        "merchant_payload.offre",
+        "merchant_payload.contenu"
+      ],
+      "continuity_rule": "Une seule formule par publicité. Le même plat, la même boisson et les mêmes accompagnements restent présents dans les quatre scènes.",
+      "ordinal": 2,
+      "screen_id": "T5_CAPTURE_S1_B_RECORDING",
+      "route_key": "t5.capture.s1.recording",
+      "state": "B_RECORDING",
+      "display_state": "B / ENREGISTREMENT",
+      "bindings": {
+        "elapsed_ms": "runtime.capture.elapsed_ms",
+        "progress_0_to_1": "runtime.capture.progress",
+        "instruction": "capture-guide/consignes_T5.json#/scenes/0/recording/instruction",
+        "output_uri": "runtime.captures.S1.uri"
+      },
+      "resolved_text": {
+        "screen_label": "ÉCRAN 02 — B / ENREGISTREMENT",
+        "scene_counter": "SCÈNE 1 SUR 4 — 6 SECONDES",
+        "recording_status": "REC",
+        "timer_initial": "00:00 / 00:06",
+        "timer_total": "00:06",
+        "instruction": "MONTRE TOUTE TA FORMULE.",
+        "audio_status": "Micro activé.",
+        "orientation_status": "Vidéo verticale.",
+        "auto_stop_status": "Arrêt automatique à la fin des 6 secondes.",
+        "duration_seconds": 6
+      },
+      "visible_components": [
+        "screen_label",
+        "scene_counter",
+        "recording_status",
+        "recording_timer",
+        "current_instruction",
+        "microphone_active",
+        "vertical_video_status",
+        "automatic_stop_status"
+      ],
+      "forbidden_components": [
+        "instruction_sheet",
+        "manual_stop_button",
+        "review_actions",
+        "automatic_subtitles"
+      ],
+      "capture": {
+        "starts_after": "COUNTDOWN_3_2_1_COMPLETE",
+        "video": true,
+        "microphone_audio": true,
+        "orientation": "vertical",
+        "source_speed": 1.0,
+        "duration_ms": 6000,
+        "auto_stop": true,
+        "manual_stop": false,
+        "write_to": "runtime.captures.S1.uri"
+      },
+      "actions": [
+        {
+          "event": "CAPTURE_DURATION_REACHED",
+          "effects": [
+            "stop_recorder",
+            "finalize_capture_file",
+            "probe_capture_metadata",
+            "open_audio_review"
+          ],
+          "next_screen_id": "T5_CAPTURE_S1_C_REVIEW"
+        }
+      ],
+      "proof_png": "ui-screens/T5_CAPTURE_S1_B_RECORDING.png"
+    },
+    {
+      "scene_id": "S1",
+      "scene_index": 1,
+      "scene_total": 4,
+      "capture_duration_ms": 6000,
+      "capture_slot": "captures.S1",
+      "data_used": [
+        "merchant_payload.nom",
+        "merchant_payload.offre",
+        "merchant_payload.contenu"
+      ],
+      "continuity_rule": "Une seule formule par publicité. Le même plat, la même boisson et les mêmes accompagnements restent présents dans les quatre scènes.",
+      "ordinal": 3,
+      "screen_id": "T5_CAPTURE_S1_C_REVIEW",
+      "route_key": "t5.capture.s1.review",
+      "state": "C_REVIEW",
+      "display_state": "C / VÉRIFICATION",
+      "bindings": {
+        "preview_uri": "runtime.captures.S1.uri",
+        "capture_metadata": "runtime.captures.S1.metadata",
+        "review_question": "capture-guide/consignes_T5.json#/scenes/0/review/question",
+        "review_checks": "capture-guide/consignes_T5.json#/scenes/0/review/checks"
+      },
+      "resolved_text": {
+        "screen_label": "ÉCRAN 03 — C / VÉRIFICATION",
+        "take_label": "PRISE 1 — 0:06",
+        "audio_status": "Son activé.",
+        "review_question": "EST-CE QU'ON VOIT BIEN TOUTE LA FORMULE ?",
+        "review_checks": [
+          "Le plat et la boisson sont visibles.",
+          "Rien n'est caché.",
+          "Toute la formule est bien dans la vidéo."
+        ],
+        "redo_action": "REFAIRE",
+        "positive_action": "SCÈNE SUIVANTE"
+      },
+      "visible_components": [
+        "screen_label",
+        "captured_video_preview",
+        "captured_audio_playback",
+        "review_question",
+        "review_checklist",
+        "redo_button",
+        "accept_button"
+      ],
+      "forbidden_components": [
+        "instruction_sheet",
+        "recording_timer",
+        "recording_progress",
+        "automatic_subtitles"
+      ],
+      "playback": {
+        "audio": true,
+        "loop": true,
+        "source_speed": 1.0
+      },
+      "actions": [
+        {
+          "event": "RETAKE",
+          "label": "REFAIRE",
+          "effects": [
+            "delete:runtime.captures.S1",
+            "reset_scene_capture_state"
+          ],
+          "next_screen_id": "T5_CAPTURE_S1_A_GUIDE"
+        },
+        {
+          "event": "ACCEPT_CAPTURE",
+          "label": "SCÈNE SUIVANTE",
+          "effects": [
+            "persist:runtime.captures.S1",
+            "mark_capture_accepted"
+          ],
+          "next_screen_id": "T5_CAPTURE_S2_A_GUIDE"
+        }
+      ],
+      "proof_png": "ui-screens/T5_CAPTURE_S1_C_REVIEW.png"
+    },
+    {
+      "scene_id": "S2",
+      "scene_index": 2,
+      "scene_total": 4,
+      "capture_duration_ms": 8000,
+      "capture_slot": "captures.S2",
+      "data_used": [
+        "merchant_payload.contenu"
+      ],
+      "continuity_rule": "Une seule formule par publicité. Le même plat, la même boisson et les mêmes accompagnements restent présents dans les quatre scènes.",
+      "ordinal": 4,
+      "screen_id": "T5_CAPTURE_S2_A_GUIDE",
+      "route_key": "t5.capture.s2.guide",
+      "state": "A_GUIDE",
+      "display_state": "A / GUIDE",
+      "bindings": {
+        "title": "capture-guide/consignes_T5.json#/scenes/1/guide/title",
+        "instruction": "capture-guide/consignes_T5.json#/scenes/1/guide/instruction",
+        "film_list": "capture-guide/consignes_T5.json#/scenes/1/guide/film_list",
+        "avoid_list": "capture-guide/consignes_T5.json#/scenes/1/guide/avoid_list",
+        "required_action": "capture-guide/consignes_T5.json#/scenes/1/guide/required_action",
+        "optional_example": "capture-guide/consignes_T5.json#/scenes/1/guide/optional_example",
+        "speech_note": "capture-guide/consignes_T5.json#/speech_note"
+      },
+      "resolved_text": {
+        "screen_label": "ÉCRAN 04 — A / GUIDE",
+        "scene_counter": "SCÈNE 2 SUR 4 — 8 SECONDES",
+        "title": "REGARDE TOUT CE QU'IL Y A DEDANS !",
+        "guide_section_title": "CE QUE TU VAS FILMER",
+        "instruction": "Montre de plus près les différents éléments de ta formule pour que les clients voient bien ce qu'ils vont recevoir.",
+        "film_section_title": "À FILMER",
+        "film_list": [
+          "Le plat principal.",
+          "La boisson.",
+          "L'accompagnement, s'il y en a."
+        ],
+        "avoid_section_title": "À ÉVITER",
+        "avoid_list": [
+          "Cacher un élément.",
+          "Mettre ta main devant le plat.",
+          "Filmer trop vite."
+        ],
+        "action_section_title": "CE QUE TU DOIS FAIRE",
+        "required_action": "Garde ton téléphone posé. Avec ton doigt, montre le plat, puis la boisson et le reste de la formule.",
+        "speech_section_title": "TU PEUX PARLER PENDANT QUE TU FILMES",
+        "speech_note": "Tu peux parler en fon, yoruba, français, anglais ou dans une autre langue que tu maîtrises. Tu peux aussi ne pas parler si tu préfères.",
+        "example_section_title": "EXEMPLE DE PHRASE (FACULTATIF)",
+        "optional_example": "« Voici le plat, la boisson et tout ce qui accompagne notre formule ! »",
+        "primary_action": "COMMENCER À FILMER"
+      },
+      "visible_components": [
+        "screen_label",
+        "scene_counter",
+        "title",
+        "what_to_film",
+        "film_list",
+        "avoid_list",
+        "required_action",
+        "speech_note",
+        "optional_example",
+        "start_recording_button"
+      ],
+      "forbidden_components": [
+        "recording_timer",
+        "review_actions",
+        "automatic_subtitles"
+      ],
+      "actions": [
+        {
+          "event": "START_RECORDING",
+          "label": "COMMENCER À FILMER",
+          "effects": [
+            "request_camera_permission",
+            "request_microphone_permission",
+            "run_COUNTDOWN_3_2_1"
+          ],
+          "next_screen_id": "T5_CAPTURE_S2_B_RECORDING"
+        }
+      ],
+      "proof_png": "ui-screens/T5_CAPTURE_S2_A_GUIDE.png"
+    },
+    {
+      "scene_id": "S2",
+      "scene_index": 2,
+      "scene_total": 4,
+      "capture_duration_ms": 8000,
+      "capture_slot": "captures.S2",
+      "data_used": [
+        "merchant_payload.contenu"
+      ],
+      "continuity_rule": "Une seule formule par publicité. Le même plat, la même boisson et les mêmes accompagnements restent présents dans les quatre scènes.",
+      "ordinal": 5,
+      "screen_id": "T5_CAPTURE_S2_B_RECORDING",
+      "route_key": "t5.capture.s2.recording",
+      "state": "B_RECORDING",
+      "display_state": "B / ENREGISTREMENT",
+      "bindings": {
+        "elapsed_ms": "runtime.capture.elapsed_ms",
+        "progress_0_to_1": "runtime.capture.progress",
+        "instruction": "capture-guide/consignes_T5.json#/scenes/1/recording/instruction",
+        "output_uri": "runtime.captures.S2.uri"
+      },
+      "resolved_text": {
+        "screen_label": "ÉCRAN 05 — B / ENREGISTREMENT",
+        "scene_counter": "SCÈNE 2 SUR 4 — 8 SECONDES",
+        "recording_status": "REC",
+        "timer_initial": "00:00 / 00:08",
+        "timer_total": "00:08",
+        "instruction": "MONTRE LE PLAT, LA BOISSON ET L'ACCOMPAGNEMENT.",
+        "audio_status": "Micro activé.",
+        "orientation_status": "Vidéo verticale.",
+        "auto_stop_status": "Arrêt automatique à la fin des 8 secondes.",
+        "duration_seconds": 8
+      },
+      "visible_components": [
+        "screen_label",
+        "scene_counter",
+        "recording_status",
+        "recording_timer",
+        "current_instruction",
+        "microphone_active",
+        "vertical_video_status",
+        "automatic_stop_status"
+      ],
+      "forbidden_components": [
+        "instruction_sheet",
+        "manual_stop_button",
+        "review_actions",
+        "automatic_subtitles"
+      ],
+      "capture": {
+        "starts_after": "COUNTDOWN_3_2_1_COMPLETE",
+        "video": true,
+        "microphone_audio": true,
+        "orientation": "vertical",
+        "source_speed": 1.0,
+        "duration_ms": 8000,
+        "auto_stop": true,
+        "manual_stop": false,
+        "write_to": "runtime.captures.S2.uri"
+      },
+      "actions": [
+        {
+          "event": "CAPTURE_DURATION_REACHED",
+          "effects": [
+            "stop_recorder",
+            "finalize_capture_file",
+            "probe_capture_metadata",
+            "open_audio_review"
+          ],
+          "next_screen_id": "T5_CAPTURE_S2_C_REVIEW"
+        }
+      ],
+      "proof_png": "ui-screens/T5_CAPTURE_S2_B_RECORDING.png"
+    },
+    {
+      "scene_id": "S2",
+      "scene_index": 2,
+      "scene_total": 4,
+      "capture_duration_ms": 8000,
+      "capture_slot": "captures.S2",
+      "data_used": [
+        "merchant_payload.contenu"
+      ],
+      "continuity_rule": "Une seule formule par publicité. Le même plat, la même boisson et les mêmes accompagnements restent présents dans les quatre scènes.",
+      "ordinal": 6,
+      "screen_id": "T5_CAPTURE_S2_C_REVIEW",
+      "route_key": "t5.capture.s2.review",
+      "state": "C_REVIEW",
+      "display_state": "C / VÉRIFICATION",
+      "bindings": {
+        "preview_uri": "runtime.captures.S2.uri",
+        "capture_metadata": "runtime.captures.S2.metadata",
+        "review_question": "capture-guide/consignes_T5.json#/scenes/1/review/question",
+        "review_checks": "capture-guide/consignes_T5.json#/scenes/1/review/checks"
+      },
+      "resolved_text": {
+        "screen_label": "ÉCRAN 06 — C / VÉRIFICATION",
+        "take_label": "PRISE 2 — 0:08",
+        "audio_status": "Son activé.",
+        "review_question": "EST-CE QU'ON VOIT BIEN CE QU'IL Y A DANS LA FORMULE ?",
+        "review_checks": [
+          "Le plat est bien visible.",
+          "La boisson est bien visible.",
+          "On voit aussi les accompagnements."
+        ],
+        "redo_action": "REFAIRE",
+        "positive_action": "SCÈNE SUIVANTE"
+      },
+      "visible_components": [
+        "screen_label",
+        "captured_video_preview",
+        "captured_audio_playback",
+        "review_question",
+        "review_checklist",
+        "redo_button",
+        "accept_button"
+      ],
+      "forbidden_components": [
+        "instruction_sheet",
+        "recording_timer",
+        "recording_progress",
+        "automatic_subtitles"
+      ],
+      "playback": {
+        "audio": true,
+        "loop": true,
+        "source_speed": 1.0
+      },
+      "actions": [
+        {
+          "event": "RETAKE",
+          "label": "REFAIRE",
+          "effects": [
+            "delete:runtime.captures.S2",
+            "reset_scene_capture_state"
+          ],
+          "next_screen_id": "T5_CAPTURE_S2_A_GUIDE"
+        },
+        {
+          "event": "ACCEPT_CAPTURE",
+          "label": "SCÈNE SUIVANTE",
+          "effects": [
+            "persist:runtime.captures.S2",
+            "mark_capture_accepted"
+          ],
+          "next_screen_id": "T5_CAPTURE_S3_A_GUIDE"
+        }
+      ],
+      "proof_png": "ui-screens/T5_CAPTURE_S2_C_REVIEW.png"
+    },
+    {
+      "scene_id": "S3",
+      "scene_index": 3,
+      "scene_total": 4,
+      "capture_duration_ms": 7000,
+      "capture_slot": "captures.S3",
+      "data_used": [
+        "merchant_payload.offre",
+        "merchant_payload.prix"
+      ],
+      "continuity_rule": "Une seule formule par publicité. Le même plat, la même boisson et les mêmes accompagnements restent présents dans les quatre scènes.",
+      "ordinal": 7,
+      "screen_id": "T5_CAPTURE_S3_A_GUIDE",
+      "route_key": "t5.capture.s3.guide",
+      "state": "A_GUIDE",
+      "display_state": "A / GUIDE",
+      "bindings": {
+        "title": "capture-guide/consignes_T5.json#/scenes/2/guide/title",
+        "instruction": "capture-guide/consignes_T5.json#/scenes/2/guide/instruction",
+        "film_list": "capture-guide/consignes_T5.json#/scenes/2/guide/film_list",
+        "avoid_list": "capture-guide/consignes_T5.json#/scenes/2/guide/avoid_list",
+        "required_action": "capture-guide/consignes_T5.json#/scenes/2/guide/required_action",
+        "optional_example": "capture-guide/consignes_T5.json#/scenes/2/guide/optional_example",
+        "speech_note": "capture-guide/consignes_T5.json#/speech_note"
+      },
+      "resolved_text": {
+        "screen_label": "ÉCRAN 07 — A / GUIDE",
+        "scene_counter": "SCÈNE 3 SUR 4 — 7 SECONDES",
+        "title": "VOICI LE PRIX DE LA FORMULE !",
+        "guide_section_title": "CE QUE TU VAS FILMER",
+        "instruction": "Montre encore toute ta formule. Le prix sera ajouté sur ta vidéo.",
+        "film_section_title": "À FILMER",
+        "film_list": [
+          "Le plat et la boisson.",
+          "Tous les éléments de la formule.",
+          "Une belle présentation sur la table."
+        ],
+        "avoid_section_title": "À ÉVITER",
+        "avoid_list": [
+          "Cacher une partie du plat.",
+          "Mettre le plateau trop près du bord.",
+          "Bouger le téléphone."
+        ],
+        "action_section_title": "CE QUE TU DOIS FAIRE",
+        "required_action": "Laisse toute la formule sur la table. Pose ton téléphone bien devant et filme sans le bouger.",
+        "speech_section_title": "TU PEUX PARLER PENDANT QUE TU FILMES",
+        "speech_note": "Tu peux parler en fon, yoruba, français, anglais ou dans une autre langue que tu maîtrises. Tu peux aussi ne pas parler si tu préfères.",
+        "example_section_title": "EXEMPLE DE PHRASE (FACULTATIF)",
+        "optional_example": "« Tout ça est disponible au prix affiché ! »",
+        "primary_action": "COMMENCER À FILMER"
+      },
+      "visible_components": [
+        "screen_label",
+        "scene_counter",
+        "title",
+        "what_to_film",
+        "film_list",
+        "avoid_list",
+        "required_action",
+        "speech_note",
+        "optional_example",
+        "start_recording_button"
+      ],
+      "forbidden_components": [
+        "recording_timer",
+        "review_actions",
+        "automatic_subtitles"
+      ],
+      "actions": [
+        {
+          "event": "START_RECORDING",
+          "label": "COMMENCER À FILMER",
+          "effects": [
+            "request_camera_permission",
+            "request_microphone_permission",
+            "run_COUNTDOWN_3_2_1"
+          ],
+          "next_screen_id": "T5_CAPTURE_S3_B_RECORDING"
+        }
+      ],
+      "proof_png": "ui-screens/T5_CAPTURE_S3_A_GUIDE.png"
+    },
+    {
+      "scene_id": "S3",
+      "scene_index": 3,
+      "scene_total": 4,
+      "capture_duration_ms": 7000,
+      "capture_slot": "captures.S3",
+      "data_used": [
+        "merchant_payload.offre",
+        "merchant_payload.prix"
+      ],
+      "continuity_rule": "Une seule formule par publicité. Le même plat, la même boisson et les mêmes accompagnements restent présents dans les quatre scènes.",
+      "ordinal": 8,
+      "screen_id": "T5_CAPTURE_S3_B_RECORDING",
+      "route_key": "t5.capture.s3.recording",
+      "state": "B_RECORDING",
+      "display_state": "B / ENREGISTREMENT",
+      "bindings": {
+        "elapsed_ms": "runtime.capture.elapsed_ms",
+        "progress_0_to_1": "runtime.capture.progress",
+        "instruction": "capture-guide/consignes_T5.json#/scenes/2/recording/instruction",
+        "output_uri": "runtime.captures.S3.uri"
+      },
+      "resolved_text": {
+        "screen_label": "ÉCRAN 08 — B / ENREGISTREMENT",
+        "scene_counter": "SCÈNE 3 SUR 4 — 7 SECONDES",
+        "recording_status": "REC",
+        "timer_initial": "00:00 / 00:07",
+        "timer_total": "00:07",
+        "instruction": "GARDE TOUTE LA FORMULE DANS LA VIDÉO.",
+        "audio_status": "Micro activé.",
+        "orientation_status": "Vidéo verticale.",
+        "auto_stop_status": "Arrêt automatique à la fin des 7 secondes.",
+        "duration_seconds": 7
+      },
+      "visible_components": [
+        "screen_label",
+        "scene_counter",
+        "recording_status",
+        "recording_timer",
+        "current_instruction",
+        "microphone_active",
+        "vertical_video_status",
+        "automatic_stop_status"
+      ],
+      "forbidden_components": [
+        "instruction_sheet",
+        "manual_stop_button",
+        "review_actions",
+        "automatic_subtitles"
+      ],
+      "capture": {
+        "starts_after": "COUNTDOWN_3_2_1_COMPLETE",
+        "video": true,
+        "microphone_audio": true,
+        "orientation": "vertical",
+        "source_speed": 1.0,
+        "duration_ms": 7000,
+        "auto_stop": true,
+        "manual_stop": false,
+        "write_to": "runtime.captures.S3.uri"
+      },
+      "actions": [
+        {
+          "event": "CAPTURE_DURATION_REACHED",
+          "effects": [
+            "stop_recorder",
+            "finalize_capture_file",
+            "probe_capture_metadata",
+            "open_audio_review"
+          ],
+          "next_screen_id": "T5_CAPTURE_S3_C_REVIEW"
+        }
+      ],
+      "proof_png": "ui-screens/T5_CAPTURE_S3_B_RECORDING.png"
+    },
+    {
+      "scene_id": "S3",
+      "scene_index": 3,
+      "scene_total": 4,
+      "capture_duration_ms": 7000,
+      "capture_slot": "captures.S3",
+      "data_used": [
+        "merchant_payload.offre",
+        "merchant_payload.prix"
+      ],
+      "continuity_rule": "Une seule formule par publicité. Le même plat, la même boisson et les mêmes accompagnements restent présents dans les quatre scènes.",
+      "ordinal": 9,
+      "screen_id": "T5_CAPTURE_S3_C_REVIEW",
+      "route_key": "t5.capture.s3.review",
+      "state": "C_REVIEW",
+      "display_state": "C / VÉRIFICATION",
+      "bindings": {
+        "preview_uri": "runtime.captures.S3.uri",
+        "capture_metadata": "runtime.captures.S3.metadata",
+        "review_question": "capture-guide/consignes_T5.json#/scenes/2/review/question",
+        "review_checks": "capture-guide/consignes_T5.json#/scenes/2/review/checks"
+      },
+      "resolved_text": {
+        "screen_label": "ÉCRAN 09 — C / VÉRIFICATION",
+        "take_label": "PRISE 3 — 0:07",
+        "audio_status": "Son activé.",
+        "review_question": "EST-CE QU'ON VOIT BIEN TOUTE LA FORMULE ?",
+        "review_checks": [
+          "Tous les éléments sont visibles.",
+          "Le plat est bien présenté.",
+          "La vidéo reste stable."
+        ],
+        "redo_action": "REFAIRE",
+        "positive_action": "SCÈNE SUIVANTE"
+      },
+      "visible_components": [
+        "screen_label",
+        "captured_video_preview",
+        "captured_audio_playback",
+        "review_question",
+        "review_checklist",
+        "redo_button",
+        "accept_button"
+      ],
+      "forbidden_components": [
+        "instruction_sheet",
+        "recording_timer",
+        "recording_progress",
+        "automatic_subtitles"
+      ],
+      "playback": {
+        "audio": true,
+        "loop": true,
+        "source_speed": 1.0
+      },
+      "actions": [
+        {
+          "event": "RETAKE",
+          "label": "REFAIRE",
+          "effects": [
+            "delete:runtime.captures.S3",
+            "reset_scene_capture_state"
+          ],
+          "next_screen_id": "T5_CAPTURE_S3_A_GUIDE"
+        },
+        {
+          "event": "ACCEPT_CAPTURE",
+          "label": "SCÈNE SUIVANTE",
+          "effects": [
+            "persist:runtime.captures.S3",
+            "mark_capture_accepted"
+          ],
+          "next_screen_id": "T5_CAPTURE_S4_A_GUIDE"
+        }
+      ],
+      "proof_png": "ui-screens/T5_CAPTURE_S3_C_REVIEW.png"
+    },
+    {
+      "scene_id": "S4",
+      "scene_index": 4,
+      "scene_total": 4,
+      "capture_duration_ms": 9000,
+      "capture_slot": "captures.S4",
+      "data_used": [
+        "merchant_payload.nom",
+        "merchant_payload.whatsapp",
+        "merchant_payload.quartier"
+      ],
+      "continuity_rule": "Une seule formule par publicité. Le même plat, la même boisson et les mêmes accompagnements restent présents dans les quatre scènes.",
+      "ordinal": 10,
+      "screen_id": "T5_CAPTURE_S4_A_GUIDE",
+      "route_key": "t5.capture.s4.guide",
+      "state": "A_GUIDE",
+      "display_state": "A / GUIDE",
+      "bindings": {
+        "title": "capture-guide/consignes_T5.json#/scenes/3/guide/title",
+        "instruction": "capture-guide/consignes_T5.json#/scenes/3/guide/instruction",
+        "film_list": "capture-guide/consignes_T5.json#/scenes/3/guide/film_list",
+        "avoid_list": "capture-guide/consignes_T5.json#/scenes/3/guide/avoid_list",
+        "required_action": "capture-guide/consignes_T5.json#/scenes/3/guide/required_action",
+        "optional_example": "capture-guide/consignes_T5.json#/scenes/3/guide/optional_example",
+        "speech_note": "capture-guide/consignes_T5.json#/speech_note"
+      },
+      "resolved_text": {
+        "screen_label": "ÉCRAN 10 — A / GUIDE",
+        "scene_counter": "SCÈNE 4 SUR 4 — 9 SECONDES",
+        "title": "ENVIE DE COMMANDER ?",
+        "guide_section_title": "CE QUE TU VAS FILMER",
+        "instruction": "Montre ta formule prête à être servie. Fais une dernière belle présentation pour donner envie aux clients de commander.",
+        "film_section_title": "À FILMER",
+        "film_list": [
+          "Toute la formule prête.",
+          "Le plat et la boisson bien présentés.",
+          "Le plateau ou la commande."
+        ],
+        "avoid_section_title": "À ÉVITER",
+        "avoid_list": [
+          "Cacher une partie de la formule.",
+          "Montrer une table sale.",
+          "Bouger le téléphone à la fin."
+        ],
+        "action_section_title": "CE QUE TU DOIS FAIRE",
+        "required_action": "Mets ta formule devant ton téléphone. Filme-la bien et garde ton téléphone sans bouger jusqu'à la fin.",
+        "speech_section_title": "TU PEUX PARLER PENDANT QUE TU FILMES",
+        "speech_note": "Tu peux parler en fon, yoruba, français, anglais ou dans une autre langue que tu maîtrises. Tu peux aussi ne pas parler si tu préfères.",
+        "example_section_title": "EXEMPLE DE PHRASE (FACULTATIF)",
+        "optional_example": "« Tu veux cette formule ? Écris-nous sur WhatsApp pour commander ! »",
+        "primary_action": "COMMENCER À FILMER"
+      },
+      "visible_components": [
+        "screen_label",
+        "scene_counter",
+        "title",
+        "what_to_film",
+        "film_list",
+        "avoid_list",
+        "required_action",
+        "speech_note",
+        "optional_example",
+        "start_recording_button"
+      ],
+      "forbidden_components": [
+        "recording_timer",
+        "review_actions",
+        "automatic_subtitles"
+      ],
+      "actions": [
+        {
+          "event": "START_RECORDING",
+          "label": "COMMENCER À FILMER",
+          "effects": [
+            "request_camera_permission",
+            "request_microphone_permission",
+            "run_COUNTDOWN_3_2_1"
+          ],
+          "next_screen_id": "T5_CAPTURE_S4_B_RECORDING"
+        }
+      ],
+      "proof_png": "ui-screens/T5_CAPTURE_S4_A_GUIDE.png"
+    },
+    {
+      "scene_id": "S4",
+      "scene_index": 4,
+      "scene_total": 4,
+      "capture_duration_ms": 9000,
+      "capture_slot": "captures.S4",
+      "data_used": [
+        "merchant_payload.nom",
+        "merchant_payload.whatsapp",
+        "merchant_payload.quartier"
+      ],
+      "continuity_rule": "Une seule formule par publicité. Le même plat, la même boisson et les mêmes accompagnements restent présents dans les quatre scènes.",
+      "ordinal": 11,
+      "screen_id": "T5_CAPTURE_S4_B_RECORDING",
+      "route_key": "t5.capture.s4.recording",
+      "state": "B_RECORDING",
+      "display_state": "B / ENREGISTREMENT",
+      "bindings": {
+        "elapsed_ms": "runtime.capture.elapsed_ms",
+        "progress_0_to_1": "runtime.capture.progress",
+        "instruction": "capture-guide/consignes_T5.json#/scenes/3/recording/instruction",
+        "output_uri": "runtime.captures.S4.uri"
+      },
+      "resolved_text": {
+        "screen_label": "ÉCRAN 11 — B / ENREGISTREMENT",
+        "scene_counter": "SCÈNE 4 SUR 4 — 9 SECONDES",
+        "recording_status": "REC",
+        "timer_initial": "00:00 / 00:09",
+        "timer_total": "00:09",
+        "instruction": "MONTRE TA FORMULE BIEN PRÉSENTÉE.",
+        "audio_status": "Micro activé.",
+        "orientation_status": "Vidéo verticale.",
+        "auto_stop_status": "Arrêt automatique à la fin des 9 secondes.",
+        "duration_seconds": 9
+      },
+      "visible_components": [
+        "screen_label",
+        "scene_counter",
+        "recording_status",
+        "recording_timer",
+        "current_instruction",
+        "microphone_active",
+        "vertical_video_status",
+        "automatic_stop_status"
+      ],
+      "forbidden_components": [
+        "instruction_sheet",
+        "manual_stop_button",
+        "review_actions",
+        "automatic_subtitles"
+      ],
+      "capture": {
+        "starts_after": "COUNTDOWN_3_2_1_COMPLETE",
+        "video": true,
+        "microphone_audio": true,
+        "orientation": "vertical",
+        "source_speed": 1.0,
+        "duration_ms": 9000,
+        "auto_stop": true,
+        "manual_stop": false,
+        "write_to": "runtime.captures.S4.uri"
+      },
+      "actions": [
+        {
+          "event": "CAPTURE_DURATION_REACHED",
+          "effects": [
+            "stop_recorder",
+            "finalize_capture_file",
+            "probe_capture_metadata",
+            "open_audio_review"
+          ],
+          "next_screen_id": "T5_CAPTURE_S4_C_REVIEW"
+        }
+      ],
+      "proof_png": "ui-screens/T5_CAPTURE_S4_B_RECORDING.png"
+    },
+    {
+      "scene_id": "S4",
+      "scene_index": 4,
+      "scene_total": 4,
+      "capture_duration_ms": 9000,
+      "capture_slot": "captures.S4",
+      "data_used": [
+        "merchant_payload.nom",
+        "merchant_payload.whatsapp",
+        "merchant_payload.quartier"
+      ],
+      "continuity_rule": "Une seule formule par publicité. Le même plat, la même boisson et les mêmes accompagnements restent présents dans les quatre scènes.",
+      "ordinal": 12,
+      "screen_id": "T5_CAPTURE_S4_C_REVIEW",
+      "route_key": "t5.capture.s4.review",
+      "state": "C_REVIEW",
+      "display_state": "C / VÉRIFICATION",
+      "bindings": {
+        "preview_uri": "runtime.captures.S4.uri",
+        "capture_metadata": "runtime.captures.S4.metadata",
+        "review_question": "capture-guide/consignes_T5.json#/scenes/3/review/question",
+        "review_checks": "capture-guide/consignes_T5.json#/scenes/3/review/checks"
+      },
+      "resolved_text": {
+        "screen_label": "ÉCRAN 12 — C / VÉRIFICATION",
+        "take_label": "PRISE 4 — 0:09",
+        "audio_status": "Son activé.",
+        "review_question": "EST-CE QUE TA FORMULE EST BIEN PRÉSENTÉE ?",
+        "review_checks": [
+          "Le plat et la boisson sont visibles.",
+          "Toute la formule est bien présentée.",
+          "La vidéo reste stable jusqu'à la fin."
+        ],
+        "redo_action": "REFAIRE",
+        "positive_action": "VOIR MON MONTAGE"
+      },
+      "visible_components": [
+        "screen_label",
+        "captured_video_preview",
+        "captured_audio_playback",
+        "review_question",
+        "review_checklist",
+        "redo_button",
+        "accept_button"
+      ],
+      "forbidden_components": [
+        "instruction_sheet",
+        "recording_timer",
+        "recording_progress",
+        "automatic_subtitles"
+      ],
+      "playback": {
+        "audio": true,
+        "loop": true,
+        "source_speed": 1.0
+      },
+      "actions": [
+        {
+          "event": "RETAKE",
+          "label": "REFAIRE",
+          "effects": [
+            "delete:runtime.captures.S4",
+            "reset_scene_capture_state"
+          ],
+          "next_screen_id": "T5_CAPTURE_S4_A_GUIDE"
+        },
+        {
+          "event": "ACCEPT_CAPTURE",
+          "label": "VOIR MON MONTAGE",
+          "effects": [
+            "persist:runtime.captures.S4",
+            "mark_capture_accepted"
+          ],
+          "next_screen_id": "T5_RENDER_CONFIRMATION"
+        }
+      ],
+      "proof_png": "ui-screens/T5_CAPTURE_S4_C_REVIEW.png"
+    }
+  ],
+  "session_model": {
+    "name": "T5FormuleComboOffreSession",
+    "fields": [
+      "merchant_payload",
+      "captures",
+      "current_screen_id",
+      "accepted_scene_ids"
+    ],
+    "persistence": "persist accepted content URIs and media metadata until RenderJob submission"
+  },
+  "renderer_handoff": {
+    "trigger": "ACCEPT_CAPTURE on T5_CAPTURE_S4_C_REVIEW",
+    "render_job": "demo/render_job_silent_demo.json",
+    "capture_bindings": {
+      "captures.S1": "runtime.captures.S1.uri",
+      "captures.S2": "runtime.captures.S2.uri",
+      "captures.S3": "runtime.captures.S3.uri",
+      "captures.S4": "runtime.captures.S4.uri"
+    },
+    "merchant_payload_source": "form/questions_T5.json",
+    "merchant_payload_targets": [
+      "merchant_payload.nom",
+      "merchant_payload.offre",
+      "merchant_payload.contenu",
+      "merchant_payload.prix",
+      "merchant_payload.whatsapp",
+      "merchant_payload.quartier"
+    ],
+    "production_render_plane": "github_actions"
+  }
+} as const;

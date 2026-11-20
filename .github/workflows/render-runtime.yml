@@ -1,0 +1,263 @@
+name: Rendu T5 runtime — 4 captures et 6 réponses
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish_prerelease:
+        description: Publier le candidat vérifié dans une pré-Release additive
+        required: true
+        type: boolean
+        default: true
+  repository_dispatch:
+    types: [t5_render_job]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: t5-runtime-${{ github.event.client_payload.job_id || github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  render-qc-deliver:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout T5
+        uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Installer FFmpeg et les dépendances
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          ffmpeg -version | head -n 1
+          ffprobe -version | head -n 1
+
+      - name: Tester contrats, liaisons de pixels et isolation des captures
+        run: |
+          python -m compileall -q adapter engine tools tests
+          pytest -q
+          python tools/build_t5_capture_flow.py --output /tmp/T5_CAPTURE_FLOW_V1_0_0.json
+          cmp config/T5_CAPTURE_FLOW_V1_0_0.json /tmp/T5_CAPTURE_FLOW_V1_0_0.json
+
+      - name: Obtenir le RenderJob Cloudflare ou construire la fixture formulaire
+        env:
+          CALLBACK_TOKEN: ${{ secrets.T5_CALLBACK_TOKEN }}
+          EVENT_NAME: ${{ github.event_name }}
+          API_BASE: ${{ github.event.client_payload.api_base }}
+          DISPATCH_JOB_ID: ${{ github.event.client_payload.job_id }}
+        run: |
+          set -euo pipefail
+          mkdir -p .tmp/t5-runtime
+          if [ "$EVENT_NAME" = repository_dispatch ]; then
+            test -n "$CALLBACK_TOKEN"
+            test -n "$API_BASE"
+            test -n "$DISPATCH_JOB_ID"
+            curl --fail-with-body --silent --show-error \
+              -H "Authorization: Bearer $CALLBACK_TOKEN" \
+              "$API_BASE/v1/jobs/$DISPATCH_JOB_ID/payload" \
+              -o .tmp/t5-runtime/job-response.json
+            jq -e '.job' .tmp/t5-runtime/job-response.json > .tmp/t5-runtime/render-job.json
+            echo "T5_API_BASE=$API_BASE" >> "$GITHUB_ENV"
+            echo "T5_JOB_ID=$DISPATCH_JOB_ID" >> "$GITHUB_ENV"
+          else
+            JOB_ID="t5-runtime-github-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+            python adapter/t5_adapter.py \
+              --render-job-id "$JOB_ID" \
+              --answers demo/reponses_runtime_demo.json \
+              --captures rushes/manifest.json \
+              --control-plane github_actions_fixture \
+              --output .tmp/t5-runtime/render-job.json
+            echo "T5_JOB_ID=$JOB_ID" >> "$GITHUB_ENV"
+          fi
+          python - <<'PY'
+          import json
+          from jsonschema import Draft202012Validator
+          job=json.load(open('.tmp/t5-runtime/render-job.json'))
+          schema=json.load(open('schemas/T5_render_job.schema.json'))
+          Draft202012Validator(schema).validate(job)
+          assert job['render']['visual_mode']=='runtime_hybrid_render'
+          assert job['render']['render_business_text'] is True
+          assert job['render']['production_render_plane']=='github_actions'
+          print('T5_RENDER_JOB_SCHEMA_PASS', job['job_id'], job['control_plane'])
+          PY
+
+      - name: Télécharger les quatre captures sans les publier et vérifier chaque SHA-256
+        env:
+          CALLBACK_TOKEN: ${{ secrets.T5_CALLBACK_TOKEN }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          set -euo pipefail
+          mkdir -p .tmp/t5-runtime/captures
+          if [ "$EVENT_NAME" = repository_dispatch ]; then
+            for SLOT in S1 S2 S3 S4; do
+              MIME=$(jq -r --arg slot "$SLOT" '.captures[$slot].mime_type' .tmp/t5-runtime/render-job.json)
+              case "$MIME" in
+                video/webm) EXT=webm ;;
+                video/quicktime) EXT=mov ;;
+                video/mp4) EXT=mp4 ;;
+                *) echo "MIME capture interdit: $MIME" >&2; exit 1 ;;
+              esac
+              curl --fail-with-body --silent --show-error \
+                -H "Authorization: Bearer $CALLBACK_TOKEN" \
+                "$T5_API_BASE/v1/jobs/$T5_JOB_ID/captures/$SLOT" \
+                -o ".tmp/t5-runtime/captures/$SLOT.$EXT"
+              EXPECTED=$(jq -r --arg slot "$SLOT" '.captures[$slot].sha256' .tmp/t5-runtime/render-job.json)
+              echo "$EXPECTED  .tmp/t5-runtime/captures/$SLOT.$EXT" | sha256sum -c -
+            done
+          else
+            python tools/fetch_t5_demo_captures.py --cache .tmp/t5-runtime/captures
+          fi
+
+      - name: Construire le manifeste runtime exclusivement depuis les captures vérifiées
+        run: |
+          python tools/build_t5_runtime_visual_inputs.py \
+            --render-job .tmp/t5-runtime/render-job.json \
+            --capture-dir .tmp/t5-runtime/captures \
+            --manifest .tmp/t5-runtime/runtime-manifest.json
+
+      - name: Rendre les quatre scènes et les six réponses sur GitHub
+        run: |
+          rm -rf "output/runtime/$T5_JOB_ID"
+          python engine/render_runtime.py \
+            --render-job .tmp/t5-runtime/render-job.json \
+            --manifest .tmp/t5-runtime/runtime-manifest.json \
+            --capture-dir .tmp/t5-runtime/captures \
+            --output-dir "output/runtime/$T5_JOB_ID"
+
+      - name: Contrôler le vrai MP4 et émettre RenderResult
+        run: |
+          OUTDIR="output/runtime/$T5_JOB_ID"
+          python tools/validate_runtime_render.py \
+            --video "$OUTDIR/VIDEO_T5_FORMULE_RUNTIME_DYNAMIQUE_V2_A_VALIDER.mp4" \
+            --render-job .tmp/t5-runtime/render-job.json \
+            --manifest .tmp/t5-runtime/runtime-manifest.json \
+            --render-report "$OUTDIR/T5_RUNTIME_RENDER_REPORT.json" \
+            --validation "$OUTDIR/T5_RUNTIME_VALIDATION.json" \
+            --result "$OUTDIR/T5_RENDER_RESULT.json"
+
+      - name: Déposer le MP4 vérifié puis callback COMPLETED
+        if: github.event_name == 'repository_dispatch'
+        env:
+          CALLBACK_TOKEN: ${{ secrets.T5_CALLBACK_TOKEN }}
+        run: |
+          set -euo pipefail
+          OUTDIR="output/runtime/$T5_JOB_ID"
+          OUT="$OUTDIR/VIDEO_T5_FORMULE_RUNTIME_DYNAMIQUE_V2_A_VALIDER.mp4"
+          SHA=$(sha256sum "$OUT" | cut -d' ' -f1)
+          BYTES=$(stat -c '%s' "$OUT")
+          curl --fail-with-body --silent --show-error \
+            -X PUT -H "Authorization: Bearer $CALLBACK_TOKEN" \
+            -H 'Content-Type: video/mp4' -H "Content-Length: $BYTES" \
+            -H "X-Content-SHA256: $SHA" --data-binary "@$OUT" \
+            "$T5_API_BASE/v1/jobs/$T5_JOB_ID/output" \
+            -o .tmp/t5-runtime/output-storage-response.json
+          jq -n -e --slurpfile result "$OUTDIR/T5_RENDER_RESULT.json" \
+            --arg run_id "$GITHUB_RUN_ID" \
+            --arg run_url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+            '{status:"COMPLETED",github_run_id:$run_id,github_run_url:$run_url,result:$result[0]}' \
+            > .tmp/t5-runtime/completed-event.json
+          curl --fail-with-body --silent --show-error \
+            -X POST -H "Authorization: Bearer $CALLBACK_TOKEN" \
+            -H 'Content-Type: application/json' \
+            --data-binary @.tmp/t5-runtime/completed-event.json \
+            "$T5_API_BASE/v1/jobs/$T5_JOB_ID/events" \
+            -o .tmp/t5-runtime/completed-response.json
+          jq -e '.status == "COMPLETED"' .tmp/t5-runtime/completed-response.json
+
+      - name: Assembler la livraison sans aucun rush brut
+        run: |
+          set -euo pipefail
+          OUTDIR="output/runtime/$T5_JOB_ID"
+          rm -rf release
+          mkdir release
+          cp "$OUTDIR/VIDEO_T5_FORMULE_RUNTIME_DYNAMIQUE_V2_A_VALIDER.mp4" release/
+          cp "$OUTDIR/T5_RUNTIME_PLANCHE_12_IMAGES.jpg" release/
+          cp "$OUTDIR/T5_RUNTIME_RENDER_REPORT.json" release/
+          cp "$OUTDIR/T5_RUNTIME_VALIDATION.json" release/
+          cp "$OUTDIR/T5_RENDER_RESULT.json" release/
+          cp "$OUTDIR/T5_RESOLVED_TEXT.json" release/
+          cp .tmp/t5-runtime/render-job.json release/T5_RENDER_JOB.json
+          cp .tmp/t5-runtime/runtime-manifest.json release/T5_RUNTIME_CAPTURE_MANIFEST.json
+          cp config/T5_RUNTIME_CONTRACT_V2_0_0.json release/
+          cp schemas/T5_render_job.schema.json release/
+          cp schemas/T5_render_result.schema.json release/
+          cp schemas/T5_render_error.schema.json release/
+          cp rushes/manifest.json release/T5_DEMO_SOURCE_PROVENANCE.json
+          cp docs/LICENCE_RUSH_DEMO_V2.md release/
+          if find release -maxdepth 1 -type f \( -name 'S[1-4]*.mp4' -o -name '*.mov' -o -name '*.webm' \) | grep -q .; then
+            echo 'Rush brut interdit dans la livraison' >&2
+            exit 1
+          fi
+          (cd release && find . -maxdepth 1 -type f ! -name SHA256SUMS.txt -printf '%f\n' | sort | xargs sha256sum > SHA256SUMS.txt)
+          (cd release && sha256sum -c SHA256SUMS.txt)
+
+      - name: Publier l’artefact reproductible
+        uses: actions/upload-artifact@v4
+        with:
+          name: T5-runtime-dynamic-${{ github.run_id }}
+          path: release/
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Préparer les notes du candidat runtime
+        if: github.event_name == 'workflow_dispatch' && inputs.publish_prerelease
+        run: |
+          cat > /tmp/t5-runtime-release-notes.md <<'EOF'
+          # RESTAURATION‑T5 — candidat runtime dynamique V2
+
+          Ce candidat remplace l’ancienne pré‑Release rejetée.
+
+          - les **six réponses** viennent du `merchant_payload` du RenderJob ;
+          - les scènes S1, S2, S3 et S4 consomment **quatre captures distinctes**, chacune vérifiée par SHA‑256 ;
+          - le manifeste visuel est construit au runtime, puis consommé par le moteur ;
+          - rendu exclusivement sur **GitHub Actions** ; Cloudflare ne fait que contrôler, stocker et dispatcher ;
+          - 30,000 s, 720 × 1280, 30 i/s, 900 images, H.264, aucune piste audio ;
+          - QC 16/16 : pixels des six champs, quatre captures, intégrité, durée, stabilité finale et absence de rush brut dans la livraison.
+
+          Les valeurs visibles sont la fixture formulaire de validation `Burger Atelier Kandi`. Elles ne sont pas codées dans le moteur : les tests prouvent que changer chaque réponse change les pixels attendus.
+          EOF
+
+      - name: Publier une pré-Release additive du vrai rendu GitHub
+        if: github.event_name == 'workflow_dispatch' && inputs.publish_prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          TAG="t5-runtime-v2-candidate-${GITHUB_RUN_NUMBER}"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "La Release $TAG existe déjà : refus de l’écraser." >&2
+            exit 1
+          fi
+          gh release create "$TAG" release/* \
+            --target "$GITHUB_SHA" \
+            --title "T5 Formule — runtime dynamique V2 #${GITHUB_RUN_NUMBER}" \
+            --notes-file /tmp/t5-runtime-release-notes.md \
+            --prerelease
+
+      - name: Signaler un RenderError au plan de contrôle
+        if: failure() && github.event_name == 'repository_dispatch'
+        continue-on-error: true
+        env:
+          CALLBACK_TOKEN: ${{ secrets.T5_CALLBACK_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p .tmp/t5-runtime
+          jq -n \
+            --arg job_id "${T5_JOB_ID:-${{ github.event.client_payload.job_id }}}" \
+            --arg run_id "$GITHUB_RUN_ID" \
+            --arg run_url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+            '{status:"FAILED",github_run_id:$run_id,github_run_url:$run_url,error:{schema_version:"1.0.0",status:"FAILED",job_id:$job_id,code:"T5_GITHUB_RENDER_FAILED",message:"Le rendu ou le contrôle qualité GitHub Actions a échoué.",retryable:true,stage:"QUALITY_CONTROL",details:{render_plane:"github_actions"}}}' \
+            > .tmp/t5-runtime/failed-event.json
+          curl --fail-with-body --silent --show-error \
+            -X POST -H "Authorization: Bearer $CALLBACK_TOKEN" \
+            -H 'Content-Type: application/json' \
+            --data-binary @.tmp/t5-runtime/failed-event.json \
+            "${T5_API_BASE:-${{ github.event.client_payload.api_base }}}/v1/jobs/${T5_JOB_ID:-${{ github.event.client_payload.job_id }}}/events"

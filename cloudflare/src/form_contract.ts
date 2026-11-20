@@ -1,0 +1,109 @@
+// Generated from form/questions_T5.json; do not edit.
+export const FORM_CONTRACT = {
+  "schema_version": "1.0.0",
+  "template_id": "RESTAURATION-T5",
+  "title": "6 questions avant de filmer — T5 Formule, combo ou offre",
+  "status": "owner_approved",
+  "additionalProperties": false,
+  "fields": [
+    {
+      "id": "nom",
+      "question": "Comment s'appelle ton restaurant, ton maquis ou ton activité ?",
+      "required": true,
+      "minLength": 1,
+      "maxLength": 40,
+      "example": "Chez Mariam",
+      "json_target": "merchant_payload.nom",
+      "used_in_scenes": [
+        "S1",
+        "S4"
+      ]
+    },
+    {
+      "id": "offre",
+      "question": "Comment s'appelle la formule, le combo ou l'offre que tu veux montrer ?",
+      "required": true,
+      "minLength": 1,
+      "maxLength": 48,
+      "example": "Formule poulet braisé",
+      "json_target": "merchant_payload.offre",
+      "used_in_scenes": [
+        "S1",
+        "S3"
+      ]
+    },
+    {
+      "id": "contenu",
+      "question": "Qu'est-ce qu'il y a dedans ? Écris chaque plat, boisson ou produit avec sa quantité.",
+      "required": true,
+      "minLength": 1,
+      "maxLength": 140,
+      "example": "1 poulet braisé, 1 portion d'alloco et 2 jus",
+      "helper": "Écris seulement ce que le client reçoit vraiment.",
+      "json_target": "merchant_payload.contenu",
+      "used_in_scenes": [
+        "S1",
+        "S2",
+        "S3"
+      ]
+    },
+    {
+      "id": "prix",
+      "question": "Quel est le prix exact de cette formule ?",
+      "required": true,
+      "minLength": 1,
+      "maxLength": 48,
+      "example": "5 000 FCFA pour 2 personnes",
+      "helper": "Ajoute une condition seulement si elle est vraie : taille, nombre de personnes ou période.",
+      "json_target": "merchant_payload.prix",
+      "used_in_scenes": [
+        "S3"
+      ]
+    },
+    {
+      "id": "whatsapp",
+      "question": "Sur quel numéro WhatsApp les clients peuvent-ils commander ?",
+      "required": true,
+      "minLength": 4,
+      "maxLength": 20,
+      "example": "+229 01 97 00 00 00",
+      "json_target": "merchant_payload.whatsapp",
+      "used_in_scenes": [
+        "S4"
+      ]
+    },
+    {
+      "id": "quartier",
+      "question": "Dans quel quartier ou quelle zone peut-on venir chercher la commande ?",
+      "required": true,
+      "minLength": 1,
+      "maxLength": 48,
+      "example": "Kandi, près du marché central",
+      "json_target": "merchant_payload.quartier",
+      "used_in_scenes": [
+        "S4"
+      ]
+    }
+  ],
+  "proposal_decision": {
+    "question_count": 6,
+    "all_six_required": true,
+    "why": "Le nom de l'offre, son contenu exact, son prix, le contact et le lieu sont tous nécessaires pour présenter une formule sans rien inventer.",
+    "invented_content_forbidden": true
+  },
+  "approval": {
+    "date": "2026-11-18",
+    "decision_channel": "arena_ask_user",
+    "question_id": "validation_questions_t5",
+    "selected_option_id": "valider_questions",
+    "decision": "Valider les 6 questions",
+    "scope": [
+      "nom du commerce",
+      "nom de la formule",
+      "contenu exact avec quantités",
+      "prix exact",
+      "WhatsApp",
+      "lieu de retrait"
+    ]
+  }
+} as const;

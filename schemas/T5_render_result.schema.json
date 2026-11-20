@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/vitrinevideo0-bot/vitrine-video-t5-formule-combo-offre/raw/main/schemas/T5_render_result.schema.json",
+  "title": "RESTAURATION-T5 RenderResult",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "status",
+    "job_id",
+    "idempotency_key",
+    "template_id",
+    "template_version",
+    "profile_used",
+    "control_plane",
+    "output",
+    "quality",
+    "inputs",
+    "rendered_fields",
+    "scene_capture_bindings"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "status": {"const": "COMPLETED"},
+    "job_id": {"$ref": "#/$defs/id"},
+    "idempotency_key": {"$ref": "#/$defs/id"},
+    "template_id": {"const": "RESTAURATION-T5"},
+    "template_version": {"const": "2.0.0-runtime"},
+    "profile_used": {"const": "T5_GITHUB_ACTIONS_RUNTIME_V2"},
+    "control_plane": {"enum": ["cloudflare_worker", "github_actions_fixture"]},
+    "output": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["uri", "file", "sha256", "bytes"],
+      "properties": {
+        "uri": {"type": "string", "pattern": "^output/runtime/[A-Za-z0-9._-]+/VIDEO_T5_FORMULE_RUNTIME_DYNAMIQUE_V2_A_VALIDER\\.mp4$"},
+        "file": {"const": "VIDEO_T5_FORMULE_RUNTIME_DYNAMIQUE_V2_A_VALIDER.mp4"},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "bytes": {"type": "integer", "minimum": 1}
+      }
+    },
+    "quality": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "report", "passed", "total"],
+      "properties": {
+        "status": {"const": "PASS"},
+        "report": {"const": "T5_RUNTIME_VALIDATION.json"},
+        "passed": {"type": "integer", "minimum": 1},
+        "total": {"type": "integer", "minimum": 1}
+      }
+    },
+    "inputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["merchant_payload_sha256", "capture_sha256", "runtime_manifest_sha256", "resolved_text_sha256"],
+      "properties": {
+        "merchant_payload_sha256": {"$ref": "#/$defs/sha256"},
+        "capture_sha256": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["S1", "S2", "S3", "S4"],
+          "properties": {
+            "S1": {"$ref": "#/$defs/sha256"},
+            "S2": {"$ref": "#/$defs/sha256"},
+            "S3": {"$ref": "#/$defs/sha256"},
+            "S4": {"$ref": "#/$defs/sha256"}
+          }
+        },
+        "runtime_manifest_sha256": {"$ref": "#/$defs/sha256"},
+        "resolved_text_sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "rendered_fields": {"const": ["nom", "offre", "contenu", "prix", "whatsapp", "quartier"]},
+    "scene_capture_bindings": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "prefixItems": [
+        {"$ref": "#/$defs/bindingS1"},
+        {"$ref": "#/$defs/bindingS2"},
+        {"$ref": "#/$defs/bindingS3"},
+        {"$ref": "#/$defs/bindingS4"}
+      ],
+      "items": false
+    }
+  },
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{7,127}$"},
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scene", "capture_slot", "capture_sha256", "timeline_start_frame", "timeline_end_frame"],
+      "properties": {
+        "scene": {"type": "string"},
+        "capture_slot": {"type": "string"},
+        "capture_sha256": {"$ref": "#/$defs/sha256"},
+        "timeline_start_frame": {"type": "integer", "minimum": 0},
+        "timeline_end_frame": {"type": "integer", "minimum": 0}
+      }
+    },
+    "bindingS1": {"allOf": [{"$ref": "#/$defs/binding"}, {"properties": {"scene": {"const": "S1"}, "capture_slot": {"const": "S1"}, "timeline_start_frame": {"const": 0}, "timeline_end_frame": {"const": 179}}}]},
+    "bindingS2": {"allOf": [{"$ref": "#/$defs/binding"}, {"properties": {"scene": {"const": "S2"}, "capture_slot": {"const": "S2"}, "timeline_start_frame": {"const": 180}, "timeline_end_frame": {"const": 419}}}]},
+    "bindingS3": {"allOf": [{"$ref": "#/$defs/binding"}, {"properties": {"scene": {"const": "S3"}, "capture_slot": {"const": "S3"}, "timeline_start_frame": {"const": 420}, "timeline_end_frame": {"const": 629}}}]},
+    "bindingS4": {"allOf": [{"$ref": "#/$defs/binding"}, {"properties": {"scene": {"const": "S4"}, "capture_slot": {"const": "S4"}, "timeline_start_frame": {"const": 630}, "timeline_end_frame": {"const": 899}}}]}
+  }
+}

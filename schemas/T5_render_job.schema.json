@@ -1,67 +1,134 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/vitrinevideo0-bot/vitrine-video-t5-formule-combo-offre/raw/main/schemas/T5_render_job.schema.json",
-  "title": "RESTAURATION-T5 first silent montage RenderJob",
+  "title": "RESTAURATION-T5 runtime RenderJob",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version", "job_id", "template_id", "template_version", "is_demo", "merchant_payload", "captures", "render_profile", "output"],
+  "required": [
+    "schema_version",
+    "job_id",
+    "idempotency_key",
+    "template_id",
+    "template_version",
+    "merchant_payload",
+    "captures",
+    "render",
+    "output",
+    "control_plane",
+    "cloudflare_rendering_forbidden"
+  ],
   "properties": {
-    "schema_version": { "const": "1.0.0" },
-    "job_id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
-    "template_id": { "const": "RESTAURATION-T5" },
-    "template_version": { "const": "1.0.0" },
-    "is_demo": { "const": true },
+    "schema_version": {"const": "1.0.0"},
+    "job_id": {"$ref": "#/$defs/id"},
+    "idempotency_key": {"$ref": "#/$defs/id"},
+    "template_id": {"const": "RESTAURATION-T5"},
+    "template_version": {"const": "2.0.0-runtime"},
     "merchant_payload": {
       "type": "object",
       "additionalProperties": false,
       "required": ["nom", "offre", "contenu", "prix", "whatsapp", "quartier"],
       "properties": {
-        "nom": { "$ref": "#/$defs/nonEmpty" },
-        "offre": { "$ref": "#/$defs/nonEmpty" },
-        "contenu": { "$ref": "#/$defs/nonEmpty" },
-        "prix": { "$ref": "#/$defs/nonEmpty" },
-        "whatsapp": { "$ref": "#/$defs/nonEmpty" },
-        "quartier": { "$ref": "#/$defs/nonEmpty" }
+        "nom": {"type": "string", "minLength": 1, "maxLength": 40},
+        "offre": {"type": "string", "minLength": 1, "maxLength": 48},
+        "contenu": {"type": "string", "minLength": 1, "maxLength": 140},
+        "prix": {"type": "string", "minLength": 1, "maxLength": 48},
+        "whatsapp": {"type": "string", "minLength": 4, "maxLength": 20},
+        "quartier": {"type": "string", "minLength": 1, "maxLength": 48}
       }
     },
     "captures": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["source", "continuity"],
+      "required": ["S1", "S2", "S3", "S4"],
       "properties": {
-        "source": { "const": "rushes/manifest.json" },
-        "continuity": { "const": "one_pexels_source_same_cake_and_cappuccino" }
+        "S1": {"$ref": "#/$defs/capture"},
+        "S2": {"$ref": "#/$defs/capture"},
+        "S3": {"$ref": "#/$defs/capture"},
+        "S4": {"$ref": "#/$defs/capture"}
       }
     },
-    "render_profile": {
+    "render": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["width", "height", "fps", "duration_seconds", "scene_durations_seconds", "transition_reference", "transition_style", "include_audio", "burn_demo_text", "demo_disclaimer_required"],
+      "required": [
+        "visual_mode",
+        "runtime_capture_manifest_required",
+        "render_business_text",
+        "business_text_source",
+        "runtime_contract",
+        "transition_reference",
+        "width",
+        "height",
+        "fps",
+        "frames",
+        "duration_s",
+        "scene_durations_s",
+        "audio_mode",
+        "production_render_plane"
+      ],
       "properties": {
-        "width": { "const": 720 },
-        "height": { "const": 1280 },
-        "fps": { "const": 30 },
-        "duration_seconds": { "const": 30.0 },
-        "scene_durations_seconds": { "const": [6, 8, 7, 9] },
-        "transition_reference": { "const": "T1" },
-        "transition_style": { "const": "dish_swipe_slide" },
-        "include_audio": { "const": false },
-        "burn_demo_text": { "const": true },
-        "demo_disclaimer_required": { "const": true }
+        "visual_mode": {"const": "runtime_hybrid_render"},
+        "runtime_capture_manifest_required": {"const": true},
+        "render_business_text": {"const": true},
+        "business_text_source": {"const": "merchant_payload"},
+        "runtime_contract": {"const": "config/T5_RUNTIME_CONTRACT_V2_0_0.json"},
+        "transition_reference": {"const": "T1"},
+        "width": {"const": 720},
+        "height": {"const": 1280},
+        "fps": {"const": 30},
+        "frames": {"const": 900},
+        "duration_s": {"const": 30.0},
+        "scene_durations_s": {"const": [6, 8, 7, 9]},
+        "audio_mode": {"const": "silent_no_audio_stream"},
+        "production_render_plane": {"const": "github_actions"}
       }
     },
     "output": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["filename", "audio", "demo_only"],
+      "required": ["uri", "filename"],
       "properties": {
-        "filename": { "const": "VIDEO_T5_PREMIER_MONTAGE_SILENCIEUX_V1_A_JUGER.mp4" },
-        "audio": { "const": false },
-        "demo_only": { "const": true }
+        "uri": {"type": "string", "pattern": "^output/runtime/[A-Za-z0-9._-]+/VIDEO_T5_FORMULE_RUNTIME_DYNAMIQUE_V2_A_VALIDER\\.mp4$"},
+        "filename": {"const": "VIDEO_T5_FORMULE_RUNTIME_DYNAMIQUE_V2_A_VALIDER.mp4"}
       }
-    }
+    },
+    "control_plane": {"enum": ["cloudflare_worker", "github_actions_fixture"]},
+    "cloudflare_rendering_forbidden": {"const": true}
   },
   "$defs": {
-    "nonEmpty": { "type": "string", "minLength": 1, "maxLength": 140 }
+    "id": {"type": "string", "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{7,127}$"},
+    "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "capture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "uri",
+        "sha256",
+        "mime_type",
+        "width",
+        "height",
+        "fps",
+        "frame_count",
+        "duration_ms",
+        "source_in_ms",
+        "video_codec",
+        "audio_codec",
+        "has_audio"
+      ],
+      "properties": {
+        "uri": {"type": "string", "minLength": 1},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "mime_type": {"enum": ["video/mp4", "video/webm", "video/quicktime"]},
+        "width": {"type": "integer", "minimum": 320},
+        "height": {"type": "integer", "minimum": 320},
+        "fps": {"type": "number", "minimum": 12, "maximum": 120},
+        "frame_count": {"type": "integer", "minimum": 1},
+        "duration_ms": {"type": "integer", "minimum": 1000},
+        "source_in_ms": {"type": "integer", "minimum": 0},
+        "video_codec": {"type": "string", "minLength": 1, "maxLength": 30},
+        "audio_codec": {"type": ["string", "null"]},
+        "has_audio": {"type": "boolean"}
+      }
+    }
   }
 }

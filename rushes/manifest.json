@@ -1,38 +1,26 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "2.0.0",
   "template_id": "RESTAURATION-T5",
-  "purpose": "Un rush Pexels vertical de démonstration montre la même formule gâteau et cappuccino. Quatre fenêtres et gels d'image en sont dérivés sans publier le rush brut.",
+  "purpose": "Quatre prises distinctes du même tournage pour exercer le chemin runtime T5 : formule complète, détail, prix et commande.",
   "continuity_rule": {
     "one_offer_per_ad": true,
     "same_dish_drink_and_sides_across_four_scenes": true,
-    "demo_offer": "Gâteau et cappuccino",
-    "source_count": 1
+    "same_shoot_and_creator": true,
+    "demo_offer": "Double burger, frites et cola",
+    "source_count": 4,
+    "visible_in_every_scene": [
+      "double burger",
+      "portion de frites",
+      "verre de cola"
+    ]
   },
   "license": {
     "provider": "Pexels",
     "license_url": "https://www.pexels.com/license/",
     "verified_at_utc": "2026-11-18",
-    "summary": "La page indique une licence gratuite Pexels. Le projet conserve l'attribution et ne versionne ni ne republie le rush brut.",
+    "summary": "Vidéos gratuites Pexels d’Artem Podrez. Les quatre fichiers proviennent du même tournage apparent et ne sont ni commités ni publiés comme artefacts.",
     "raw_media_committed": false,
     "raw_media_published_as_artifact": false
-  },
-  "source": {
-    "pexels_id": 25724633,
-    "creator": "Esra Afşar",
-    "page_title": "A table with a plate of food on it",
-    "page_url": "https://www.pexels.com/video/a-table-with-a-plate-of-food-on-it-25724633/",
-    "download_url": "https://videos.pexels.com/video-files/25724633/11903941_1440_2430_60fps.mp4",
-    "cache_filename": "pexels_25724633.mp4",
-    "expected_bytes": 11277371,
-    "sha256": "2301f2f293451064a03d1eb67a70e36e4b43fae9f8ae039c043c7770576de7ab",
-    "width": 1440,
-    "height": 2430,
-    "fps": 60.0,
-    "duration_seconds": 11.283333,
-    "visible_items": [
-      "une part de gâteau sur une assiette",
-      "un cappuccino dans une tasse"
-    ]
   },
   "output_contract": {
     "width": 720,
@@ -43,64 +31,94 @@
     "video_codec": "h264",
     "pixel_format": "yuv420p",
     "audio_streams": 0,
-    "burned_demo_text": true,
-    "demo_text_must_be_replaced_for_merchant_delivery": true
+    "burned_text_source": "merchant_payload",
+    "production_render_plane": "github_actions"
   },
   "transition_contract": {
     "reference": "T1",
     "family": "dish_swipe",
-    "duration_seconds": 0.267,
-    "offsets_seconds": [
-      6.0,
-      14.0,
-      21.0
-    ],
-    "variants": [
-      "slideleft",
-      "slideright",
-      "slideleft"
-    ]
+    "duration_frames": 8,
+    "boundary_frames": [180, 420, 630],
+    "variants": ["slideleft", "slideright", "slideleft"]
   },
-  "scenes": [
+  "sources": [
     {
-      "scene": "S1",
-      "title": "LA FORMULE",
-      "catalog_duration_seconds": 6,
-      "render_input_duration_seconds": 6.267,
-      "trim_start_seconds": 0.0,
-      "motion_seconds": 1.5,
-      "freeze_tail_seconds": 4.767,
-      "purpose": "La tasse et le gâteau sont visibles ensemble, puis l'image reste lisible."
+      "slot": "S1",
+      "pexels_id": 4731057,
+      "creator": "Artem Podrez",
+      "page_title": "Man Sitting on a Table with Food",
+      "page_url": "https://www.pexels.com/video/man-sitting-on-a-table-with-food-4731057/",
+      "download_url": "https://videos.pexels.com/video-files/4731057/4731057-uhd_2560_1440_30fps.mp4",
+      "cache_filename": "S1_4731057.mp4",
+      "expected_bytes": 14484553,
+      "sha256": "2a5f66dd1ffe656d2f3211d3ecd8714233784790460a1bd6b24b026d40762520",
+      "width": 2560,
+      "height": 1440,
+      "fps": 30.0,
+      "frame_count": 299,
+      "duration_ms": 9967,
+      "visible_items": ["double burger", "portion de frites", "verre de cola"],
+      "scene_fit": "Plan d’ensemble stable : le plat, la boisson et l’accompagnement sont visibles en même temps."
     },
     {
-      "scene": "S2",
-      "title": "CE QU'IL Y A DANS LA FORMULE",
-      "catalog_duration_seconds": 8,
-      "render_input_duration_seconds": 8.267,
-      "trim_start_seconds": 2.5,
-      "motion_seconds": 8.267,
-      "freeze_tail_seconds": 0.0,
-      "purpose": "Le mouvement réel sépare puis réunit le gâteau et le cappuccino."
+      "slot": "S2",
+      "pexels_id": 4731063,
+      "creator": "Artem Podrez",
+      "page_title": "Man Eating a Burger and Fries",
+      "page_url": "https://www.pexels.com/video/man-eating-a-burger-and-fries-4731063/",
+      "download_url": "https://videos.pexels.com/video-files/4731063/4731063-uhd_2560_1440_30fps.mp4",
+      "cache_filename": "S2_4731063.mp4",
+      "expected_bytes": 17545899,
+      "sha256": "d6df57374a781c4c101c21937ad20009dd39f063d505d7e2beb98ee5df07cbac",
+      "width": 2560,
+      "height": 1440,
+      "fps": 30.0,
+      "frame_count": 332,
+      "duration_ms": 11067,
+      "visible_items": ["double burger", "portion de frites", "verre de cola"],
+      "scene_fit": "Vue rapprochée de la formule pendant que les frites sont montrées."
     },
     {
-      "scene": "S3",
-      "title": "LE PRIX",
-      "catalog_duration_seconds": 7,
-      "render_input_duration_seconds": 7.267,
-      "trim_start_seconds": 10.6,
-      "motion_seconds": 0.2,
-      "freeze_tail_seconds": 7.067,
-      "purpose": "La formule complète reste stable pour rendre le prix lisible."
+      "slot": "S3",
+      "pexels_id": 4731066,
+      "creator": "Artem Podrez",
+      "page_title": "Man Eating at the Fastfood",
+      "page_url": "https://www.pexels.com/video/man-eating-at-the-fastfood-4731066/",
+      "download_url": "https://videos.pexels.com/video-files/4731066/4731066-uhd_2560_1440_30fps.mp4",
+      "cache_filename": "S3_4731066.mp4",
+      "expected_bytes": 12526695,
+      "sha256": "ff4b3642cc9ce5d50191384175d1a4fa7b1f49fc8653154ccb97c9216aa6baee",
+      "width": 2560,
+      "height": 1440,
+      "fps": 30.0,
+      "frame_count": 258,
+      "duration_ms": 8600,
+      "visible_items": ["double burger", "portion de frites", "verre de cola"],
+      "scene_fit": "Plan produit rapproché et stable pour afficher le prix sans masquer la formule."
     },
     {
-      "scene": "S4",
-      "title": "COMMANDER",
-      "catalog_duration_seconds": 9,
-      "render_input_duration_seconds": 9.0,
-      "trim_start_seconds": 8.0,
-      "motion_seconds": 3.283333,
-      "freeze_tail_seconds": 5.716667,
-      "purpose": "La tasse revient près du gâteau, puis la fin reste stable pour le contact."
+      "slot": "S4",
+      "pexels_id": 4731132,
+      "creator": "Artem Podrez",
+      "page_title": "Man Having a Meal",
+      "page_url": "https://www.pexels.com/video/man-having-a-meal-4731132/",
+      "download_url": "https://videos.pexels.com/video-files/4731132/4731132-uhd_2560_1440_30fps.mp4",
+      "cache_filename": "S4_4731132.mp4",
+      "expected_bytes": 16524151,
+      "sha256": "5bb285f21ca7ed90607224afd4325fc437e789fe344ca3516e23f37a3c519341",
+      "width": 2560,
+      "height": 1440,
+      "fps": 30.0,
+      "frame_count": 326,
+      "duration_ms": 10867,
+      "visible_items": ["double burger", "portion de frites", "verre de cola"],
+      "scene_fit": "Dégustation avec la formule complète visible ; les trois dernières secondes deviennent un appel à l’action stable."
     }
+  ],
+  "scenes": [
+    {"scene": "S1", "title": "LA FORMULE", "duration_seconds": 6, "source_slot": "S1", "source_in_ms": 0, "freeze_tail_ms": 0},
+    {"scene": "S2", "title": "CE QU’IL Y A DANS LA FORMULE", "duration_seconds": 8, "source_slot": "S2", "source_in_ms": 0, "freeze_tail_ms": 0},
+    {"scene": "S3", "title": "LE PRIX", "duration_seconds": 7, "source_slot": "S3", "source_in_ms": 0, "freeze_tail_ms": 0},
+    {"scene": "S4", "title": "COMMANDER", "duration_seconds": 9, "source_slot": "S4", "source_in_ms": 0, "freeze_tail_ms": 3000}
   ]
 }

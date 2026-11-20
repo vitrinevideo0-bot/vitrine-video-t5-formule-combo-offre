@@ -1,0 +1,10 @@
+{
+  "schema_version": "1.0.0",
+  "status": "FAILED",
+  "job_id": "t5-runtime-example-0001",
+  "code": "T5_GITHUB_RENDER_FAILED",
+  "message": "Le rendu ou le contrôle qualité GitHub Actions a échoué.",
+  "retryable": true,
+  "stage": "QUALITY_CONTROL",
+  "details": {"render_plane": "github_actions"}
+}

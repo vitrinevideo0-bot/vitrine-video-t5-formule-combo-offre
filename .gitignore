@@ -5,10 +5,15 @@ __pycache__/
 
 # Médias bruts : jamais versionnés ni publiés.
 .cache/
-rushes/cache/
+rushes/cache*/
+rushes/runtime/
 rushes/*.mp4
 
 # Fichiers intermédiaires et rendus locaux reproductibles.
 .tmp/
 output/
 release/
+node_modules/
+.wrangler/
+.wrangler-*/
+.dev.vars

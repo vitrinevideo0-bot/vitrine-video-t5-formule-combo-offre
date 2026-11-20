@@ -1,4 +1,4 @@
-name: Contrats, questions et 12 écrans T5
+name: Contrats, 12 écrans et runtime dynamique T5
 
 on:
   push:
@@ -12,7 +12,7 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v5
 
@@ -21,13 +21,33 @@ jobs:
           python-version: '3.12'
           cache: pip
 
-      - name: Installer les dépendances
-        run: python -m pip install -r requirements.txt
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22.12.0'
+          cache: npm
+          cache-dependency-path: cloudflare/package-lock.json
 
-      - name: Compiler et tester
+      - name: Installer FFmpeg et les dépendances
         run: |
-          python -m compileall -q engine tools tests
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg
+          python -m pip install -r requirements.txt
+          npm ci --prefix cloudflare
+
+      - name: Compiler et tester contrats, pixels et captures
+        run: |
+          python -m compileall -q adapter engine tools tests
           pytest -q
+
+      - name: Prouver le RenderJob formulaire → quatre captures
+        run: |
+          python adapter/t5_adapter.py \
+            --render-job-id t5-runtime-demo-0001 \
+            --answers demo/reponses_runtime_demo.json \
+            --captures rushes/manifest.json \
+            --control-plane github_actions_fixture \
+            --output /tmp/render_job_runtime_demo.json
+          cmp demo/render_job_runtime_demo.json /tmp/render_job_runtime_demo.json
 
       - name: Prouver le contrat des 12 écrans
         run: |
@@ -40,7 +60,43 @@ jobs:
           python tools/generate_t5_ui_screens.py --output-dir /tmp/t5-ui-screens
           diff -qr ui-screens /tmp/t5-ui-screens
 
-      - name: Prouver la simulation autonome
+      - name: Prouver la simulation autonome sans la confondre avec le rendu
         run: |
           python tools/build_t5_simulation.py --output /tmp/T5_12_ECRANS_EXECUTABLE.html
           cmp simulation/T5_12_ECRANS_EXECUTABLE.html /tmp/T5_12_ECRANS_EXECUTABLE.html
+
+      - name: Compiler et empaqueter le Worker Cloudflare sans le déployer
+        run: |
+          python tools/build_t5_cloudflare_contracts.py --check
+          npm test --prefix cloudflare
+
+      - name: Tester formulaire, R2, repository_dispatch et RenderResult
+        working-directory: cloudflare
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/t5-wrangler-ci
+          python test/mock_github_api.py --port 8791 > /tmp/t5-mock-github.log 2>&1 &
+          MOCK_PID=$!
+          npx wrangler dev --local --ip 127.0.0.1 --port 8788 --persist-to /tmp/t5-wrangler-ci \
+            --var CLIENT_API_TOKEN:test-client \
+            --var CALLBACK_TOKEN:test-callback \
+            --var GITHUB_TOKEN:test-github \
+            --var GITHUB_API_BASE:http://127.0.0.1:8791 \
+            --var PUBLIC_API_BASE:http://127.0.0.1:8788 \
+            > /tmp/t5-wrangler.log 2>&1 &
+          WRANGLER_PID=$!
+          cleanup() { kill "$WRANGLER_PID" "$MOCK_PID" 2>/dev/null || true; }
+          trap cleanup EXIT
+          python - <<'PY'
+          import time, urllib.request
+          for _ in range(120):
+              try:
+                  with urllib.request.urlopen('http://127.0.0.1:8788/health', timeout=1) as response:
+                      if response.status == 200:
+                          break
+              except Exception:
+                  time.sleep(0.25)
+          else:
+              raise SystemExit('Wrangler did not become ready')
+          PY
+          python test/control_plane_integration.py --base http://127.0.0.1:8788

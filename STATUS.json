@@ -1,11 +1,10 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "2.0.0",
   "template_id": "RESTAURATION-T5",
   "template_name": "Formule, combo ou offre",
   "updated_on": "2026-11-18",
   "workflow": {
-    "status_number": 6,
-    "status": "Owner-approved T5 implementation is public; repository CI and the GitHub first-montage render both pass; candidate 1 awaits owner review",
+    "status": "Runtime V2 implemented and locally verified; GitHub server validation pending",
     "completion_percent_claimed": null
   },
   "owner_decisions": {
@@ -22,20 +21,25 @@
     "questions_json": true,
     "capture_guide_json": true,
     "twelve_screen_flow": true,
-    "twelve_png_proofs": true,
-    "standalone_simulation": true,
-    "json_schemas": true,
-    "licensed_demo_rush_manifest": true,
-    "first_silent_montage_renderer": true,
-    "first_silent_montage_validator": true,
+    "cloudflare_form_and_capture_client": true,
+    "cloudflare_r2_control_plane": true,
+    "render_job_adapter": true,
+    "four_capture_sha256_verification": true,
+    "runtime_manifest_builder": true,
+    "dynamic_business_text_renderer": true,
+    "render_result_and_error_contracts": true,
     "github_ci_workflow": true,
-    "github_render_workflow": true
+    "github_runtime_render_workflow": true
   },
   "local_validation": {
-    "python_tests": "PASS_16_OF_16",
-    "first_montage": "PASS_12_OF_12",
-    "first_montage_sha256": "694fe4ff15cfa4d22938ce065619bd43ab1260c70867228b47dae42bf3c77139",
-    "deterministic_rerender_sha256_match": true,
+    "python_tests": "PASS_28_OF_28",
+    "cloudflare_typescript": "PASS",
+    "cloudflare_black_box_integration": "PASS",
+    "runtime_render_qc": "PASS_16_OF_16",
+    "runtime_render_sha256": "e4101ace048db253515993328b3de6b7d576c77114db3c603c9e90e1fb390c3c",
+    "six_fields_change_real_pixels": true,
+    "four_scenes_consume_declared_captures": true,
+    "capture_substitution_isolated_by_scene": true,
     "duration_seconds": 30.0,
     "frames": 900,
     "dimensions": "720x1280",
@@ -49,25 +53,28 @@
     "repository_created": true,
     "repository_public": true,
     "repository_url": "https://github.com/vitrinevideo0-bot/vitrine-video-t5-formule-combo-offre",
-    "implementation_commit": "3e628ab1e036befa70772cd14fc5bf4aa1e9643e",
-    "ci_run_id": 44716635345,
-    "ci_conclusion": "success",
-    "render_run_id": 44716734789,
-    "render_conclusion": "success",
-    "release_tag": "t5-first-montage-v1-candidate-1",
-    "release_url": "https://github.com/vitrinevideo0-bot/vitrine-video-t5-formule-combo-offre/releases/tag/t5-first-montage-v1-candidate-1",
-    "first_montage_sha256": "493495e8449487ccf3b4ee3b72eef1f558658409b2ab0f5017d72d3836f1a266",
-    "release_sha256s_verified_after_download": true,
-    "first_montage_validation": "PASS_12_OF_12",
-    "raw_rush_in_release": false
+    "runtime_v2_commit": null,
+    "ci_run_id": null,
+    "ci_conclusion": "pending",
+    "render_run_id": null,
+    "render_conclusion": "pending",
+    "release_tag": null,
+    "release_url": null,
+    "runtime_render_sha256": null
+  },
+  "rejected_history": {
+    "tag": "t5-first-montage-v1-candidate-1",
+    "status": "REJECTED_ARCHIVE_ONLY",
+    "release_notes_updated": true,
+    "must_not_be_used_as_reference": true
   },
   "claims": {
-    "implemented": true,
-    "github_published": true,
-    "first_montage_owner_approved": false,
+    "runtime_v2_implemented": true,
+    "runtime_v2_github_published": false,
+    "runtime_v2_owner_approved": false,
     "audio_implemented": false,
     "cloudflare_deployed": false,
     "production_ready": false
   },
-  "next_decision": "Owner judges first silent montage candidate 1 before voice, music, final merchant data or production integration."
+  "next_action": "Push Runtime V2, require green CI, run render-runtime on GitHub, download and verify the released MP4 before presentation."
 }

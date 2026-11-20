@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/vitrinevideo0-bot/vitrine-video-t5-formule-combo-offre/raw/main/schemas/T5_render_error.schema.json",
+  "title": "RESTAURATION-T5 RenderError",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "status", "job_id", "code", "message", "retryable", "stage"],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "status": {"const": "FAILED"},
+    "job_id": {"type": "string", "pattern": "^[a-zA-Z0-9][a-zA-Z0-9._-]{7,127}$"},
+    "code": {"type": "string", "pattern": "^T5_[A-Z0-9_]+$"},
+    "message": {"type": "string", "minLength": 1, "maxLength": 1000},
+    "retryable": {"type": "boolean"},
+    "stage": {"enum": ["FETCH_JOB", "FETCH_INPUT", "VALIDATE_INPUT", "BUILD_MANIFEST", "RENDER_VIDEO", "QUALITY_CONTROL", "PUBLISH", "CALLBACK"]},
+    "details": {"type": "object"}
+  }
+}
