@@ -3,7 +3,7 @@
   "template_id": "RESTAURATION-T5",
   "version": "3.0.0-full-frame",
   "title": "Formule, combo ou offre — montage complet plein écran",
-  "status": "owner_readability_correction_pending_github_render",
+  "status": "owner_baseline_subtitle_correction_pending_github_render",
   "approved_sources": {
     "questions": {
       "path": "form/questions_T5.json",
@@ -19,15 +19,19 @@
       "stable_screens": 12
     },
     "text_motion": {
-      "path": "config/T5_TEXT_MOTION_V3_0_0.json",
-      "sha256": "d0a87de1efdcb04bd7db7f32581af22b3fb02d4fede19243c5d485d48c577b4f",
-      "reveal_unit": "character",
-      "letter_motion": "staggered_soft_rise_and_fade",
+      "path": "config/T5_TEXT_MOTION_V4_0_0.json",
+      "sha256": "aeb1a6451b61f78b4d96ee4bfe2539484ddcb11f09ee7ee1e98d7bf1cc6835f5",
+      "reveal_unit": "block",
+      "per_letter_animation": false,
       "font_family": "Playfair Display",
       "font_classification": "readable editorial display serif",
       "text_color": "#FFFFFF",
       "minimum_weight": 800,
-      "native_pair_kerning": true
+      "uniform_baseline": true,
+      "centered_horizontally": true,
+      "maximum_lines": 2,
+      "line_height_ratio": 1.2,
+      "fine_dark_outline": true
     },
     "motion_font": {
       "path": "assets/fonts/playfair-display/PlayfairDisplay[wght].ttf",
@@ -39,8 +43,8 @@
       ]
     },
     "motion_typography_approval": {
-      "path": "approvals/APPROBATION_CORRECTION_LISIBILITE_PLAYFAIR_T5_2026-11-18.json",
-      "sha256": "b23f58c082962bfe972e557f217c078a9cc7f93707644967b4e02121bfc7dfeb"
+      "path": "approvals/APPROBATION_CORRECTION_BASELINE_SOUS_TITRES_T5_2026-11-18.json",
+      "sha256": "ab0119321e7cafb5b582a8da69dffa47b3a5d390cfd9b277f2dd3bdf6c7a906d"
     },
     "creative_approval": {
       "path": "approvals/APPROBATION_DIRECTION_CREATIVE_T5_2026-11-18.json",
@@ -98,7 +102,7 @@
         "offre",
         "contenu"
       ],
-      "text_motion": "config/T5_TEXT_MOTION_V3_0_0.json#/scenes/S1",
+      "text_motion": "config/T5_TEXT_MOTION_V4_0_0.json#/scenes/S1",
       "framing": "full_screen_formula_hero",
       "camera_motion": "slow_push_in"
     },
@@ -118,7 +122,7 @@
       "visible_fields": [
         "contenu"
       ],
-      "text_motion": "config/T5_TEXT_MOTION_V3_0_0.json#/scenes/S2",
+      "text_motion": "config/T5_TEXT_MOTION_V4_0_0.json#/scenes/S2",
       "framing": "full_screen_formula_details",
       "camera_motion": "gentle_pull_back"
     },
@@ -140,7 +144,7 @@
         "contenu",
         "prix"
       ],
-      "text_motion": "config/T5_TEXT_MOTION_V3_0_0.json#/scenes/S3",
+      "text_motion": "config/T5_TEXT_MOTION_V4_0_0.json#/scenes/S3",
       "framing": "full_screen_formula_price_hero",
       "camera_motion": "subtle_push_in"
     },
@@ -162,7 +166,7 @@
         "whatsapp",
         "quartier"
       ],
-      "text_motion": "config/T5_TEXT_MOTION_V3_0_0.json#/scenes/S4",
+      "text_motion": "config/T5_TEXT_MOTION_V4_0_0.json#/scenes/S4",
       "framing": "full_screen_formula_order_hero",
       "camera_motion": "slow_push_then_lock",
       "stable_tail_frames": [
@@ -232,25 +236,38 @@
     "horizontal_color_seams_forbidden": true,
     "readability_gradient_must_reach_frame_bottom": true,
     "static_text_stack_forbidden": true,
-    "character_by_character_reveal_required": true,
-    "text_alignment": "left",
+    "text_alignment": "center",
     "font_family": "Playfair Display",
     "max_simultaneous_text_fields": 2,
     "allowed_overlays": [
       "exact merchant_payload characters",
-      "soft text shadow",
+      "fine dark text outline",
+      "subtle text shadow",
       "edge-to-edge readability gradient"
     ],
     "font_classification": "readable editorial display serif",
     "font_style": "ExtraBold/Black",
     "text_color": "#FFFFFF",
     "minimum_font_weight": 800,
-    "large_readable_editorial_composition": true,
-    "soft_per_character_rise_and_fade_required": true,
-    "native_pair_kerning_required": true,
-    "neutral_tracking_required": true,
-    "text_outline_forbidden": true,
-    "readability_priority": "maximum"
+    "readability_priority": "maximum",
+    "whole_block_timed_entry_required": true,
+    "per_letter_animation_forbidden": true,
+    "uniform_baseline_required": true,
+    "rotation_degrees": 0,
+    "constant_letter_spacing_required": true,
+    "regular_word_spacing_required": true,
+    "decorative_alternates_forbidden": true,
+    "maximum_text_lines": 2,
+    "target_words_per_line": [
+      4,
+      6
+    ],
+    "line_height_ratio": 1.2,
+    "side_safe_margin_pixels": 50,
+    "bottom_safe_margin_pixels": 150,
+    "fine_dark_outline_required": true,
+    "subtle_shadow_required": true,
+    "centered_stable_subtitle_composition": true
   },
   "render_plane": "github_actions",
   "cloudflare_video_rendering_forbidden": true,
@@ -259,6 +276,11 @@
       "revision": "T5_TYPOGRAPHIE_EDITORIALE_BODONI_2026-11-18",
       "release": "t5-full-frame-v3-candidate-5",
       "reason": "Bodoni Moda appliquée au texte long est illisible ; ne pas réutiliser cette variante."
+    },
+    {
+      "revision": "T5_TYPOGRAPHIE_LISIBLE_PLAYFAIR_2026-11-18",
+      "release": "t5-full-frame-v3-candidate-6",
+      "reason": "La famille Playfair est conservée, mais la mise en forme lettre par lettre est rejetée car elle décale temporairement les glyphes hors de leur baseline."
     }
   ]
 }

@@ -1,0 +1,401 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/vitrinevideo0-bot/vitrine-video-t5-formule-combo-offre/raw/main/schemas/T5_text_motion_v4.schema.json",
+  "title": "RESTAURATION-T5 stable centered Playfair subtitle contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "contract_id",
+    "template_id",
+    "status",
+    "revision",
+    "design_intent",
+    "font",
+    "animation",
+    "render_style",
+    "readability_policy",
+    "field_pixel_proofs",
+    "scenes",
+    "approval"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "4.0.0"
+    },
+    "contract_id": {
+      "const": "t5_text_motion_v4_0_0"
+    },
+    "template_id": {
+      "const": "RESTAURATION-T5"
+    },
+    "status": {
+      "const": "owner_baseline_and_subtitle_layout_correction"
+    },
+    "revision": {
+      "const": "T5_SOUS_TITRES_PLAYFAIR_STABLES_2026-11-18"
+    },
+    "design_intent": {
+      "type": "string",
+      "minLength": 1
+    },
+    "font": {
+      "const": {
+        "family": "Playfair Display",
+        "classification": "readable editorial display serif",
+        "style_reference": "Didot-inspired editorial serif optimized for screen readability",
+        "source": "Google Fonts",
+        "license": "OFL-1.1",
+        "file": "assets/fonts/playfair-display/PlayfairDisplay[wght].ttf",
+        "license_file": "assets/fonts/playfair-display/OFL.txt",
+        "metadata_file": "assets/fonts/playfair-display/METADATA.pb",
+        "variation_axes": {
+          "wght": {
+            "minimum": 400,
+            "default": 400,
+            "maximum": 900
+          }
+        },
+        "weights": {
+          "bold": 700,
+          "extrabold": 800,
+          "black": 900
+        }
+      }
+    },
+    "animation": {
+      "const": {
+        "reveal_unit": "block",
+        "sequence": "timed_field_blocks",
+        "alignment": "center",
+        "entry": "whole_block_fade_in",
+        "exit": "whole_block_fade_out",
+        "entry_fade_frames": 3,
+        "exit_fade_frames": 6,
+        "max_simultaneous_fields": 2,
+        "static_all_fields_from_first_frame": false,
+        "text_background_boxes": false,
+        "preserve_exact_merchant_value": true,
+        "frame_intervals": "start_inclusive_end_exclusive",
+        "per_letter_animation": false,
+        "baseline_motion_pixels": 0,
+        "rotation_degrees": 0,
+        "case_transform": "none",
+        "composition": "centered_stable_subtitles",
+        "opentype_features_disabled": [
+          "kern",
+          "liga",
+          "clig",
+          "dlig",
+          "calt",
+          "salt",
+          "swsh"
+        ]
+      }
+    },
+    "render_style": {
+      "const": {
+        "fill": "#FFFFFF",
+        "accent_fill": "#FFFFFF",
+        "outline": "#090909",
+        "stroke_width": 1,
+        "stroke_alpha": 230,
+        "shadow": "#000000",
+        "shadow_alpha": 145,
+        "shadow_blur_radius": 3,
+        "shadow_offset": [
+          0,
+          2
+        ]
+      }
+    },
+    "readability_policy": {
+      "const": {
+        "priority": "maximum",
+        "same_font_family": true,
+        "uniform_baseline": true,
+        "constant_letter_spacing": true,
+        "regular_word_spacing": true,
+        "decorative_alternates_disabled": true,
+        "centered_horizontally": true,
+        "line_height_ratio": 1.2,
+        "maximum_lines": 2,
+        "target_words_per_line": [
+          4,
+          6
+        ],
+        "minimum_preferred_size": 52,
+        "minimum_weight": 800,
+        "side_safe_margin_pixels": 50,
+        "bottom_safe_margin_pixels": 150,
+        "fine_dark_outline": true,
+        "subtle_shadow": true,
+        "block_entry_only": true
+      }
+    },
+    "field_pixel_proofs": {
+      "const": {
+        "nom": {
+          "scene": "S1",
+          "frame": 42
+        },
+        "offre": {
+          "scene": "S1",
+          "frame": 94
+        },
+        "contenu": {
+          "scene": "S2",
+          "frame": 120
+        },
+        "prix": {
+          "scene": "S3",
+          "frame": 180
+        },
+        "whatsapp": {
+          "scene": "S4",
+          "frame": 112
+        },
+        "quartier": {
+          "scene": "S4",
+          "frame": 172
+        }
+      }
+    },
+    "scenes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "S1",
+        "S2",
+        "S3",
+        "S4"
+      ],
+      "properties": {
+        "S1": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "scene_frames",
+            "fields"
+          ],
+          "properties": {
+            "scene_frames": {
+              "const": 180
+            },
+            "fields": {
+              "type": "array",
+              "minItems": 3,
+              "maxItems": 3,
+              "items": {
+                "$ref": "#/$defs/field"
+              }
+            }
+          }
+        },
+        "S2": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "scene_frames",
+            "fields"
+          ],
+          "properties": {
+            "scene_frames": {
+              "const": 240
+            },
+            "fields": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 1,
+              "items": {
+                "$ref": "#/$defs/field"
+              }
+            }
+          }
+        },
+        "S3": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "scene_frames",
+            "fields"
+          ],
+          "properties": {
+            "scene_frames": {
+              "const": 210
+            },
+            "fields": {
+              "type": "array",
+              "minItems": 3,
+              "maxItems": 3,
+              "items": {
+                "$ref": "#/$defs/field"
+              }
+            }
+          }
+        },
+        "S4": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "scene_frames",
+            "fields",
+            "stable_tail"
+          ],
+          "properties": {
+            "scene_frames": {
+              "const": 270
+            },
+            "fields": {
+              "type": "array",
+              "minItems": 3,
+              "maxItems": 3,
+              "items": {
+                "$ref": "#/$defs/field"
+              }
+            },
+            "stable_tail": {
+              "const": {
+                "start_frame": 180,
+                "end_frame": 269,
+                "visible_fields": [
+                  "whatsapp",
+                  "quartier"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "approval": {
+      "const": {
+        "date": "2026-11-18",
+        "timezone": "Africa/Lagos",
+        "decision_channel": "arena_direct_instruction",
+        "reference_images": [
+          "image-32.png",
+          "image-35.png"
+        ],
+        "font_decision": "Playfair Display ExtraBold/Black reste exactement la famille active.",
+        "layout_decision": "Toutes les lettres partagent une baseline fixe ; texte centré, deux lignes maximum, interligne 1,2, contour sombre fin et apparition du bloc complet sans animation par lettre.",
+        "publication_target": "github_main_and_new_server_render"
+      }
+    }
+  },
+  "$defs": {
+    "field": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "start_frame",
+        "entry_end_frame",
+        "hold_end_frame",
+        "end_frame",
+        "box",
+        "preferred_size",
+        "minimum_size",
+        "weight",
+        "max_lines",
+        "letter_spacing_em",
+        "word_spacing_em",
+        "line_height_ratio",
+        "accent"
+      ],
+      "properties": {
+        "id": {
+          "enum": [
+            "nom",
+            "offre",
+            "contenu",
+            "prix",
+            "whatsapp",
+            "quartier"
+          ]
+        },
+        "start_frame": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 269
+        },
+        "entry_end_frame": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 270
+        },
+        "hold_end_frame": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 270
+        },
+        "end_frame": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 270
+        },
+        "box": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "integer",
+              "minimum": 50,
+              "maximum": 719
+            },
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1129
+            },
+            {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 670
+            },
+            {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1130
+            }
+          ],
+          "items": false,
+          "minItems": 4,
+          "maxItems": 4
+        },
+        "preferred_size": {
+          "type": "integer",
+          "minimum": 52,
+          "maximum": 96
+        },
+        "minimum_size": {
+          "type": "integer",
+          "minimum": 44,
+          "maximum": 80
+        },
+        "weight": {
+          "enum": [
+            800,
+            900
+          ]
+        },
+        "max_lines": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2
+        },
+        "letter_spacing_em": {
+          "const": 0.0
+        },
+        "word_spacing_em": {
+          "const": 0.0
+        },
+        "line_height_ratio": {
+          "const": 1.2
+        },
+        "accent": {
+          "const": false
+        }
+      }
+    }
+  }
+}

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Primitives visuelles T5 V3 : rush plein écran et typographie motion issue du JSON.
+"""Primitives visuelles T5 : rush plein écran et sous-titres Playfair stables.
 
 Aucun titre éditorial, carte, cadre vidéo, barre de progression ou libellé de scène
-n'est produit ici. Les seuls glyphes brûlés sont des caractères des valeurs exactes
-du RenderJob, révélés selon config/T5_TEXT_MOTION_V3_0_0.json.
+n'est produit ici. Les seules valeurs brûlées viennent exactement du RenderJob et
+suivent le contrat centré sans animation par lettre T5_TEXT_MOTION_V4_0_0.json.
 """
 from __future__ import annotations
 
@@ -14,14 +14,19 @@ from pathlib import Path
 from typing import Any, Mapping
 import re
 
-from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
+from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont, features as pil_features
 
 ROOT = Path(__file__).resolve().parents[1]
 WIDTH, HEIGHT = 720, 1280
-TEXT_MOTION_CONFIG_PATH = ROOT / "config/T5_TEXT_MOTION_V3_0_0.json"
+TEXT_MOTION_CONFIG_PATH = ROOT / "config/T5_TEXT_MOTION_V4_0_0.json"
 TEXT_MOTION: dict[str, Any] = json.loads(TEXT_MOTION_CONFIG_PATH.read_text(encoding="utf-8"))
 FONT_FILE = ROOT / TEXT_MOTION["font"]["file"]
 FONT_LICENSE_FILE = ROOT / TEXT_MOTION["font"]["license_file"]
+DISABLED_FEATURES: tuple[str, ...] = tuple(
+    f"-{tag}" for tag in TEXT_MOTION["animation"]["opentype_features_disabled"]
+)
+WEAK_LINE_ENDINGS = frozenset({"a", "à", "au", "aux", "de", "des", "du", "en", "et", "près"})
+WEAK_LINE_STARTS = frozenset({"à", "au", "aux", "de", "des", "du", "en"})
 
 SCENE_FIELDS: dict[str, tuple[str, ...]] = {
     scene: tuple(field["id"] for field in scene_contract["fields"])
@@ -54,21 +59,36 @@ def _validate_motion_contract() -> None:
     if TEXT_MOTION["font"]["family"] != "Playfair Display":
         raise RuntimeError("The active T5 readable editorial family must be Playfair Display")
     readability = TEXT_MOTION["readability_policy"]
-    if TEXT_MOTION["render_style"]["fill"] != "#FFFFFF" or TEXT_MOTION["render_style"]["stroke_width"] != 0:
-        raise RuntimeError("The active T5 text must remain solid white without an outline")
-    if TEXT_MOTION["animation"]["letter_motion"] != "staggered_soft_rise_and_fade":
-        raise RuntimeError("The active T5 letters must use the readable soft motion")
+    animation = TEXT_MOTION["animation"]
+    style = TEXT_MOTION["render_style"]
+    if not pil_features.check_feature("raqm"):
+        raise RuntimeError("RAQM/HarfBuzz is required to disable decorative OpenType features deterministically")
+    if style["fill"] != "#FFFFFF" or style["stroke_width"] != 1 or int(style["stroke_alpha"]) <= 0:
+        raise RuntimeError("The active T5 subtitles must remain white with a fine dark outline")
+    if animation["reveal_unit"] != "block" or animation["per_letter_animation"] is not False:
+        raise RuntimeError("The active T5 subtitles must appear as complete stable blocks")
+    if animation["alignment"] != "center" or animation["baseline_motion_pixels"] != 0 or animation["rotation_degrees"] != 0:
+        raise RuntimeError("The active T5 subtitles must remain centered on one fixed baseline per line")
     if readability != {
         "priority": "maximum",
-        "native_pair_kerning": True,
-        "neutral_tracking": True,
-        "minimum_preferred_size": 48,
+        "same_font_family": True,
+        "uniform_baseline": True,
+        "constant_letter_spacing": True,
+        "regular_word_spacing": True,
+        "decorative_alternates_disabled": True,
+        "centered_horizontally": True,
+        "line_height_ratio": 1.2,
+        "maximum_lines": 2,
+        "target_words_per_line": [4, 6],
+        "minimum_preferred_size": 52,
         "minimum_weight": 800,
-        "white_only": True,
-        "no_outline": True,
-        "long_copy_max_lines": 3,
+        "side_safe_margin_pixels": 50,
+        "bottom_safe_margin_pixels": 150,
+        "fine_dark_outline": True,
+        "subtle_shadow": True,
+        "block_entry_only": True,
     }:
-        raise RuntimeError("The T5 maximum-readability policy must remain contract-bound")
+        raise RuntimeError("The T5 stable-subtitle readability policy must remain contract-bound")
     maximum_active = 0
     for scene, total in expected_frames.items():
         contract = TEXT_MOTION["scenes"][scene]
@@ -76,20 +96,27 @@ def _validate_motion_contract() -> None:
             raise RuntimeError(f"Text motion scene length diverges for {scene}")
         for field in contract["fields"]:
             start = int(field["start_frame"])
-            type_end = int(field["type_on_end_frame"])
+            entry_end = int(field["entry_end_frame"])
             hold_end = int(field["hold_end_frame"])
             end = int(field["end_frame"])
-            if not (0 <= start < type_end <= hold_end <= end <= total):
-                raise RuntimeError(f"Invalid kinetic text interval for {scene}.{field['id']}")
+            if not (0 <= start < entry_end <= hold_end <= end <= total):
+                raise RuntimeError(f"Invalid stable subtitle interval for {scene}.{field['id']}")
             x0, y0, x1, y1 = map(int, field["box"])
             if not (0 <= x0 < x1 <= WIDTH and 0 <= y0 < y1 <= HEIGHT):
-                raise RuntimeError(f"Invalid kinetic text box for {scene}.{field['id']}")
+                raise RuntimeError(f"Invalid subtitle box for {scene}.{field['id']}")
+            if x0 < int(readability["side_safe_margin_pixels"]) or x1 > WIDTH - int(readability["side_safe_margin_pixels"]):
+                raise RuntimeError(f"Subtitle side safety margin is too small for {scene}.{field['id']}")
+            if y1 > HEIGHT - int(readability["bottom_safe_margin_pixels"]):
+                raise RuntimeError(f"Subtitle bottom safety margin is too small for {scene}.{field['id']}")
             if (
                 int(field["weight"]) < int(readability["minimum_weight"])
                 or int(field["preferred_size"]) < int(readability["minimum_preferred_size"])
-                or float(field["tracking"]) != 0.0
+                or int(field["max_lines"]) > int(readability["maximum_lines"])
+                or float(field["letter_spacing_em"]) != 0.0
+                or float(field["word_spacing_em"]) != 0.0
+                or float(field["line_height_ratio"]) != float(readability["line_height_ratio"])
             ):
-                raise RuntimeError(f"Editorial text must remain large, bold and naturally spaced for {scene}.{field['id']}")
+                raise RuntimeError(f"Subtitle typography must remain large, stable and regularly spaced for {scene}.{field['id']}")
         for frame in range(total):
             active = sum(
                 int(field["start_frame"]) <= frame < int(field["end_frame"])
@@ -100,8 +127,8 @@ def _validate_motion_contract() -> None:
         raise RuntimeError("The motion schedule exceeds the approved simultaneous-field limit")
     for field, (scene, proof_frame) in FIELD_PIXEL_PROOFS.items():
         spec = FIELD_SPECS[scene][field]
-        if not (int(spec["type_on_end_frame"]) <= proof_frame < int(spec["hold_end_frame"])):
-            raise RuntimeError(f"Pixel proof frame must show the complete value for {field}")
+        if not (int(spec["entry_end_frame"]) <= proof_frame < int(spec["hold_end_frame"])):
+            raise RuntimeError(f"Pixel proof frame must show the complete stable block for {field}")
     tail = TEXT_MOTION["scenes"]["S4"]["stable_tail"]
     if tail != {"start_frame": 180, "end_frame": 269, "visible_fields": ["whatsapp", "quartier"]}:
         raise RuntimeError("The final three-second stable motion state must remain contract-bound")
@@ -128,7 +155,7 @@ def motion_design_evidence() -> dict[str, Any]:
             {
                 "field": field["id"],
                 "start_frame": field["start_frame"],
-                "type_on_end_frame": field["type_on_end_frame"],
+                "entry_end_frame": field["entry_end_frame"],
                 "hold_end_frame": field["hold_end_frame"],
                 "end_frame": field["end_frame"],
             }
@@ -154,18 +181,22 @@ def motion_design_evidence() -> dict[str, Any]:
         "reveal_unit": animation["reveal_unit"],
         "sequence": animation["sequence"],
         "alignment": animation["alignment"],
-        "letter_motion": animation["letter_motion"],
+        "per_letter_animation": animation["per_letter_animation"],
+        "uniform_baseline": animation["baseline_motion_pixels"] == 0,
+        "rotation_degrees": animation["rotation_degrees"],
         "composition": animation["composition"],
         "case_transform": animation["case_transform"],
-        "white_bold_editorial_style": (
+        "opentype_features_disabled": animation["opentype_features_disabled"],
+        "white_outlined_editorial_style": (
             TEXT_MOTION["render_style"]["fill"] == "#FFFFFF"
-            and TEXT_MOTION["render_style"]["stroke_width"] == 0
+            and TEXT_MOTION["render_style"]["stroke_width"] == 1
+            and TEXT_MOTION["render_style"]["stroke_alpha"] > 0
             and min(field["weight"] for scene in TEXT_MOTION["scenes"].values() for field in scene["fields"])
                 >= TEXT_MOTION["readability_policy"]["minimum_weight"]
             and min(field["preferred_size"] for scene in TEXT_MOTION["scenes"].values() for field in scene["fields"])
                 >= TEXT_MOTION["readability_policy"]["minimum_preferred_size"]
         ),
-        "native_pair_kerning": True,
+        "constant_letter_spacing": True,
         "readability_policy": TEXT_MOTION["readability_policy"],
         "static_all_fields_from_first_frame": animation["static_all_fields_from_first_frame"],
         "text_background_boxes": animation["text_background_boxes"],
@@ -182,7 +213,7 @@ def _resample() -> int:
 
 @lru_cache(maxsize=128)
 def load_font(size: int, weight: int = 900) -> ImageFont.FreeTypeFont:
-    font = ImageFont.truetype(str(FONT_FILE), size)
+    font = ImageFont.truetype(str(FONT_FILE), size, layout_engine=ImageFont.Layout.RAQM)
     variation_axes = TEXT_MOTION["font"].get("variation_axes", {})
     if variation_axes and hasattr(font, "set_variation_by_axes"):
         axis_values: list[int] = []
@@ -234,26 +265,69 @@ def _tokens(value: str) -> list[str]:
     return re.findall(r"\S+", _normalize(value))
 
 
-def _tracked_width(value: str, font: ImageFont.FreeTypeFont, tracking: float) -> float:
+def _tracked_width(
+    value: str,
+    font: ImageFont.FreeTypeFont,
+    tracking: float,
+    word_spacing: float = 0.0,
+) -> float:
+    """Largeur sans kerning ni ligature, avec le même ajout régulier entre chaque lettre."""
     if not value:
         return 0.0
-    # Mesurer la chaîne complète conserve le kerning natif des paires (AV, To, etc.).
-    return float(font.getlength(value)) + tracking * max(0, len(value) - 1)
+    advances = [
+        float(font.getlength(character, features=list(DISABLED_FEATURES)))
+        + (word_spacing if character == " " else 0.0)
+        for character in value
+    ]
+    return sum(advances) + tracking * max(0, len(value) - 1)
 
 
-def _wrap_lines(value: str, font: ImageFont.FreeTypeFont, max_width: int, tracking: float) -> list[str]:
-    words = _tokens(value) or [""]
-    lines: list[str] = []
-    current = words[0]
-    for word in words[1:]:
-        candidate = f"{current} {word}"
-        if _tracked_width(candidate, font, tracking) <= max_width:
-            current = candidate
+def _break_word(value: str) -> str:
+    return value.lower().strip(".,;:!?…()[]{}\"'’")
+
+
+def _wrap_lines(
+    value: str,
+    font: ImageFont.FreeTypeFont,
+    max_width: int,
+    max_lines: int,
+    tracking: float,
+    word_spacing: float,
+) -> list[str]:
+    """Choisit au plus deux lignes équilibrées en évitant les coupures françaises faibles."""
+    normalized = _normalize(value)
+    words = _tokens(normalized) or [""]
+    if _tracked_width(normalized, font, tracking, word_spacing) <= max_width or max_lines == 1:
+        return [normalized]
+
+    target_min, target_max = map(int, TEXT_MOTION["readability_policy"]["target_words_per_line"])
+    candidates: list[tuple[float, list[str]]] = []
+    overflow_candidates: list[tuple[float, list[str]]] = []
+    for split in range(1, len(words)):
+        lines = [" ".join(words[:split]), " ".join(words[split:])]
+        widths = [_tracked_width(line, font, tracking, word_spacing) for line in lines]
+        counts = [split, len(words) - split]
+        count_penalty = sum(
+            max(0, target_min - count) * 90 + max(0, count - target_max) * 90
+            for count in counts
+        )
+        natural_penalty = 0
+        if _break_word(words[split - 1]) in WEAK_LINE_ENDINGS:
+            natural_penalty += 700
+        if _break_word(words[split]) in WEAK_LINE_STARTS:
+            natural_penalty += 160
+        if words[split - 1].endswith((",", ";", ":")):
+            natural_penalty -= 60
+        balance_penalty = abs(widths[0] - widths[1]) / max(1.0, float(max_width)) * 25
+        score = count_penalty + natural_penalty + balance_penalty
+        overflow = max(0.0, max(widths) - max_width)
+        item = (score + overflow * 20, lines)
+        if overflow == 0:
+            candidates.append(item)
         else:
-            lines.append(current)
-            current = word
-    lines.append(current)
-    return lines
+            overflow_candidates.append(item)
+    pool = candidates or overflow_candidates
+    return min(pool, key=lambda item: item[0])[1] if pool else [normalized]
 
 
 @lru_cache(maxsize=256)
@@ -265,28 +339,32 @@ def _layout_text(
     minimum_size: int,
     weight: int,
     max_lines: int,
-    tracking: float,
-    line_spacing: int,
-) -> tuple[tuple[str, ...], int, int, int]:
+    letter_spacing_em: float,
+    word_spacing_em: float,
+    line_height_ratio: float,
+) -> tuple[tuple[str, ...], int, int, int, int, int]:
     normalized = _normalize(value)
-    fallback: tuple[tuple[str, ...], int, int, int] | None = None
+    fallback: tuple[tuple[str, ...], int, int, int, int, int] | None = None
     for size in range(preferred_size, minimum_size - 1, -1):
         font = load_font(size, weight)
-        lines = _wrap_lines(normalized, font, max_width, tracking)
-        line_bbox = font.getbbox("Ag", anchor="lt")
-        line_height = max(1, line_bbox[3] - line_bbox[1])
-        total_height = line_height * len(lines) + line_spacing * max(0, len(lines) - 1)
-        fallback = (tuple(lines), size, line_height, total_height)
+        tracking = size * letter_spacing_em
+        word_spacing = size * word_spacing_em
+        lines = _wrap_lines(normalized, font, max_width, max_lines, tracking, word_spacing)
+        ascent, descent = map(int, font.getmetrics())
+        line_advance = max(1, round(size * line_height_ratio))
+        total_height = ascent + descent + line_advance * max(0, len(lines) - 1)
+        fallback = (tuple(lines), size, ascent, descent, line_advance, total_height)
         if (
             len(lines) <= max_lines
-            and max((_tracked_width(line, font, tracking) for line in lines), default=0) <= max_width
+            and max((_tracked_width(line, font, tracking, word_spacing) for line in lines), default=0) <= max_width
             and total_height <= max_height
         ):
             return fallback
     if fallback is None:
         font = load_font(minimum_size, weight)
-        line_height = max(1, font.getbbox("Ag", anchor="lt")[3])
-        return ((normalized,), minimum_size, line_height, line_height)
+        ascent, descent = map(int, font.getmetrics())
+        line_advance = max(1, round(minimum_size * line_height_ratio))
+        return ((normalized,), minimum_size, ascent, descent, line_advance, ascent + descent)
     return fallback
 
 
@@ -327,54 +405,38 @@ def _smoothstep(value: float) -> float:
 
 
 def text_motion_state(scene: str, field: str, local_frame: int, value: str) -> dict[str, Any]:
+    """État du bloc complet : aucune lettre ne possède de position ou d'alpha indépendant."""
     spec = FIELD_SPECS[scene][field]
     start = int(spec["start_frame"])
-    type_end = int(spec["type_on_end_frame"])
+    entry_end = int(spec["entry_end_frame"])
     hold_end = int(spec["hold_end_frame"])
     end = int(spec["end_frame"])
     total_characters = len(_normalize(value))
-    reveal_duration = max(1, type_end - start)
     if local_frame < start or local_frame >= end or total_characters == 0:
         return {
             "phase": "hidden",
+            "block_visible": False,
             "visible_characters": 0,
             "total_characters": total_characters,
-            "elapsed_frames": 0,
-            "reveal_duration": reveal_duration,
             "alpha": 0,
             "y_offset": 0,
+            "rotation_degrees": 0,
         }
-    elapsed_frames = local_frame - start + 1
-    letter_fade_frames = int(TEXT_MOTION["animation"]["letter_fade_frames"])
-    stagger_span = max(0.0, float(reveal_duration - letter_fade_frames))
-    if total_characters <= 1 or stagger_span == 0:
-        visible_characters = total_characters
-    else:
-        visible_characters = sum(
-            elapsed_frames > character_index * stagger_span / (total_characters - 1)
-            for character_index in range(total_characters)
-        )
-    visible_characters = min(total_characters, max(1, visible_characters))
-    entry_frames = int(TEXT_MOTION["animation"]["entry_fade_frames"])
-    entry_progress = min(1.0, (local_frame - start + 1) / max(1, entry_frames))
-    entry_eased = _smoothstep(entry_progress)
-    alpha_factor = entry_eased
-    y_offset = float(TEXT_MOTION["animation"]["entry_rise_pixels"]) * (1.0 - entry_eased)
-    phase = "type_on" if local_frame < type_end else "hold"
+    entry_progress = min(1.0, (local_frame - start + 1) / max(1, entry_end - start))
+    alpha_factor = _smoothstep(entry_progress)
+    phase = "entry" if local_frame < entry_end else "hold"
     if hold_end < end and local_frame >= hold_end:
         exit_progress = (local_frame - hold_end + 1) / max(1, end - hold_end)
-        exit_eased = _smoothstep(exit_progress)
-        alpha_factor *= 1.0 - exit_eased
-        y_offset -= float(TEXT_MOTION["animation"]["exit_rise_pixels"]) * exit_eased
+        alpha_factor *= 1.0 - _smoothstep(exit_progress)
         phase = "exit"
     return {
         "phase": phase,
-        "visible_characters": visible_characters,
+        "block_visible": True,
+        "visible_characters": total_characters,
         "total_characters": total_characters,
-        "elapsed_frames": elapsed_frames,
-        "reveal_duration": reveal_duration,
         "alpha": max(0, min(255, round(255 * alpha_factor))),
-        "y_offset": round(y_offset, 3),
+        "y_offset": 0,
+        "rotation_degrees": 0,
     }
 
 
@@ -383,68 +445,41 @@ def _hex_rgb(value: str) -> tuple[int, int, int]:
     return tuple(int(value[index:index + 2], 16) for index in (0, 2, 4))
 
 
-def _draw_characters(
+def _draw_stable_lines(
     draw: ImageDraw.ImageDraw,
     lines: tuple[str, ...],
     *,
-    state: Mapping[str, Any],
     font: ImageFont.FreeTypeFont,
-    x: float,
-    y: float,
-    line_height: int,
-    line_spacing: int,
+    center_x: float,
+    first_baseline: float,
+    line_advance: int,
     tracking: float,
+    word_spacing: float,
     fill: tuple[int, int, int, int],
     stroke_width: int = 0,
     stroke_fill: tuple[int, int, int, int] | None = None,
 ) -> None:
-    visible_characters = int(state["visible_characters"])
-    total_characters = int(state["total_characters"])
-    elapsed_frames = float(state["elapsed_frames"])
-    reveal_duration = float(state["reveal_duration"])
-    letter_fade_frames = float(TEXT_MOTION["animation"]["letter_fade_frames"])
-    letter_rise_pixels = float(TEXT_MOTION["animation"]["letter_rise_pixels"])
-    stagger_span = max(0.0, reveal_duration - letter_fade_frames)
-    character_index = 0
+    """Dessine tous les glyphes avec la même baseline, le même alpha et aucune rotation."""
     for line_index, line in enumerate(lines):
-        for line_character_index, character in enumerate(line):
-            if character_index >= visible_characters:
-                return
-            # Position cumulative avec la paire courante afin de conserver le kerning natif.
-            shaped_prefix = line[:line_character_index + 1]
-            cursor_x = (
-                x
-                + float(font.getlength(shaped_prefix))
-                - float(font.getlength(character))
-                + tracking * line_character_index
-            )
-            if state["phase"] == "type_on" and total_characters > 1 and stagger_span > 0:
-                start_offset = character_index * stagger_span / (total_characters - 1)
-                letter_progress = _smoothstep((elapsed_frames - start_offset) / max(1.0, letter_fade_frames))
-            else:
-                letter_progress = 1.0
-            character_fill = (*fill[:3], round(fill[3] * letter_progress))
-            character_stroke = None
-            if stroke_fill is not None:
-                character_stroke = (*stroke_fill[:3], round(stroke_fill[3] * letter_progress))
-            character_y = (
-                y
-                + line_index * (line_height + line_spacing)
-                + letter_rise_pixels * (1.0 - letter_progress)
-            )
+        width = _tracked_width(line, font, tracking, word_spacing)
+        cursor_x = center_x - width / 2
+        baseline = first_baseline + line_index * line_advance
+        for character_index, character in enumerate(line):
             draw.text(
-                (cursor_x, character_y),
+                (cursor_x, baseline),
                 character,
                 font=font,
-                anchor="lt",
-                fill=character_fill,
+                anchor="ls",
+                fill=fill,
                 stroke_width=stroke_width,
-                stroke_fill=character_stroke,
+                stroke_fill=stroke_fill,
+                features=list(DISABLED_FEATURES),
             )
-            character_index += 1
-        if line_index < len(lines) - 1:
-            # Le wrapping remplace exactement un espace de la valeur normalisée.
-            character_index += 1
+            cursor_x += float(font.getlength(character, features=list(DISABLED_FEATURES)))
+            if character == " ":
+                cursor_x += word_spacing
+            if character_index < len(line) - 1:
+                cursor_x += tracking
 
 
 def _draw_kinetic_value(
@@ -453,13 +488,11 @@ def _draw_kinetic_value(
     spec: Mapping[str, Any],
     state: Mapping[str, Any],
 ) -> None:
-    if int(state["alpha"]) <= 0 or int(state["visible_characters"]) <= 0:
+    if int(state["alpha"]) <= 0 or state.get("block_visible") is not True:
         return
     x0, y0, x1, y1 = map(int, spec["box"])
     box_width, box_height = x1 - x0, y1 - y0
-    tracking = float(spec["tracking"])
-    line_spacing = int(spec["line_spacing"])
-    lines, size, line_height, total_height = _layout_text(
+    lines, size, ascent, _descent, line_advance, total_height = _layout_text(
         _normalize(value),
         box_width,
         box_height,
@@ -467,10 +500,13 @@ def _draw_kinetic_value(
         int(spec["minimum_size"]),
         int(spec["weight"]),
         int(spec["max_lines"]),
-        tracking,
-        line_spacing,
+        float(spec["letter_spacing_em"]),
+        float(spec["word_spacing_em"]),
+        float(spec["line_height_ratio"]),
     )
     font = load_font(size, int(spec["weight"]))
+    tracking = size * float(spec["letter_spacing_em"])
+    word_spacing = size * float(spec["word_spacing_em"])
     style = TEXT_MOTION["render_style"]
     blur = int(style["shadow_blur_radius"])
     shadow_offset_x, shadow_offset_y = map(int, style["shadow_offset"])
@@ -478,43 +514,40 @@ def _draw_kinetic_value(
     layer_size = (box_width + padding * 2, box_height + padding * 2)
     alpha = int(state["alpha"])
     text_rgb = _hex_rgb(style["accent_fill"] if spec["accent"] else style["fill"])
+    outline_rgb = _hex_rgb(style["outline"])
     shadow_rgb = _hex_rgb(style["shadow"])
-    text_y = padding + max(0, (box_height - total_height) / 2) + float(state["y_offset"])
-    text_x = float(padding)
+    center_x = padding + box_width / 2
+    first_baseline = padding + max(0.0, (box_height - total_height) / 2) + ascent
 
     shadow_layer = Image.new("RGBA", layer_size, (0, 0, 0, 0))
-    shadow_draw = ImageDraw.Draw(shadow_layer)
-    _draw_characters(
-        shadow_draw,
+    _draw_stable_lines(
+        ImageDraw.Draw(shadow_layer),
         lines,
-        state=state,
         font=font,
-        x=text_x + shadow_offset_x,
-        y=text_y + shadow_offset_y,
-        line_height=line_height,
-        line_spacing=line_spacing,
+        center_x=center_x + shadow_offset_x,
+        first_baseline=first_baseline + shadow_offset_y,
+        line_advance=line_advance,
         tracking=tracking,
+        word_spacing=word_spacing,
         fill=(*shadow_rgb, round(int(style["shadow_alpha"]) * alpha / 255)),
     )
     if blur:
         shadow_layer = shadow_layer.filter(ImageFilter.GaussianBlur(radius=blur))
 
     text_layer = Image.new("RGBA", layer_size, (0, 0, 0, 0))
-    text_draw = ImageDraw.Draw(text_layer)
     stroke_alpha = round(int(style["stroke_alpha"]) * alpha / 255)
-    _draw_characters(
-        text_draw,
+    _draw_stable_lines(
+        ImageDraw.Draw(text_layer),
         lines,
-        state=state,
         font=font,
-        x=text_x,
-        y=text_y,
-        line_height=line_height,
-        line_spacing=line_spacing,
+        center_x=center_x,
+        first_baseline=first_baseline,
+        line_advance=line_advance,
         tracking=tracking,
+        word_spacing=word_spacing,
         fill=(*text_rgb, alpha),
         stroke_width=int(style["stroke_width"]),
-        stroke_fill=(*shadow_rgb, stroke_alpha),
+        stroke_fill=(*outline_rgb, stroke_alpha),
     )
     composed = Image.alpha_composite(shadow_layer, text_layer)
     frame.paste(composed, (x0 - padding, y0 - padding), composed)

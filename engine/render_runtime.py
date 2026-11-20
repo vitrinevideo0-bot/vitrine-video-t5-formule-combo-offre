@@ -260,7 +260,7 @@ def main() -> int:
     sheet_path = args.output_dir / "T5_RUNTIME_PLANCHE_12_IMAGES.jpg"
     payload: dict[str, str] = dict(job["merchant_payload"])
     resolved = {
-        "schema_version": "3.0.0",
+        "schema_version": "4.0.0",
         "job_id": job["job_id"],
         "source": "RenderJob.merchant_payload",
         "ordered_fields": list(payload),
@@ -271,7 +271,11 @@ def main() -> int:
         "font_family": TEXT_MOTION["font"]["family"],
         "font_style": TEXT_MOTION["font"]["style_reference"],
         "reveal_unit": TEXT_MOTION["animation"]["reveal_unit"],
-        "letter_motion": TEXT_MOTION["animation"]["letter_motion"],
+        "per_letter_animation": TEXT_MOTION["animation"]["per_letter_animation"],
+        "alignment": TEXT_MOTION["animation"]["alignment"],
+        "uniform_baseline": TEXT_MOTION["readability_policy"]["uniform_baseline"],
+        "maximum_lines": TEXT_MOTION["readability_policy"]["maximum_lines"],
+        "line_height_ratio": TEXT_MOTION["readability_policy"]["line_height_ratio"],
         "scene_values": {
             slot: {field: payload[field] for field in SCENE_FIELDS[slot]}
             for slot in SLOTS
@@ -383,15 +387,22 @@ def main() -> int:
             "scene_or_technical_labels": False,
             "horizontal_color_seams": False,
             "readability_gradient_reaches_frame_bottom": True,
-            "kinetic_text_motion": True,
+            "kinetic_text_motion": False,
+            "timed_subtitle_blocks": True,
+            "per_letter_animation": False,
             "static_text_stack": False,
             "max_simultaneous_text_fields": 2,
             "font_family": TEXT_MOTION["font"]["family"],
             "font_classification": TEXT_MOTION["font"]["classification"],
             "large_white_bold_text": True,
-            "native_pair_kerning": TEXT_MOTION["readability_policy"]["native_pair_kerning"],
-            "neutral_tracking": TEXT_MOTION["readability_policy"]["neutral_tracking"],
-            "text_outline": not TEXT_MOTION["readability_policy"]["no_outline"],
+            "uniform_baseline": TEXT_MOTION["readability_policy"]["uniform_baseline"],
+            "centered_horizontally": TEXT_MOTION["readability_policy"]["centered_horizontally"],
+            "constant_letter_spacing": TEXT_MOTION["readability_policy"]["constant_letter_spacing"],
+            "decorative_alternates_disabled": TEXT_MOTION["readability_policy"]["decorative_alternates_disabled"],
+            "maximum_text_lines": TEXT_MOTION["readability_policy"]["maximum_lines"],
+            "line_height_ratio": TEXT_MOTION["readability_policy"]["line_height_ratio"],
+            "fine_dark_outline": TEXT_MOTION["readability_policy"]["fine_dark_outline"],
+            "subtle_shadow": TEXT_MOTION["readability_policy"]["subtle_shadow"],
             "readability_priority": TEXT_MOTION["readability_policy"]["priority"],
             "visible_text_source": "merchant_payload_exact_values_only",
         },

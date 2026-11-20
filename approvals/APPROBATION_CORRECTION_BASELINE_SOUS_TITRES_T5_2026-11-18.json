@@ -1,0 +1,64 @@
+{
+  "schema_version": "1.0.0",
+  "template_id": "RESTAURATION-T5",
+  "decision_id": "T5_CORRECTION_BASELINE_SOUS_TITRES_2026-11-18",
+  "status": "owner_required_immediate_correction",
+  "date_local": "2026-11-18",
+  "timezone": "Africa/Lagos",
+  "decision_channel": "arena_direct_instruction",
+  "reference_evidence": {
+    "file": "image-35.png",
+    "committed": false,
+    "sha256": "f5ca9e9796f05b22459e94cf60e7d36c45ad98ef80768e3cbd02c41d24d1d91c",
+    "finding": "Le rendu intermédiaire lettre par lettre produit des décalages verticaux et une lecture instable ; cette mise en forme est rejetée."
+  },
+  "font_decision": {
+    "family_must_not_change": true,
+    "selected_family": "Playfair Display",
+    "selected_weights": [800, 900],
+    "license": "OFL-1.1"
+  },
+  "required_layout": {
+    "uniform_baseline": true,
+    "rotation_degrees": 0,
+    "per_letter_vertical_offset_pixels": 0,
+    "per_letter_animation": false,
+    "constant_letter_spacing": true,
+    "regular_word_spacing": true,
+    "centered_horizontally": true,
+    "line_height_ratio": 1.2,
+    "decorative_ligatures_and_alternates_disabled": true,
+    "maximum_lines": 2,
+    "target_words_per_line": [4, 6],
+    "natural_line_breaks": true,
+    "larger_type_with_safe_margins": true,
+    "white_fill": "#FFFFFF",
+    "fine_dark_outline": true,
+    "subtle_shadow": true,
+    "whole_block_timed_entry": true,
+    "style": "sobre_net_elegant_immediate_reading"
+  },
+  "preserved_contract": {
+    "exact_merchant_values": true,
+    "four_full_frame_scenes": true,
+    "scene_durations": true,
+    "three_t1_transitions": true,
+    "stable_final_tail": true,
+    "templates_t1_to_t4_unchanged": true
+  },
+  "implementation": {
+    "subtitle_contract": {
+      "source": "config/T5_TEXT_MOTION_V4_0_0.json",
+      "sha256": "aeb1a6451b61f78b4d96ee4bfe2539484ddcb11f09ee7ee1e98d7bf1cc6835f5"
+    },
+    "subtitle_schema": {
+      "source": "schemas/T5_text_motion_v4.schema.json",
+      "sha256": "b72e358cc24691c450932e177b89f43fd096bb72318ce477d0fc069413283ede"
+    },
+    "font": {
+      "source": "assets/fonts/playfair-display/PlayfairDisplay[wght].ttf",
+      "sha256": "c40f2293766a503bc70cce9e512ef844a4ccb7cbcde792fe2ea31d191917d8d6"
+    }
+  },
+  "publication_authorized": true
+}

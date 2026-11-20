@@ -119,15 +119,22 @@ def main() -> int:
         and visual_policy.get("scene_or_technical_labels") is False
         and visual_policy.get("horizontal_color_seams") is False
         and visual_policy.get("readability_gradient_reaches_frame_bottom") is True
-        and visual_policy.get("kinetic_text_motion") is True
+        and visual_policy.get("kinetic_text_motion") is False
+        and visual_policy.get("timed_subtitle_blocks") is True
+        and visual_policy.get("per_letter_animation") is False
         and visual_policy.get("static_text_stack") is False
         and visual_policy.get("max_simultaneous_text_fields") == 2
         and visual_policy.get("font_family") == "Playfair Display"
         and visual_policy.get("font_classification") == "readable editorial display serif"
         and visual_policy.get("large_white_bold_text") is True
-        and visual_policy.get("native_pair_kerning") is True
-        and visual_policy.get("neutral_tracking") is True
-        and visual_policy.get("text_outline") is False
+        and visual_policy.get("uniform_baseline") is True
+        and visual_policy.get("centered_horizontally") is True
+        and visual_policy.get("constant_letter_spacing") is True
+        and visual_policy.get("decorative_alternates_disabled") is True
+        and visual_policy.get("maximum_text_lines") == 2
+        and visual_policy.get("line_height_ratio") == 1.2
+        and visual_policy.get("fine_dark_outline") is True
+        and visual_policy.get("subtle_shadow") is True
         and visual_policy.get("readability_priority") == "maximum"
     )
     gradient = render_report.get("readability_gradient_evidence", {})
@@ -143,7 +150,7 @@ def main() -> int:
     motion_font = motion.get("font", {})
     motion_contract_path = ROOT / str(motion_contract.get("file", "missing"))
     motion_font_path = ROOT / str(motion_font.get("file", "missing"))
-    kinetic_text_is_contract_bound = (
+    stable_subtitles_are_contract_bound = (
         motion_contract_path.is_file()
         and motion_font_path.is_file()
         and motion_contract.get("sha256") == sha256(motion_contract_path)
@@ -153,23 +160,35 @@ def main() -> int:
         and motion_font.get("style_reference") == "Didot-inspired editorial serif optimized for screen readability"
         and motion_font.get("license") == "OFL-1.1"
         and motion_font.get("variation_axes", {}).get("wght", {}).get("maximum") == 900
-        and motion.get("reveal_unit") == "character"
-        and motion.get("sequence") == "staggered_one_field_after_another"
-        and motion.get("alignment") == "left"
-        and motion.get("letter_motion") == "staggered_soft_rise_and_fade"
-        and motion.get("composition") == "large_readable_editorial_serif"
+        and motion.get("reveal_unit") == "block"
+        and motion.get("sequence") == "timed_field_blocks"
+        and motion.get("alignment") == "center"
+        and motion.get("per_letter_animation") is False
+        and motion.get("uniform_baseline") is True
+        and motion.get("rotation_degrees") == 0
+        and motion.get("composition") == "centered_stable_subtitles"
         and motion.get("case_transform") == "none"
-        and motion.get("white_bold_editorial_style") is True
-        and motion.get("native_pair_kerning") is True
+        and motion.get("opentype_features_disabled") == ["kern", "liga", "clig", "dlig", "calt", "salt", "swsh"]
+        and motion.get("white_outlined_editorial_style") is True
+        and motion.get("constant_letter_spacing") is True
         and motion.get("readability_policy") == {
             "priority": "maximum",
-            "native_pair_kerning": True,
-            "neutral_tracking": True,
-            "minimum_preferred_size": 48,
+            "same_font_family": True,
+            "uniform_baseline": True,
+            "constant_letter_spacing": True,
+            "regular_word_spacing": True,
+            "decorative_alternates_disabled": True,
+            "centered_horizontally": True,
+            "line_height_ratio": 1.2,
+            "maximum_lines": 2,
+            "target_words_per_line": [4, 6],
+            "minimum_preferred_size": 52,
             "minimum_weight": 800,
-            "white_only": True,
-            "no_outline": True,
-            "long_copy_max_lines": 3,
+            "side_safe_margin_pixels": 50,
+            "bottom_safe_margin_pixels": 150,
+            "fine_dark_outline": True,
+            "subtle_shadow": True,
+            "block_entry_only": True,
         }
         and motion.get("static_all_fields_from_first_frame") is False
         and motion.get("text_background_boxes") is False
@@ -187,11 +206,15 @@ def main() -> int:
         visual_policy.get("visible_text_source") == "merchant_payload_exact_values_only"
         and resolved.get("values") == job["merchant_payload"]
         and resolved.get("static_business_copy") == []
-        and resolved.get("text_motion_contract") == "config/T5_TEXT_MOTION_V3_0_0.json"
+        and resolved.get("text_motion_contract") == "config/T5_TEXT_MOTION_V4_0_0.json"
         and resolved.get("font_family") == "Playfair Display"
         and resolved.get("font_style") == "Didot-inspired editorial serif optimized for screen readability"
-        and resolved.get("reveal_unit") == "character"
-        and resolved.get("letter_motion") == "staggered_soft_rise_and_fade"
+        and resolved.get("reveal_unit") == "block"
+        and resolved.get("per_letter_animation") is False
+        and resolved.get("alignment") == "center"
+        and resolved.get("uniform_baseline") is True
+        and resolved.get("maximum_lines") == 2
+        and resolved.get("line_height_ratio") == 1.2
     )
     transitions = render_report.get("transition_evidence", [])
     transitions_are_exact = (
@@ -217,7 +240,7 @@ def main() -> int:
         "four_visual_windows_are_distinct": distinct_capture_pixels,
         "rushes_are_full_frame_without_cards": full_frame_policy,
         "readability_gradient_is_continuous_to_frame_bottom": gradient_is_continuous,
-        "kinetic_text_is_character_staggered_and_contract_bound": kinetic_text_is_contract_bound,
+        "subtitles_are_centered_stable_blocks_and_contract_bound": stable_subtitles_are_contract_bound,
         "visible_text_is_exactly_from_merchant_payload": exact_text_policy,
         "three_t1_transitions_are_exactly_eight_frames": transitions_are_exact,
         "runtime_manifest_is_hash_bound": sha256(args.manifest) == render_report["runtime_manifest"]["sha256"],

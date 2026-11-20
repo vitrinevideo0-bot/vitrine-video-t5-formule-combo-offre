@@ -12,6 +12,8 @@ sys.path.insert(0, str(ROOT))
 from adapter.t5_adapter import build_render_job, captures_from_demo_manifest
 from engine.runtime_visual import (
     HEIGHT,
+    TEXT_MOTION,
+    _layout_text,
     _tracked_width,
     load_font,
     motion_design_evidence,
@@ -71,16 +73,22 @@ def test_every_answer_and_capture_has_an_explicit_runtime_target() -> None:
         "captures.S1", "captures.S2", "captures.S3", "captures.S4"
     ]
     assert [item["duration_ms"] for item in contract["scene_bindings"]] == [6000, 8000, 7000, 9000]
-    assert contract["text_motion_contract"] == "config/T5_TEXT_MOTION_V3_0_0.json"
-    assert contract["visual_contract"]["text_motion"] == "readable_editorial_character_staggered_soft_rise_and_fade"
+    assert contract["text_motion_contract"] == "config/T5_TEXT_MOTION_V4_0_0.json"
+    assert contract["visual_contract"]["text_motion"] == "timed_centered_stable_subtitle_blocks"
     assert contract["visual_contract"]["font_family"] == "Playfair Display"
     assert contract["visual_contract"]["font_classification"] == "readable editorial display serif"
     assert contract["visual_contract"]["text_color"] == "#FFFFFF"
     assert contract["visual_contract"]["minimum_font_weight"] == 800
-    assert contract["visual_contract"]["large_readable_editorial_composition"] is True
-    assert contract["visual_contract"]["native_pair_kerning"] is True
-    assert contract["visual_contract"]["neutral_tracking"] is True
-    assert contract["visual_contract"]["text_outline"] is False
+    assert contract["visual_contract"]["centered_stable_subtitle_composition"] is True
+    assert contract["visual_contract"]["uniform_baseline"] is True
+    assert contract["visual_contract"]["constant_letter_spacing"] is True
+    assert contract["visual_contract"]["regular_word_spacing"] is True
+    assert contract["visual_contract"]["per_letter_animation"] is False
+    assert contract["visual_contract"]["decorative_alternates_disabled"] is True
+    assert contract["visual_contract"]["maximum_text_lines"] == 2
+    assert contract["visual_contract"]["line_height_ratio"] == 1.2
+    assert contract["visual_contract"]["fine_dark_outline"] is True
+    assert contract["visual_contract"]["subtle_shadow"] is True
     assert contract["visual_contract"]["readability_priority"] == "maximum"
     assert contract["visual_contract"]["static_text_stack"] is False
     assert contract["runtime_order"][3]["render_plane"] == "github_actions"
@@ -96,22 +104,35 @@ def test_v3_montage_is_full_frame_and_uses_three_exact_eight_frame_transitions()
     assert montage["visual_policy"]["horizontal_color_seams_forbidden"] is True
     assert montage["visual_policy"]["readability_gradient_must_reach_frame_bottom"] is True
     assert montage["visual_policy"]["static_text_stack_forbidden"] is True
-    assert montage["visual_policy"]["character_by_character_reveal_required"] is True
+    assert montage["visual_policy"]["whole_block_timed_entry_required"] is True
+    assert montage["visual_policy"]["per_letter_animation_forbidden"] is True
     assert montage["visual_policy"]["font_family"] == "Playfair Display"
     assert montage["visual_policy"]["font_classification"] == "readable editorial display serif"
     assert montage["visual_policy"]["text_color"] == "#FFFFFF"
     assert montage["visual_policy"]["minimum_font_weight"] == 800
-    assert montage["visual_policy"]["large_readable_editorial_composition"] is True
-    assert montage["visual_policy"]["native_pair_kerning_required"] is True
-    assert montage["visual_policy"]["neutral_tracking_required"] is True
-    assert montage["visual_policy"]["text_outline_forbidden"] is True
+    assert montage["visual_policy"]["centered_stable_subtitle_composition"] is True
+    assert montage["visual_policy"]["uniform_baseline_required"] is True
+    assert montage["visual_policy"]["constant_letter_spacing_required"] is True
+    assert montage["visual_policy"]["regular_word_spacing_required"] is True
+    assert montage["visual_policy"]["decorative_alternates_forbidden"] is True
+    assert montage["visual_policy"]["maximum_text_lines"] == 2
+    assert montage["visual_policy"]["line_height_ratio"] == 1.2
+    assert montage["visual_policy"]["fine_dark_outline_required"] is True
+    assert montage["visual_policy"]["subtle_shadow_required"] is True
     assert montage["visual_policy"]["readability_priority"] == "maximum"
     assert montage["visual_policy"]["max_simultaneous_text_fields"] == 2
-    assert montage["rejected_revisions"] == [{
-        "revision": "T5_TYPOGRAPHIE_EDITORIALE_BODONI_2026-11-18",
-        "release": "t5-full-frame-v3-candidate-5",
-        "reason": "Bodoni Moda appliquée au texte long est illisible ; ne pas réutiliser cette variante.",
-    }]
+    assert montage["rejected_revisions"] == [
+        {
+            "revision": "T5_TYPOGRAPHIE_EDITORIALE_BODONI_2026-11-18",
+            "release": "t5-full-frame-v3-candidate-5",
+            "reason": "Bodoni Moda appliquée au texte long est illisible ; ne pas réutiliser cette variante.",
+        },
+        {
+            "revision": "T5_TYPOGRAPHIE_LISIBLE_PLAYFAIR_2026-11-18",
+            "release": "t5-full-frame-v3-candidate-6",
+            "reason": "La famille Playfair est conservée, mais la mise en forme lettre par lettre est rejetée car elle décale temporairement les glyphes hors de leur baseline.",
+        },
+    ]
     assert montage["merchant_payload"]["ordered_fields"] == [
         "nom", "offre", "contenu", "prix", "whatsapp", "quartier"
     ]
@@ -132,7 +153,7 @@ def test_readability_gradient_is_continuous_through_the_last_pixel() -> None:
     }
 
 
-def test_motion_design_is_character_staggered_left_aligned_and_font_bound() -> None:
+def test_subtitle_design_is_centered_stable_and_font_bound() -> None:
     evidence = motion_design_evidence()
     assert evidence["font"]["family"] == "Playfair Display"
     assert evidence["font"]["classification"] == "readable editorial display serif"
@@ -142,23 +163,35 @@ def test_motion_design_is_character_staggered_left_aligned_and_font_bound() -> N
     assert evidence["font"]["sha256"] == hashlib.sha256(
         (ROOT / evidence["font"]["file"]).read_bytes()
     ).hexdigest()
-    assert evidence["reveal_unit"] == "character"
-    assert evidence["sequence"] == "staggered_one_field_after_another"
-    assert evidence["alignment"] == "left"
-    assert evidence["letter_motion"] == "staggered_soft_rise_and_fade"
-    assert evidence["composition"] == "large_readable_editorial_serif"
+    assert evidence["reveal_unit"] == "block"
+    assert evidence["sequence"] == "timed_field_blocks"
+    assert evidence["alignment"] == "center"
+    assert evidence["per_letter_animation"] is False
+    assert evidence["uniform_baseline"] is True
+    assert evidence["rotation_degrees"] == 0
+    assert evidence["composition"] == "centered_stable_subtitles"
     assert evidence["case_transform"] == "none"
-    assert evidence["white_bold_editorial_style"] is True
-    assert evidence["native_pair_kerning"] is True
+    assert evidence["opentype_features_disabled"] == ["kern", "liga", "clig", "dlig", "calt", "salt", "swsh"]
+    assert evidence["white_outlined_editorial_style"] is True
+    assert evidence["constant_letter_spacing"] is True
     assert evidence["readability_policy"] == {
         "priority": "maximum",
-        "native_pair_kerning": True,
-        "neutral_tracking": True,
-        "minimum_preferred_size": 48,
+        "same_font_family": True,
+        "uniform_baseline": True,
+        "constant_letter_spacing": True,
+        "regular_word_spacing": True,
+        "decorative_alternates_disabled": True,
+        "centered_horizontally": True,
+        "line_height_ratio": 1.2,
+        "maximum_lines": 2,
+        "target_words_per_line": [4, 6],
+        "minimum_preferred_size": 52,
         "minimum_weight": 800,
-        "white_only": True,
-        "no_outline": True,
-        "long_copy_max_lines": 3,
+        "side_safe_margin_pixels": 50,
+        "bottom_safe_margin_pixels": 150,
+        "fine_dark_outline": True,
+        "subtle_shadow": True,
+        "block_entry_only": True,
     }
     assert evidence["static_all_fields_from_first_frame"] is False
     assert evidence["text_background_boxes"] is False
@@ -175,20 +208,43 @@ def test_motion_design_is_character_staggered_left_aligned_and_font_bound() -> N
         assert hashlib.sha256((ROOT / source["path"]).read_bytes()).hexdigest() == source["sha256"]
 
 
-def test_readable_editorial_layout_preserves_native_pair_kerning() -> None:
+def test_subtitle_layout_disables_kerning_and_keeps_constant_spacing() -> None:
     font = load_font(64, 900)
-    full_pair_width = float(font.getlength("AV"))
-    unkerned_width = sum(float(font.getlength(character)) for character in "AV")
-    assert _tracked_width("AV", font, 0.0) == full_pair_width
-    assert full_pair_width < unkerned_width
+    kerned_pair_width = float(font.getlength("AV"))
+    isolated_width = sum(float(font.getlength(character)) for character in "AV")
+    assert _tracked_width("AV", font, 0.0) == isolated_width
+    assert kerned_pair_width < isolated_width
 
 
-def test_motion_state_reveals_characters_and_never_restores_the_three_field_stack() -> None:
+def test_long_copy_uses_two_centered_natural_lines_at_approximately_1_2_spacing() -> None:
+    spec = next(field for field in TEXT_MOTION["scenes"]["S2"]["fields"] if field["id"] == "contenu")
+    x0, y0, x1, y1 = spec["box"]
+    lines, size, _ascent, _descent, line_advance, _height = _layout_text(
+        "1 double burger, 1 portion de frites et 1 verre de cola",
+        x1 - x0,
+        y1 - y0,
+        spec["preferred_size"],
+        spec["minimum_size"],
+        spec["weight"],
+        spec["max_lines"],
+        spec["letter_spacing_em"],
+        spec["word_spacing_em"],
+        spec["line_height_ratio"],
+    )
+    assert lines == ("1 double burger, 1 portion", "de frites et 1 verre de cola")
+    assert len(lines) == 2
+    assert line_advance == round(size * 1.2)
+
+
+def test_motion_state_reveals_the_complete_block_and_never_restores_the_three_field_stack() -> None:
     payload = load("demo/reponses_runtime_demo.json")
     start = text_motion_state("S1", "nom", 10, payload["nom"])
     complete = text_motion_state("S1", "nom", 35, payload["nom"])
-    assert start["phase"] == "type_on"
-    assert 0 < start["visible_characters"] < start["total_characters"]
+    assert start["phase"] == "entry"
+    assert start["block_visible"] is True
+    assert start["visible_characters"] == start["total_characters"]
+    assert start["y_offset"] == 0
+    assert start["rotation_degrees"] == 0
     assert complete["visible_characters"] == complete["total_characters"]
     assert text_motion_state("S1", "offre", 35, payload["offre"])["phase"] == "hidden"
     assert text_motion_state("S1", "nom", 94, payload["nom"])["phase"] == "hidden"

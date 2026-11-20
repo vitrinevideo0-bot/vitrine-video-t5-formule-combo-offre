@@ -75,16 +75,24 @@ def main() -> int:
     contract = json.loads((ROOT / job["render"]["runtime_contract"]).read_text(encoding="utf-8"))
     motion_contract_path = ROOT / contract["text_motion_contract"]
     motion_contract = json.loads(motion_contract_path.read_text(encoding="utf-8"))
-    if motion_contract["animation"]["reveal_unit"] != "character":
-        raise SystemExit("T5 text motion must reveal merchant values character by character")
-    if motion_contract["animation"].get("letter_motion") != "staggered_soft_rise_and_fade":
-        raise SystemExit("T5 readable editorial letters must use the approved soft motion")
+    animation = motion_contract["animation"]
+    policy = motion_contract["readability_policy"]
+    style = motion_contract["render_style"]
+    if animation["reveal_unit"] != "block" or animation.get("per_letter_animation") is not False:
+        raise SystemExit("T5 subtitles must appear as complete blocks without per-letter animation")
+    if animation.get("baseline_motion_pixels") != 0 or animation.get("rotation_degrees") != 0:
+        raise SystemExit("T5 subtitle letters must remain on a fixed straight baseline")
     if motion_contract["font"].get("family") != "Playfair Display":
-        raise SystemExit("T5 readable editorial typography must use the contract-bound Playfair Display font")
-    if motion_contract["render_style"].get("fill") != "#FFFFFF" or motion_contract["render_style"].get("stroke_width") != 0:
-        raise SystemExit("T5 readable editorial typography must be solid white without an outline")
-    if motion_contract.get("readability_policy", {}).get("native_pair_kerning") is not True:
-        raise SystemExit("T5 readable editorial typography must preserve native pair kerning")
+        raise SystemExit("T5 subtitles must keep the contract-bound Playfair Display font")
+    if style.get("fill") != "#FFFFFF" or style.get("stroke_width") != 1:
+        raise SystemExit("T5 subtitles must be white with the approved fine dark outline")
+    if not all(policy.get(key) is True for key in (
+        "uniform_baseline", "constant_letter_spacing", "regular_word_spacing",
+        "decorative_alternates_disabled", "centered_horizontally", "block_entry_only",
+    )):
+        raise SystemExit("T5 stable subtitle layout policy is incomplete")
+    if policy.get("maximum_lines") != 2 or policy.get("line_height_ratio") != 1.2:
+        raise SystemExit("T5 subtitles must use at most two lines with a 1.2 line-height ratio")
     fields_by_scene = {item["scene"]: item["text_fields"] for item in contract["scene_bindings"]}
     scenes: list[dict[str, Any]] = []
     for slot in SLOTS:
