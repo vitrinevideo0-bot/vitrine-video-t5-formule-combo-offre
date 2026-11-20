@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0.0",
+  "template_id": "RESTAURATION-T5",
+  "template_name": "Formule, combo ou offre",
+  "decision_on": "2026-11-18",
+  "decision_channel": "arena_chat",
+  "owner_message": "Je choisis V1 avec T1",
+  "status": "owner_approved_reference_pair",
+  "video_reference": {
+    "choice": "V1",
+    "label": "Combo individuel complet — Domino's Ciudad Juárez",
+    "url": "https://www.tiktok.com/@dominos.pizza.cd/video/7391902659709586694"
+  },
+  "transition_reference": {
+    "choice": "T1",
+    "label": "Dish swipe et camera whip — Socialdrop",
+    "url": "https://www.tiktok.com/@socialdrop/video/7345936171647667461"
+  },
+  "authorized_scope": [
+    "private reference analysis",
+    "reverse engineering in OBSERVED / ADAPTED / ENGINE DECISION layers",
+    "proposal of the four T5 scenes and deterministic transition grammar"
+  ],
+  "not_authorized_by_this_decision": [
+    "copying or redistributing either reference video",
+    "copying logos, brand text, palette, music, voice or graphic universe",
+    "final engine implementation",
+    "final questions and twelve executable screens",
+    "final music, voice or Cloudflare production deployment"
+  ]
+}

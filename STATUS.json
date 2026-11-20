@@ -1,0 +1,40 @@
+{
+  "schema_version": "1.0.0",
+  "template_id": "RESTAURATION-T5",
+  "template_name": "Formule, combo ou offre",
+  "updated_on": "2026-11-18",
+  "workflow": {
+    "status_number": 2,
+    "status": "V1 and T1 selected by owner; reverse engineering proposal prepared and awaiting creative validation",
+    "completion_percent_claimed": null
+  },
+  "owner_decisions": {
+    "video_reference": "V1",
+    "transition_reference": "T1",
+    "approval_record": "approvals/APPROBATION_DIRECTION_CREATIVE_T5_2026-11-18.json"
+  },
+  "prepared": {
+    "reference_manifest": true,
+    "reverse_engineering_three_layers": true,
+    "four_scene_adaptation_proposed": true,
+    "deterministic_transition_grammar_proposed": true
+  },
+  "not_started": [
+    "owner_validation_of_reverse_engineering",
+    "six_merchant_questions",
+    "twelve_executable_screens",
+    "capture_contract",
+    "visual_engine",
+    "voice_audition",
+    "music_audition",
+    "complete_render",
+    "cloudflare_control_plane",
+    "integrator_package"
+  ],
+  "claims": {
+    "implemented": false,
+    "github_published": false,
+    "cloudflare_deployed": false,
+    "production_ready": false
+  }
+}

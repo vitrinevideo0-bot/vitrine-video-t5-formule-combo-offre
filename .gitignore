@@ -1,0 +1,9 @@
+.cache/
+.tmp/
+reference-media/
+*.mp4
+*.mov
+*.mkv
+*.webm
+.DS_Store
+__pycache__/

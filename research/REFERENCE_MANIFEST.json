@@ -1,0 +1,52 @@
+{
+  "schema_version": "1.0.0",
+  "template_id": "RESTAURATION-T5",
+  "captured_on": "2026-11-18",
+  "status": "private_analysis_complete",
+  "references": [
+    {
+      "role": "V1_SELECTED_VIDEO_GRAMMAR",
+      "title": "Combo individuel complet — Domino's Ciudad Juárez",
+      "author": "dominos.pizza.cd",
+      "official_page": "https://www.tiktok.com/@dominos.pizza.cd/video/7391902659709586694",
+      "platform_id": "7391902659709586694",
+      "duration_s": 24.0,
+      "width": 480,
+      "height": 848,
+      "fps": 30,
+      "frames": 720,
+      "private_analysis_copy_sha256": "ab70cfa4b501ad432c4c5a5b369a5ab07abc7373c368c88fb794a6813f2b4972",
+      "private_analysis_copy_bytes": 3897084,
+      "repository_media_copy_included": false,
+      "redistribution_forbidden": true
+    },
+    {
+      "role": "T1_SELECTED_TRANSITION_GRAMMAR",
+      "title": "Dish swipe et camera whip — Socialdrop",
+      "author": "socialdrop",
+      "official_page": "https://www.tiktok.com/@socialdrop/video/7345936171647667461",
+      "platform_id": "7345936171647667461",
+      "duration_s": 56.266667,
+      "width": 576,
+      "height": 1024,
+      "fps": 30,
+      "frames": 1688,
+      "final_cut_observed_approximately_s": [
+        46.37,
+        56.27
+      ],
+      "private_analysis_copy_sha256": "01df0f2c0b59b7ae8ac8fc70fefeb8e638c5c89de12c9462d85fcec10b71db1f",
+      "private_analysis_copy_bytes": 10933048,
+      "repository_media_copy_included": false,
+      "redistribution_forbidden": true
+    }
+  ],
+  "reference_policy": {
+    "analysis_only": true,
+    "reference_audio_reuse": false,
+    "reference_frame_reuse": false,
+    "brand_asset_reuse": false,
+    "text_or_palette_copy": false,
+    "engine_must_be_independent": true
+  }
+}
