@@ -96,7 +96,7 @@ def main() -> None:
     job = as_json(call(args.base, f"/v1/jobs/{job_id}/payload", headers=callback)[0])["job"]
     Draft202012Validator(json.loads((ROOT / "schemas/T5_render_job.schema.json").read_text())).validate(job)
     assert job["merchant_payload"] == merchant
-    assert job["render"]["visual_mode"] == "runtime_hybrid_render"
+    assert job["render"]["visual_mode"] == "runtime_full_frame_render"
     assert job["render"]["production_render_plane"] == "github_actions"
     assert job["control_plane"] == "cloudflare_worker" and job["cloudflare_rendering_forbidden"] is True
     for slot in SLOTS:
@@ -118,10 +118,10 @@ def main() -> None:
     ]
     result = {
         "schema_version": "1.0.0", "status": "COMPLETED", "job_id": job_id, "idempotency_key": idem,
-        "template_id": "RESTAURATION-T5", "template_version": "2.0.0-runtime",
-        "profile_used": "T5_GITHUB_ACTIONS_RUNTIME_V2", "control_plane": "cloudflare_worker",
+        "template_id": "RESTAURATION-T5", "template_version": "3.0.0-full-frame",
+        "profile_used": "T5_GITHUB_ACTIONS_FULL_FRAME_V3", "control_plane": "cloudflare_worker",
         "output": {"uri": job["output"]["uri"], "file": job["output"]["filename"], "sha256": rendered_sha, "bytes": len(rendered)},
-        "quality": {"status": "PASS", "report": "T5_RUNTIME_VALIDATION.json", "passed": 16, "total": 16},
+        "quality": {"status": "PASS", "report": "T5_RUNTIME_VALIDATION.json", "passed": 19, "total": 19},
         "inputs": {
             "merchant_payload_sha256": hashlib.sha256(json.dumps(merchant, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode()).hexdigest(),
             "capture_sha256": {slot: media_sha for slot in SLOTS},

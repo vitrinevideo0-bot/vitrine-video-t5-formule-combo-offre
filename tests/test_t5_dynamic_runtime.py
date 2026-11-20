@@ -40,7 +40,7 @@ def intersects(a: tuple[int, int, int, int], b: tuple[int, int, int, int] | None
 
 @pytest.mark.parametrize(("field", "scene", "replacement"), CASES)
 def test_each_form_answer_changes_pixels_in_its_declared_block(field: str, scene: str, replacement: str) -> None:
-    source = Image.new("RGB", (720, 405), "#9d5c35")
+    source = Image.new("RGB", (720, 1280), "#9d5c35")
     original, active = render_scene_frame(source, scene, 120, PAYLOAD)
     modified_payload = deepcopy(PAYLOAD)
     modified_payload[field] = replacement
@@ -54,14 +54,14 @@ def test_each_form_answer_changes_pixels_in_its_declared_block(field: str, scene
 
 def test_substituting_one_capture_changes_only_its_scene_window() -> None:
     captures = {
-        "S1": Image.new("RGB", (720, 405), "#8c2d20"),
-        "S2": Image.new("RGB", (720, 405), "#c28c34"),
-        "S3": Image.new("RGB", (720, 405), "#315f53"),
-        "S4": Image.new("RGB", (720, 405), "#453465"),
+        "S1": Image.new("RGB", (720, 1280), "#8c2d20"),
+        "S2": Image.new("RGB", (720, 1280), "#c28c34"),
+        "S3": Image.new("RGB", (720, 1280), "#315f53"),
+        "S4": Image.new("RGB", (720, 1280), "#453465"),
     }
     first = proof_timeline(captures, PAYLOAD)
     substituted = dict(captures)
-    substituted["S2"] = Image.new("RGB", (720, 405), "#1678a3")
+    substituted["S2"] = Image.new("RGB", (720, 1280), "#1678a3")
     second = proof_timeline(substituted, PAYLOAD)
     for slot in captures:
         difference = ImageChops.difference(first[slot], second[slot]).getbbox()

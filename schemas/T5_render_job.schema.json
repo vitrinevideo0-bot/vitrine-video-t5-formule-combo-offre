@@ -22,7 +22,7 @@
     "job_id": {"$ref": "#/$defs/id"},
     "idempotency_key": {"$ref": "#/$defs/id"},
     "template_id": {"const": "RESTAURATION-T5"},
-    "template_version": {"const": "2.0.0-runtime"},
+    "template_version": {"const": "3.0.0-full-frame"},
     "merchant_payload": {
       "type": "object",
       "additionalProperties": false,
@@ -67,11 +67,11 @@
         "production_render_plane"
       ],
       "properties": {
-        "visual_mode": {"const": "runtime_hybrid_render"},
+        "visual_mode": {"const": "runtime_full_frame_render"},
         "runtime_capture_manifest_required": {"const": true},
         "render_business_text": {"const": true},
         "business_text_source": {"const": "merchant_payload"},
-        "runtime_contract": {"const": "config/T5_RUNTIME_CONTRACT_V2_0_0.json"},
+        "runtime_contract": {"const": "config/T5_RUNTIME_CONTRACT_V3_0_0.json"},
         "transition_reference": {"const": "T1"},
         "width": {"const": 720},
         "height": {"const": 1280},
@@ -88,8 +88,8 @@
       "additionalProperties": false,
       "required": ["uri", "filename"],
       "properties": {
-        "uri": {"type": "string", "pattern": "^output/runtime/[A-Za-z0-9._-]+/VIDEO_T5_FORMULE_RUNTIME_DYNAMIQUE_V2_A_VALIDER\\.mp4$"},
-        "filename": {"const": "VIDEO_T5_FORMULE_RUNTIME_DYNAMIQUE_V2_A_VALIDER.mp4"}
+        "uri": {"type": "string", "pattern": "^output/runtime/[A-Za-z0-9._-]+/VIDEO_T5_FORMULE_PLEIN_ECRAN_V3_A_VALIDER\\.mp4$"},
+        "filename": {"const": "VIDEO_T5_FORMULE_PLEIN_ECRAN_V3_A_VALIDER.mp4"}
       }
     },
     "control_plane": {"enum": ["cloudflare_worker", "github_actions_fixture"]},

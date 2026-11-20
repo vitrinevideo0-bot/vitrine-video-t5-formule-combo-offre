@@ -4,16 +4,21 @@
   "job_id": "t5-runtime-example-0001",
   "idempotency_key": "t5-runtime-example-0001",
   "template_id": "RESTAURATION-T5",
-  "template_version": "2.0.0-runtime",
-  "profile_used": "T5_GITHUB_ACTIONS_RUNTIME_V2",
+  "template_version": "3.0.0-full-frame",
+  "profile_used": "T5_GITHUB_ACTIONS_FULL_FRAME_V3",
   "control_plane": "cloudflare_worker",
   "output": {
-    "uri": "output/runtime/t5-runtime-example-0001/VIDEO_T5_FORMULE_RUNTIME_DYNAMIQUE_V2_A_VALIDER.mp4",
-    "file": "VIDEO_T5_FORMULE_RUNTIME_DYNAMIQUE_V2_A_VALIDER.mp4",
+    "uri": "output/runtime/t5-runtime-example-0001/VIDEO_T5_FORMULE_PLEIN_ECRAN_V3_A_VALIDER.mp4",
+    "file": "VIDEO_T5_FORMULE_PLEIN_ECRAN_V3_A_VALIDER.mp4",
     "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
     "bytes": 123456
   },
-  "quality": {"status": "PASS", "report": "T5_RUNTIME_VALIDATION.json", "passed": 16, "total": 16},
+  "quality": {
+    "status": "PASS",
+    "report": "T5_RUNTIME_VALIDATION.json",
+    "passed": 19,
+    "total": 19
+  },
   "inputs": {
     "merchant_payload_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
     "capture_sha256": {
@@ -25,11 +30,42 @@
     "runtime_manifest_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
     "resolved_text_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
   },
-  "rendered_fields": ["nom", "offre", "contenu", "prix", "whatsapp", "quartier"],
+  "rendered_fields": [
+    "nom",
+    "offre",
+    "contenu",
+    "prix",
+    "whatsapp",
+    "quartier"
+  ],
   "scene_capture_bindings": [
-    {"scene": "S1", "capture_slot": "S1", "capture_sha256": "1111111111111111111111111111111111111111111111111111111111111111", "timeline_start_frame": 0, "timeline_end_frame": 179},
-    {"scene": "S2", "capture_slot": "S2", "capture_sha256": "2222222222222222222222222222222222222222222222222222222222222222", "timeline_start_frame": 180, "timeline_end_frame": 419},
-    {"scene": "S3", "capture_slot": "S3", "capture_sha256": "3333333333333333333333333333333333333333333333333333333333333333", "timeline_start_frame": 420, "timeline_end_frame": 629},
-    {"scene": "S4", "capture_slot": "S4", "capture_sha256": "4444444444444444444444444444444444444444444444444444444444444444", "timeline_start_frame": 630, "timeline_end_frame": 899}
+    {
+      "scene": "S1",
+      "capture_slot": "S1",
+      "capture_sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+      "timeline_start_frame": 0,
+      "timeline_end_frame": 179
+    },
+    {
+      "scene": "S2",
+      "capture_slot": "S2",
+      "capture_sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+      "timeline_start_frame": 180,
+      "timeline_end_frame": 419
+    },
+    {
+      "scene": "S3",
+      "capture_slot": "S3",
+      "capture_sha256": "3333333333333333333333333333333333333333333333333333333333333333",
+      "timeline_start_frame": 420,
+      "timeline_end_frame": 629
+    },
+    {
+      "scene": "S4",
+      "capture_slot": "S4",
+      "capture_sha256": "4444444444444444444444444444444444444444444444444444444444444444",
+      "timeline_start_frame": 630,
+      "timeline_end_frame": 899
+    }
   ]
 }

@@ -1,4 +1,4 @@
-name: Rendu T5 runtime — 4 captures et 6 réponses
+name: Rendu T5 V3 plein écran — 4 captures et 6 réponses
 
 on:
   workflow_dispatch:
@@ -83,7 +83,7 @@ jobs:
           job=json.load(open('.tmp/t5-runtime/render-job.json'))
           schema=json.load(open('schemas/T5_render_job.schema.json'))
           Draft202012Validator(schema).validate(job)
-          assert job['render']['visual_mode']=='runtime_hybrid_render'
+          assert job['render']['visual_mode']=='runtime_full_frame_render'
           assert job['render']['render_business_text'] is True
           assert job['render']['production_render_plane']=='github_actions'
           print('T5_RENDER_JOB_SCHEMA_PASS', job['job_id'], job['control_plane'])
@@ -136,7 +136,7 @@ jobs:
         run: |
           OUTDIR="output/runtime/$T5_JOB_ID"
           python tools/validate_runtime_render.py \
-            --video "$OUTDIR/VIDEO_T5_FORMULE_RUNTIME_DYNAMIQUE_V2_A_VALIDER.mp4" \
+            --video "$OUTDIR/VIDEO_T5_FORMULE_PLEIN_ECRAN_V3_A_VALIDER.mp4" \
             --render-job .tmp/t5-runtime/render-job.json \
             --manifest .tmp/t5-runtime/runtime-manifest.json \
             --render-report "$OUTDIR/T5_RUNTIME_RENDER_REPORT.json" \
@@ -150,7 +150,7 @@ jobs:
         run: |
           set -euo pipefail
           OUTDIR="output/runtime/$T5_JOB_ID"
-          OUT="$OUTDIR/VIDEO_T5_FORMULE_RUNTIME_DYNAMIQUE_V2_A_VALIDER.mp4"
+          OUT="$OUTDIR/VIDEO_T5_FORMULE_PLEIN_ECRAN_V3_A_VALIDER.mp4"
           SHA=$(sha256sum "$OUT" | cut -d' ' -f1)
           BYTES=$(stat -c '%s' "$OUT")
           curl --fail-with-body --silent --show-error \
@@ -178,7 +178,7 @@ jobs:
           OUTDIR="output/runtime/$T5_JOB_ID"
           rm -rf release
           mkdir release
-          cp "$OUTDIR/VIDEO_T5_FORMULE_RUNTIME_DYNAMIQUE_V2_A_VALIDER.mp4" release/
+          cp "$OUTDIR/VIDEO_T5_FORMULE_PLEIN_ECRAN_V3_A_VALIDER.mp4" release/
           cp "$OUTDIR/T5_RUNTIME_PLANCHE_12_IMAGES.jpg" release/
           cp "$OUTDIR/T5_RUNTIME_RENDER_REPORT.json" release/
           cp "$OUTDIR/T5_RUNTIME_VALIDATION.json" release/
@@ -186,12 +186,12 @@ jobs:
           cp "$OUTDIR/T5_RESOLVED_TEXT.json" release/
           cp .tmp/t5-runtime/render-job.json release/T5_RENDER_JOB.json
           cp .tmp/t5-runtime/runtime-manifest.json release/T5_RUNTIME_CAPTURE_MANIFEST.json
-          cp config/T5_RUNTIME_CONTRACT_V2_0_0.json release/
+          cp config/T5_RUNTIME_CONTRACT_V3_0_0.json release/
           cp schemas/T5_render_job.schema.json release/
           cp schemas/T5_render_result.schema.json release/
           cp schemas/T5_render_error.schema.json release/
           cp rushes/manifest.json release/T5_DEMO_SOURCE_PROVENANCE.json
-          cp docs/LICENCE_RUSH_DEMO_V2.md release/
+          cp docs/LICENCE_RUSH_DEMO_V3.md release/
           if find release -maxdepth 1 -type f \( -name 'S[1-4]*.mp4' -o -name '*.mov' -o -name '*.webm' \) | grep -q .; then
             echo 'Rush brut interdit dans la livraison' >&2
             exit 1
@@ -202,7 +202,7 @@ jobs:
       - name: Publier l’artefact reproductible
         uses: actions/upload-artifact@v4
         with:
-          name: T5-runtime-dynamic-${{ github.run_id }}
+          name: T5-full-frame-v3-${{ github.run_id }}
           path: release/
           if-no-files-found: error
           retention-days: 30
@@ -211,16 +211,16 @@ jobs:
         if: github.event_name == 'workflow_dispatch' && inputs.publish_prerelease
         run: |
           cat > /tmp/t5-runtime-release-notes.md <<'EOF'
-          # RESTAURATION‑T5 — candidat runtime dynamique V2
+          # RESTAURATION‑T5 — candidat plein écran V3
 
-          Ce candidat remplace l’ancienne pré‑Release rejetée.
+          Ce candidat remplace entièrement l’ancien runtime à cartes, conservé comme archive rejetée.
 
           - les **six réponses** viennent du `merchant_payload` du RenderJob ;
           - les scènes S1, S2, S3 et S4 consomment **quatre captures distinctes**, chacune vérifiée par SHA‑256 ;
           - le manifeste visuel est construit au runtime, puis consommé par le moteur ;
           - rendu exclusivement sur **GitHub Actions** ; Cloudflare ne fait que contrôler, stocker et dispatcher ;
           - 30,000 s, 720 × 1280, 30 i/s, 900 images, H.264, aucune piste audio ;
-          - QC 16/16 : pixels des six champs, quatre captures, intégrité, durée, stabilité finale et absence de rush brut dans la livraison.
+          - QC 19/19 : plein cadre sans cartes, texte limité aux six valeurs, trois raccords T1 de huit images, pixels dynamiques, intégrité, durée, stabilité finale et absence de rush brut dans la livraison.
 
           Les valeurs visibles sont la fixture formulaire de validation `Burger Atelier Kandi`. Elles ne sont pas codées dans le moteur : les tests prouvent que changer chaque réponse change les pixels attendus.
           EOF
@@ -231,14 +231,14 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          TAG="t5-runtime-v2-candidate-${GITHUB_RUN_NUMBER}"
+          TAG="t5-full-frame-v3-candidate-${GITHUB_RUN_NUMBER}"
           if gh release view "$TAG" >/dev/null 2>&1; then
             echo "La Release $TAG existe déjà : refus de l’écraser." >&2
             exit 1
           fi
           gh release create "$TAG" release/* \
             --target "$GITHUB_SHA" \
-            --title "T5 Formule — runtime dynamique V2 #${GITHUB_RUN_NUMBER}" \
+            --title "T5 Formule — plein écran V3 #${GITHUB_RUN_NUMBER}" \
             --notes-file /tmp/t5-runtime-release-notes.md \
             --prerelease
 

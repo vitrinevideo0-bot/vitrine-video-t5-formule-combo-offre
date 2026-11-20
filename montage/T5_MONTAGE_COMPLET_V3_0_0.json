@@ -1,0 +1,169 @@
+{
+  "schema_version": "3.0.0",
+  "template_id": "RESTAURATION-T5",
+  "version": "3.0.0-full-frame",
+  "title": "Formule, combo ou offre — montage complet plein écran",
+  "status": "owner_correction_applied_pending_github_render",
+  "approved_sources": {
+    "questions": {
+      "path": "form/questions_T5.json",
+      "sha256": "9426cbdb5e11a0b951f805573660ea7e75ee7789c72a97d9b8a49af9c9eeaeb0"
+    },
+    "capture_guide": {
+      "path": "capture-guide/consignes_T5.json",
+      "sha256": "91d3906b4bec0139c236a2b7dec99d95bdc08035e0702770c776ad581f1602e6"
+    },
+    "capture_flow": {
+      "path": "config/T5_CAPTURE_FLOW_V1_0_0.json",
+      "sha256": "3f68ea426c99175639833b419420964c59d7b4ddcd29fdf24fce6be3fc4b5ebc",
+      "stable_screens": 12
+    },
+    "creative_approval": {
+      "path": "approvals/APPROBATION_DIRECTION_CREATIVE_T5_2026-11-18.json",
+      "video_reference": "V1",
+      "transition_reference": "T1"
+    },
+    "questions_and_screens_approval": "approvals/APPROBATION_QUESTIONS_ET_12_ECRANS_T5_2026-11-18.json"
+  },
+  "merchant_payload": {
+    "source": "RenderJob.merchant_payload",
+    "ordered_fields": [
+      "nom",
+      "offre",
+      "contenu",
+      "prix",
+      "whatsapp",
+      "quartier"
+    ],
+    "visible_text_policy": "Only exact values entered in these six fields may be burned into the advertising video.",
+    "static_business_copy_allowed": false
+  },
+  "format": {
+    "width": 720,
+    "height": 1280,
+    "orientation": "portrait",
+    "fps": 30,
+    "frames": 900,
+    "duration_seconds": 30.0,
+    "scene_durations_seconds": [6, 8, 7, 9],
+    "video_codec": "h264",
+    "pixel_format": "yuv420p",
+    "audio_mode": "silent_no_audio_stream"
+  },
+  "scenes": [
+    {
+      "scene": "S1",
+      "timeline_frames": [0, 179],
+      "capture_slot": "captures.S1",
+      "capture_screens": [
+        "T5_CAPTURE_S1_A_GUIDE",
+        "T5_CAPTURE_S1_B_RECORDING",
+        "T5_CAPTURE_S1_C_REVIEW"
+      ],
+      "instruction_source": "capture-guide/consignes_T5.json#/scenes/0",
+      "visible_fields": ["nom", "offre", "contenu"],
+      "framing": "full_screen_formula_hero",
+      "camera_motion": "slow_push_in"
+    },
+    {
+      "scene": "S2",
+      "timeline_frames": [180, 419],
+      "capture_slot": "captures.S2",
+      "capture_screens": [
+        "T5_CAPTURE_S2_A_GUIDE",
+        "T5_CAPTURE_S2_B_RECORDING",
+        "T5_CAPTURE_S2_C_REVIEW"
+      ],
+      "instruction_source": "capture-guide/consignes_T5.json#/scenes/1",
+      "visible_fields": ["contenu"],
+      "framing": "full_screen_formula_details",
+      "camera_motion": "gentle_pull_back"
+    },
+    {
+      "scene": "S3",
+      "timeline_frames": [420, 629],
+      "capture_slot": "captures.S3",
+      "capture_screens": [
+        "T5_CAPTURE_S3_A_GUIDE",
+        "T5_CAPTURE_S3_B_RECORDING",
+        "T5_CAPTURE_S3_C_REVIEW"
+      ],
+      "instruction_source": "capture-guide/consignes_T5.json#/scenes/2",
+      "visible_fields": ["offre", "contenu", "prix"],
+      "framing": "full_screen_formula_price_hero",
+      "camera_motion": "subtle_push_in"
+    },
+    {
+      "scene": "S4",
+      "timeline_frames": [630, 899],
+      "capture_slot": "captures.S4",
+      "capture_screens": [
+        "T5_CAPTURE_S4_A_GUIDE",
+        "T5_CAPTURE_S4_B_RECORDING",
+        "T5_CAPTURE_S4_C_REVIEW"
+      ],
+      "instruction_source": "capture-guide/consignes_T5.json#/scenes/3",
+      "visible_fields": ["nom", "whatsapp", "quartier"],
+      "framing": "full_screen_formula_order_hero",
+      "camera_motion": "slow_push_then_lock",
+      "stable_tail_frames": [810, 899]
+    }
+  ],
+  "transitions": [
+    {
+      "id": "T5_T1_DISH_SWIPE_LEFT",
+      "reference": "T1",
+      "cut": "S1_TO_S2",
+      "cut_frame": 180,
+      "frames": [176, 183],
+      "duration_frames": 8,
+      "family": "dish_swipe_camera_whip",
+      "direction": "left",
+      "full_frame_only": true,
+      "clean_endpoints_required": true
+    },
+    {
+      "id": "T5_T1_CAMERA_WHIP_RIGHT",
+      "reference": "T1",
+      "cut": "S2_TO_S3",
+      "cut_frame": 420,
+      "frames": [416, 423],
+      "duration_frames": 8,
+      "family": "dish_swipe_camera_whip",
+      "direction": "right",
+      "full_frame_only": true,
+      "clean_endpoints_required": true
+    },
+    {
+      "id": "T5_T1_DISH_SWIPE_LEFT_FINAL",
+      "reference": "T1",
+      "cut": "S3_TO_S4",
+      "cut_frame": 630,
+      "frames": [626, 633],
+      "duration_frames": 8,
+      "family": "dish_swipe_camera_whip",
+      "direction": "left",
+      "full_frame_only": true,
+      "clean_endpoints_required": true
+    }
+  ],
+  "visual_policy": {
+    "rushes_fill_entire_frame": true,
+    "permanent_cards_forbidden": true,
+    "rounded_video_frames_forbidden": true,
+    "split_screen_forbidden": true,
+    "mosaic_and_grid_forbidden": true,
+    "progress_bars_forbidden": true,
+    "scene_labels_forbidden": true,
+    "technical_or_test_labels_forbidden": true,
+    "generic_business_headings_forbidden": true,
+    "text_background_boxes_forbidden": true,
+    "allowed_overlays": [
+      "exact merchant_payload values",
+      "text shadow",
+      "edge-to-edge readability gradient"
+    ]
+  },
+  "render_plane": "github_actions",
+  "cloudflare_video_rendering_forbidden": true
+}

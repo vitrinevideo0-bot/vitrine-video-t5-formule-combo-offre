@@ -28,7 +28,7 @@ def valid(path: Path, expected_bytes: int, expected_sha256: str) -> bool:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--manifest", type=Path, default=ROOT / "rushes/manifest.json")
-    parser.add_argument("--cache", type=Path, default=ROOT / "rushes/cache-v2")
+    parser.add_argument("--cache", type=Path, default=ROOT / "rushes/cache-v4-aida")
     args = parser.parse_args()
 
     manifest = json.loads(args.manifest.read_text(encoding="utf-8"))
@@ -42,7 +42,7 @@ def main() -> int:
             os.close(descriptor)
             Path(temporary_name).unlink(missing_ok=True)
             try:
-                request = urllib.request.Request(source["download_url"], headers={"User-Agent": "T5-GitHub-Renderer/2.0"})
+                request = urllib.request.Request(source["download_url"], headers={"User-Agent": "T5-GitHub-Renderer/3.0"})
                 with urllib.request.urlopen(request, timeout=120) as response, open(temporary_name, "wb") as stream:
                     while block := response.read(1 << 20):
                         stream.write(block)

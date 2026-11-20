@@ -24,11 +24,12 @@ def test_four_distinct_licensed_captures_preserve_one_formula() -> None:
     assert manifest["continuity_rule"]["source_count"] == 4
     assert manifest["continuity_rule"]["one_offer_per_ad"] is True
     assert manifest["continuity_rule"]["same_dish_drink_and_sides_across_four_scenes"] is True
-    assert manifest["continuity_rule"]["visible_in_every_scene"] == [
-        "double burger", "portion de frites", "verre de cola"
+    assert manifest["continuity_rule"]["formula_items"] == [
+        "double burger", "portion de frites", "verre de soda"
     ]
     assert [source["slot"] for source in manifest["sources"]] == ["S1", "S2", "S3", "S4"]
-    assert [source["pexels_id"] for source in manifest["sources"]] == [4731057, 4731063, 4731066, 4731132]
+    assert [source["pexels_id"] for source in manifest["sources"]] == [32092904, 32092902, 32092903, 32092901]
+    assert {source["creator"] for source in manifest["sources"]} == {"Aida Shukuhi"}
     assert len({source["sha256"] for source in manifest["sources"]}) == 4
     assert [scene["duration_seconds"] for scene in manifest["scenes"]] == [6, 8, 7, 9]
 
@@ -44,7 +45,7 @@ def test_demo_answers_build_the_checked_runtime_job() -> None:
     )
     assert rebuilt == load("demo/render_job_runtime_demo.json")
     assert rebuilt["merchant_payload"] == answers
-    assert rebuilt["render"]["visual_mode"] == "runtime_hybrid_render"
+    assert rebuilt["render"]["visual_mode"] == "runtime_full_frame_render"
     assert rebuilt["render"]["runtime_capture_manifest_required"] is True
     assert rebuilt["render"]["render_business_text"] is True
     assert rebuilt["render"]["production_render_plane"] == "github_actions"
@@ -52,7 +53,7 @@ def test_demo_answers_build_the_checked_runtime_job() -> None:
 
 
 def test_every_answer_and_capture_has_an_explicit_runtime_target() -> None:
-    contract = load("config/T5_RUNTIME_CONTRACT_V2_0_0.json")
+    contract = load("config/T5_RUNTIME_CONTRACT_V3_0_0.json")
     assert [item["source"] for item in contract["merchant_bindings"]] == [
         "merchant_payload.nom", "merchant_payload.offre", "merchant_payload.contenu",
         "merchant_payload.prix", "merchant_payload.whatsapp", "merchant_payload.quartier",
@@ -65,17 +66,37 @@ def test_every_answer_and_capture_has_an_explicit_runtime_target() -> None:
     assert contract["runtime_order"][3]["render_plane"] == "github_actions"
 
 
+def test_v3_montage_is_full_frame_and_uses_three_exact_eight_frame_transitions() -> None:
+    montage = load("montage/T5_MONTAGE_COMPLET_V3_0_0.json")
+    assert montage["format"]["scene_durations_seconds"] == [6, 8, 7, 9]
+    assert montage["visual_policy"]["rushes_fill_entire_frame"] is True
+    assert montage["visual_policy"]["permanent_cards_forbidden"] is True
+    assert montage["visual_policy"]["rounded_video_frames_forbidden"] is True
+    assert montage["visual_policy"]["technical_or_test_labels_forbidden"] is True
+    assert montage["merchant_payload"]["ordered_fields"] == [
+        "nom", "offre", "contenu", "prix", "whatsapp", "quartier"
+    ]
+    assert [item["cut_frame"] for item in montage["transitions"]] == [180, 420, 630]
+    assert [item["frames"] for item in montage["transitions"]] == [[176, 183], [416, 423], [626, 633]]
+    assert all(item["duration_frames"] == 8 for item in montage["transitions"])
+
+
 def test_rejected_generic_copy_is_absent_from_runtime_engine() -> None:
     source = (ROOT / "engine/render_runtime.py").read_text(encoding="utf-8") + (ROOT / "engine/runtime_visual.py").read_text(encoding="utf-8")
-    for rejected in ("CAFÉ DÉMO T5", "FORMULE PAUSE GOURMANDE", "DÉMO — DONNÉES À REMPLACER", "GÂTEAU", "CAPPUCCINO"):
+    for rejected in (
+        "CAFÉ DÉMO T5", "FORMULE PAUSE GOURMANDE", "DÉMO — DONNÉES À REMPLACER",
+        "GÂTEAU", "CAPPUCCINO", "LA FORMULE", "CE QU’IL Y A DANS LA FORMULE",
+        "LE PRIX", "COMMANDER", "PREUVE RUNTIME",
+    ):
         assert rejected not in source
+    assert "rounded_rectangle" not in source
     assert "4731057" not in source
     assert "rushes/manifest.json" not in source
 
 
 def test_raw_media_paths_are_ignored_and_not_tracked() -> None:
     ignored = subprocess.run(
-        ["git", "check-ignore", "rushes/cache-v2/S1_4731057.mp4"],
+        ["git", "check-ignore", "rushes/cache-v4-aida/S1_32092904.mp4"],
         cwd=ROOT,
         check=True,
         capture_output=True,
@@ -91,7 +112,7 @@ def test_raw_media_paths_are_ignored_and_not_tracked() -> None:
 def test_demo_source_hashes_match_local_cache_when_present() -> None:
     manifest = load("rushes/manifest.json")
     for source in manifest["sources"]:
-        path = ROOT / "rushes/cache-v2" / source["cache_filename"]
+        path = ROOT / "rushes/cache-v4-aida" / source["cache_filename"]
         if path.exists():
             assert path.stat().st_size == source["expected_bytes"]
             assert hashlib.sha256(path.read_bytes()).hexdigest() == source["sha256"]

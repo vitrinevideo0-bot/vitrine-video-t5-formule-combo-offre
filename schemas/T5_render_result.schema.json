@@ -25,16 +25,16 @@
     "job_id": {"$ref": "#/$defs/id"},
     "idempotency_key": {"$ref": "#/$defs/id"},
     "template_id": {"const": "RESTAURATION-T5"},
-    "template_version": {"const": "2.0.0-runtime"},
-    "profile_used": {"const": "T5_GITHUB_ACTIONS_RUNTIME_V2"},
+    "template_version": {"const": "3.0.0-full-frame"},
+    "profile_used": {"const": "T5_GITHUB_ACTIONS_FULL_FRAME_V3"},
     "control_plane": {"enum": ["cloudflare_worker", "github_actions_fixture"]},
     "output": {
       "type": "object",
       "additionalProperties": false,
       "required": ["uri", "file", "sha256", "bytes"],
       "properties": {
-        "uri": {"type": "string", "pattern": "^output/runtime/[A-Za-z0-9._-]+/VIDEO_T5_FORMULE_RUNTIME_DYNAMIQUE_V2_A_VALIDER\\.mp4$"},
-        "file": {"const": "VIDEO_T5_FORMULE_RUNTIME_DYNAMIQUE_V2_A_VALIDER.mp4"},
+        "uri": {"type": "string", "pattern": "^output/runtime/[A-Za-z0-9._-]+/VIDEO_T5_FORMULE_PLEIN_ECRAN_V3_A_VALIDER\\.mp4$"},
+        "file": {"const": "VIDEO_T5_FORMULE_PLEIN_ECRAN_V3_A_VALIDER.mp4"},
         "sha256": {"$ref": "#/$defs/sha256"},
         "bytes": {"type": "integer", "minimum": 1}
       }

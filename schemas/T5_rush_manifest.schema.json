@@ -1,25 +1,26 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/vitrinevideo0-bot/vitrine-video-t5-formule-combo-offre/raw/main/schemas/T5_rush_manifest.schema.json",
-  "title": "RESTAURATION-T5 four-capture validation manifest",
+  "title": "RESTAURATION-T5 V3 four-rush full-frame fixture manifest",
   "type": "object",
   "additionalProperties": false,
   "required": ["schema_version", "template_id", "purpose", "continuity_rule", "license", "output_contract", "transition_contract", "sources", "scenes"],
   "properties": {
-    "schema_version": {"const": "2.0.0"},
+    "schema_version": {"const": "3.0.0"},
     "template_id": {"const": "RESTAURATION-T5"},
     "purpose": {"type": "string", "minLength": 1},
     "continuity_rule": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["one_offer_per_ad", "same_dish_drink_and_sides_across_four_scenes", "same_shoot_and_creator", "demo_offer", "source_count", "visible_in_every_scene"],
+      "required": ["one_offer_per_ad", "same_dish_drink_and_sides_across_four_scenes", "same_shoot_and_creator", "demo_offer", "source_count", "formula_items", "coverage"],
       "properties": {
         "one_offer_per_ad": {"const": true},
         "same_dish_drink_and_sides_across_four_scenes": {"const": true},
         "same_shoot_and_creator": {"const": true},
-        "demo_offer": {"type": "string", "minLength": 1},
+        "demo_offer": {"const": "Formule Double Burger"},
         "source_count": {"const": 4},
-        "visible_in_every_scene": {"const": ["double burger", "portion de frites", "verre de cola"]}
+        "formula_items": {"const": ["double burger", "portion de frites", "verre de soda"]},
+        "coverage": {"type": "string", "minLength": 1}
       }
     },
     "license": {
@@ -38,30 +39,33 @@
     "output_contract": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["width", "height", "fps", "duration_seconds", "total_frames", "video_codec", "pixel_format", "audio_streams", "burned_text_source", "production_render_plane"],
+      "required": ["width", "height", "fps", "duration_seconds", "total_frames", "scene_durations_seconds", "video_codec", "pixel_format", "audio_streams", "burned_text_source", "rushes_fill_entire_frame", "production_render_plane"],
       "properties": {
         "width": {"const": 720},
         "height": {"const": 1280},
         "fps": {"const": 30},
         "duration_seconds": {"const": 30.0},
         "total_frames": {"const": 900},
+        "scene_durations_seconds": {"const": [6, 8, 7, 9]},
         "video_codec": {"const": "h264"},
         "pixel_format": {"const": "yuv420p"},
         "audio_streams": {"const": 0},
-        "burned_text_source": {"const": "merchant_payload"},
+        "burned_text_source": {"const": "merchant_payload_exact_values_only"},
+        "rushes_fill_entire_frame": {"const": true},
         "production_render_plane": {"const": "github_actions"}
       }
     },
     "transition_contract": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["reference", "family", "duration_frames", "boundary_frames", "variants"],
+      "required": ["reference", "family", "duration_frames", "boundary_frames", "timeline_windows", "variants"],
       "properties": {
         "reference": {"const": "T1"},
-        "family": {"const": "dish_swipe"},
+        "family": {"const": "dish_swipe_camera_whip"},
         "duration_frames": {"const": 8},
         "boundary_frames": {"const": [180, 420, 630]},
-        "variants": {"const": ["slideleft", "slideright", "slideleft"]}
+        "timeline_windows": {"const": [[176, 183], [416, 423], [626, 633]]},
+        "variants": {"const": ["left", "right", "left"]}
       }
     },
     "sources": {
@@ -98,26 +102,26 @@
       "properties": {
         "slot": {"type": "string"},
         "pexels_id": {"type": "integer", "minimum": 1},
-        "creator": {"const": "Artem Podrez"},
+        "creator": {"const": "Aida Shukuhi"},
         "page_title": {"type": "string", "minLength": 1},
-        "page_url": {"type": "string", "format": "uri", "pattern": "^https://www\\.pexels\\.com/"},
-        "download_url": {"type": "string", "format": "uri", "pattern": "^https://videos\\.pexels\\.com/"},
+        "page_url": {"type": "string", "format": "uri", "pattern": "^https://www\\.pexels\\.com/video/"},
+        "download_url": {"type": "string", "format": "uri", "pattern": "^https://videos\\.pexels\\.com/video-files/"},
         "cache_filename": {"type": "string", "pattern": "^S[1-4]_[0-9]+\\.mp4$"},
         "expected_bytes": {"type": "integer", "minimum": 1},
         "sha256": {"$ref": "#/$defs/sha256"},
-        "width": {"const": 2560},
-        "height": {"const": 1440},
-        "fps": {"const": 30.0},
-        "frame_count": {"type": "integer", "minimum": 180},
-        "duration_ms": {"type": "integer", "minimum": 6000},
-        "visible_items": {"const": ["double burger", "portion de frites", "verre de cola"]},
+        "width": {"const": 1920},
+        "height": {"const": 1080},
+        "fps": {"type": "number", "minimum": 23, "maximum": 26},
+        "frame_count": {"type": "integer", "minimum": 150},
+        "duration_ms": {"type": "integer", "minimum": 6800},
+        "visible_items": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
         "scene_fit": {"type": "string", "minLength": 1}
       }
     },
-    "sourceS1": {"allOf": [{"$ref": "#/$defs/source"}, {"properties": {"slot": {"const": "S1"}, "pexels_id": {"const": 4731057}}}]},
-    "sourceS2": {"allOf": [{"$ref": "#/$defs/source"}, {"properties": {"slot": {"const": "S2"}, "pexels_id": {"const": 4731063}}}]},
-    "sourceS3": {"allOf": [{"$ref": "#/$defs/source"}, {"properties": {"slot": {"const": "S3"}, "pexels_id": {"const": 4731066}}}]},
-    "sourceS4": {"allOf": [{"$ref": "#/$defs/source"}, {"properties": {"slot": {"const": "S4"}, "pexels_id": {"const": 4731132}}}]},
+    "sourceS1": {"allOf": [{"$ref": "#/$defs/source"}, {"properties": {"slot": {"const": "S1"}, "pexels_id": {"const": 32092904}}}]},
+    "sourceS2": {"allOf": [{"$ref": "#/$defs/source"}, {"properties": {"slot": {"const": "S2"}, "pexels_id": {"const": 32092902}}}]},
+    "sourceS3": {"allOf": [{"$ref": "#/$defs/source"}, {"properties": {"slot": {"const": "S3"}, "pexels_id": {"const": 32092903}}}]},
+    "sourceS4": {"allOf": [{"$ref": "#/$defs/source"}, {"properties": {"slot": {"const": "S4"}, "pexels_id": {"const": 32092901}}}]},
     "scene": {
       "type": "object",
       "additionalProperties": false,
@@ -131,9 +135,9 @@
         "freeze_tail_ms": {"type": "integer", "minimum": 0}
       }
     },
-    "sceneS1": {"allOf": [{"$ref": "#/$defs/scene"}, {"properties": {"scene": {"const": "S1"}, "title": {"const": "LA FORMULE"}, "duration_seconds": {"const": 6}, "source_slot": {"const": "S1"}, "freeze_tail_ms": {"const": 0}}}]},
-    "sceneS2": {"allOf": [{"$ref": "#/$defs/scene"}, {"properties": {"scene": {"const": "S2"}, "title": {"const": "CE QU’IL Y A DANS LA FORMULE"}, "duration_seconds": {"const": 8}, "source_slot": {"const": "S2"}, "freeze_tail_ms": {"const": 0}}}]},
-    "sceneS3": {"allOf": [{"$ref": "#/$defs/scene"}, {"properties": {"scene": {"const": "S3"}, "title": {"const": "LE PRIX"}, "duration_seconds": {"const": 7}, "source_slot": {"const": "S3"}, "freeze_tail_ms": {"const": 0}}}]},
-    "sceneS4": {"allOf": [{"$ref": "#/$defs/scene"}, {"properties": {"scene": {"const": "S4"}, "title": {"const": "COMMANDER"}, "duration_seconds": {"const": 9}, "source_slot": {"const": "S4"}, "freeze_tail_ms": {"const": 3000}}}]}
+    "sceneS1": {"allOf": [{"$ref": "#/$defs/scene"}, {"properties": {"scene": {"const": "S1"}, "title": {"const": "LA FORMULE"}, "duration_seconds": {"const": 6}, "source_slot": {"const": "S1"}, "source_in_ms": {"const": 300}, "freeze_tail_ms": {"const": 0}}}]},
+    "sceneS2": {"allOf": [{"$ref": "#/$defs/scene"}, {"properties": {"scene": {"const": "S2"}, "title": {"const": "CE QU’IL Y A DANS LA FORMULE"}, "duration_seconds": {"const": 8}, "source_slot": {"const": "S2"}, "source_in_ms": {"const": 2000}, "freeze_tail_ms": {"const": 0}}}]},
+    "sceneS3": {"allOf": [{"$ref": "#/$defs/scene"}, {"properties": {"scene": {"const": "S3"}, "title": {"const": "LE PRIX"}, "duration_seconds": {"const": 7}, "source_slot": {"const": "S3"}, "source_in_ms": {"const": 1000}, "freeze_tail_ms": {"const": 0}}}]},
+    "sceneS4": {"allOf": [{"$ref": "#/$defs/scene"}, {"properties": {"scene": {"const": "S4"}, "title": {"const": "COMMANDER"}, "duration_seconds": {"const": 9}, "source_slot": {"const": "S4"}, "source_in_ms": {"const": 3000}, "freeze_tail_ms": {"const": 3000}}}]}
   }
 }

@@ -17,7 +17,7 @@ QUESTIONS = ROOT / "form/questions_T5.json"
 SLOTS = ("S1", "S2", "S3", "S4")
 FIELDS = ("nom", "offre", "contenu", "prix", "whatsapp", "quartier")
 ID_PATTERN = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9._-]{7,127}$")
-OUTPUT_FILENAME = "VIDEO_T5_FORMULE_RUNTIME_DYNAMIQUE_V2_A_VALIDER.mp4"
+OUTPUT_FILENAME = "VIDEO_T5_FORMULE_PLEIN_ECRAN_V3_A_VALIDER.mp4"
 
 
 def load_json(path: Path) -> dict[str, Any]:
@@ -108,15 +108,15 @@ def build_render_job(
         "job_id": render_job_id,
         "idempotency_key": render_job_id,
         "template_id": "RESTAURATION-T5",
-        "template_version": "2.0.0-runtime",
+        "template_version": "3.0.0-full-frame",
         "merchant_payload": payload,
         "captures": verified_captures,
         "render": {
-            "visual_mode": "runtime_hybrid_render",
+            "visual_mode": "runtime_full_frame_render",
             "runtime_capture_manifest_required": True,
             "render_business_text": True,
             "business_text_source": "merchant_payload",
-            "runtime_contract": "config/T5_RUNTIME_CONTRACT_V2_0_0.json",
+            "runtime_contract": "config/T5_RUNTIME_CONTRACT_V3_0_0.json",
             "transition_reference": "T1",
             "width": 720,
             "height": 1280,

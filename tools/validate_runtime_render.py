@@ -109,6 +109,31 @@ def main() -> int:
         path.name.startswith(tuple(SLOTS)) and path.suffix.lower() in {".mp4", ".mov", ".webm"}
         for path in args.video.parent.iterdir()
     )
+    visual_policy = render_report.get("visual_policy", {})
+    full_frame_policy = (
+        visual_policy.get("rushes_fill_entire_frame") is True
+        and visual_policy.get("permanent_cards") is False
+        and visual_policy.get("rounded_video_frames") is False
+        and visual_policy.get("split_screen") is False
+        and visual_policy.get("progress_bars") is False
+        and visual_policy.get("scene_or_technical_labels") is False
+    )
+    resolved_path = args.render_report.parent / render_report["resolved_text"]["file"]
+    resolved = json.loads(resolved_path.read_text(encoding="utf-8"))
+    exact_text_policy = (
+        visual_policy.get("visible_text_source") == "merchant_payload_exact_values_only"
+        and resolved.get("values") == job["merchant_payload"]
+        and resolved.get("static_business_copy") == []
+    )
+    transitions = render_report.get("transition_evidence", [])
+    transitions_are_exact = (
+        len(transitions) == 3
+        and [item.get("cut_frame") for item in transitions] == [180, 420, 630]
+        and [item.get("timeline_frames") for item in transitions] == [[176, 183], [416, 423], [626, 633]]
+        and all(item.get("duration_frames") == 8 for item in transitions)
+        and [item.get("direction") for item in transitions] == ["left", "right", "left"]
+        and all(item.get("clean_first_frame") is True and item.get("clean_last_frame") is True for item in transitions)
+    )
 
     checks = {
         "one_video_stream": len(video_streams) == 1,
@@ -122,6 +147,9 @@ def main() -> int:
         "six_fields_change_real_pixels": fields_are_dynamic,
         "four_scenes_consume_declared_captures": captures_are_bound,
         "four_visual_windows_are_distinct": distinct_capture_pixels,
+        "rushes_are_full_frame_without_cards": full_frame_policy,
+        "visible_text_is_exactly_from_merchant_payload": exact_text_policy,
+        "three_t1_transitions_are_exactly_eight_frames": transitions_are_exact,
         "runtime_manifest_is_hash_bound": sha256(args.manifest) == render_report["runtime_manifest"]["sha256"],
         "resolved_text_is_from_render_job": render_report["merchant_payload_sha256"] == canonical_sha256(job["merchant_payload"]),
         "final_three_seconds_are_stable": stability["pass"],
@@ -130,7 +158,7 @@ def main() -> int:
     }
     status = "PASS" if all(checks.values()) else "FAIL"
     validation = {
-        "schema_version": "2.0.0",
+        "schema_version": "3.0.0",
         "template_id": "RESTAURATION-T5",
         "job_id": job["job_id"],
         "status": status,
@@ -156,15 +184,14 @@ def main() -> int:
         }
         for index, slot in enumerate(SLOTS)
     ]
-    resolved_path = args.render_report.parent / render_report["resolved_text"]["file"]
     result = {
         "schema_version": "1.0.0",
         "status": "COMPLETED",
         "job_id": job["job_id"],
         "idempotency_key": job["idempotency_key"],
         "template_id": "RESTAURATION-T5",
-        "template_version": "2.0.0-runtime",
-        "profile_used": "T5_GITHUB_ACTIONS_RUNTIME_V2",
+        "template_version": "3.0.0-full-frame",
+        "profile_used": "T5_GITHUB_ACTIONS_FULL_FRAME_V3",
         "control_plane": job["control_plane"],
         "output": {
             "uri": job["output"]["uri"],

@@ -1,238 +1,275 @@
-"""Composition visuelle déterministe des textes T5 sur une prise runtime."""
+#!/usr/bin/env python3
+"""Primitives visuelles T5 V3 : rush plein écran et texte exact du merchant_payload.
+
+Aucun titre éditorial, carte, cadre vidéo, barre de progression ou libellé de scène
+n'est produit ici. Les seules chaînes brûlées viennent du RenderJob.
+"""
 from __future__ import annotations
 
-from dataclasses import dataclass
+from functools import lru_cache
 from pathlib import Path
-from typing import Iterable
+from typing import Mapping
+import re
 
-from PIL import Image, ImageChops, ImageDraw, ImageEnhance, ImageFilter, ImageFont, ImageOps
+from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
 
-ROOT = Path(__file__).resolve().parents[1]
-FONT_BOLD = ROOT / "assets/fonts/DejaVuSans-Bold.ttf"
-FONT_REGULAR = ROOT / "assets/fonts/DejaVuSans.ttf"
 WIDTH, HEIGHT = 720, 1280
-FPS = 30
-SCENE_FRAMES = {"S1": 180, "S2": 240, "S3": 210, "S4": 270}
-SCENE_FIELDS = {
+FONT_REGULAR = Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf")
+FONT_BOLD = Path("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf")
+
+SCENE_FIELDS: dict[str, tuple[str, ...]] = {
     "S1": ("nom", "offre", "contenu"),
     "S2": ("contenu",),
     "S3": ("offre", "contenu", "prix"),
     "S4": ("nom", "whatsapp", "quartier"),
 }
-FIELD_BOXES = {
-    "S1": {"nom": (48, 580, 672, 650), "offre": (48, 650, 672, 790), "contenu": (48, 805, 672, 1045)},
-    "S2": {"contenu": (48, 690, 672, 1010)},
-    "S3": {"offre": (48, 580, 672, 660), "prix": (48, 675, 672, 835), "contenu": (48, 875, 672, 1085)},
-    "S4": {"nom": (48, 580, 672, 655), "whatsapp": (48, 700, 672, 855), "quartier": (48, 890, 672, 1035)},
+
+# Zones de texte transparentes, exprimées dans le plein cadre 720 x 1280.
+FIELD_BOXES: dict[str, dict[str, tuple[int, int, int, int]]] = {
+    "S1": {
+        "nom": (52, 758, 668, 820),
+        "offre": (52, 832, 668, 928),
+        "contenu": (52, 942, 668, 1074),
+    },
+    "S2": {
+        "contenu": (52, 872, 668, 1074),
+    },
+    "S3": {
+        "offre": (52, 750, 668, 826),
+        "contenu": (52, 840, 668, 952),
+        "prix": (52, 972, 668, 1082),
+    },
+    "S4": {
+        "nom": (52, 758, 668, 820),
+        "whatsapp": (52, 838, 668, 932),
+        "quartier": (52, 948, 668, 1056),
+    },
 }
-ACCENT = "#F8B84E"
-CREAM = "#FFF5DF"
-MUTED = "#D6C9B6"
-INK = "#130E0A"
-RED = "#E45B3D"
+
+SCENE_TEXT_STYLE: dict[str, dict[str, tuple[int, int]]] = {
+    # (taille préférée, taille minimale) — la réduction permet toujours d'afficher la valeur entière.
+    "S1": {"nom": (34, 24), "offre": (50, 32), "contenu": (31, 22)},
+    "S2": {"contenu": (42, 24)},
+    "S3": {"offre": (36, 24), "contenu": (28, 20), "prix": (58, 40)},
+    "S4": {"nom": (34, 24), "whatsapp": (43, 30), "quartier": (31, 22)},
+}
 
 
-@dataclass(frozen=True)
-class SceneCopy:
-    scene: str
-    label: str
-    eyebrow: str
-    title: str
-    body: str
-    footer: str
-    fields: tuple[str, ...]
+def _resample() -> int:
+    return getattr(Image, "Resampling", Image).LANCZOS
 
 
-def resolved_scene_copy(scene: str, payload: dict[str, str]) -> SceneCopy:
-    if scene == "S1":
-        return SceneCopy(scene, "LA FORMULE", payload["nom"], payload["offre"], payload["contenu"], "UNE SEULE FORMULE · TOUT EST INCLUS", SCENE_FIELDS[scene])
-    if scene == "S2":
-        return SceneCopy(scene, "DANS LA FORMULE", "REGARDE BIEN", "TOUT EST LÀ", payload["contenu"], "PLAT · BOISSON · ACCOMPAGNEMENT", SCENE_FIELDS[scene])
-    if scene == "S3":
-        return SceneCopy(scene, "LE PRIX", payload["offre"], payload["prix"], payload["contenu"], "LE PRIX DE LA FORMULE COMPLÈTE", SCENE_FIELDS[scene])
-    if scene == "S4":
-        return SceneCopy(scene, "COMMANDER", payload["nom"], "ÉCRIS-NOUS SUR WHATSAPP", payload["whatsapp"], payload["quartier"], SCENE_FIELDS[scene])
-    raise ValueError(f"Unknown T5 scene: {scene}")
+@lru_cache(maxsize=128)
+def load_font(size: int, bold: bool = False) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
+    path = FONT_BOLD if bold else FONT_REGULAR
+    try:
+        return ImageFont.truetype(str(path), size)
+    except OSError:
+        return ImageFont.load_default()
 
 
-def _font(path: Path, size: int) -> ImageFont.FreeTypeFont:
-    return ImageFont.truetype(str(path), size=size)
+def cover(source: Image.Image, size: tuple[int, int] = (WIDTH, HEIGHT)) -> Image.Image:
+    """Recadre au centre sans jamais créer de bord ni de cadre."""
+    source = source.convert("RGB")
+    target_w, target_h = size
+    scale = max(target_w / source.width, target_h / source.height)
+    resized = source.resize((round(source.width * scale), round(source.height * scale)), _resample())
+    left = max(0, (resized.width - target_w) // 2)
+    top = max(0, (resized.height - target_h) // 2)
+    return resized.crop((left, top, left + target_w, top + target_h))
 
 
-def _cover(image: Image.Image, size: tuple[int, int]) -> Image.Image:
-    return ImageOps.fit(image.convert("RGB"), size, method=Image.Resampling.LANCZOS, centering=(0.5, 0.5))
-
-
-def _rounded_image(image: Image.Image, size: tuple[int, int], radius: int) -> Image.Image:
-    contained = ImageOps.contain(image.convert("RGB"), size, method=Image.Resampling.LANCZOS)
-    canvas = Image.new("RGB", size, "#080604")
-    canvas.paste(contained, ((size[0] - contained.width) // 2, (size[1] - contained.height) // 2))
-    mask = Image.new("L", size, 0)
-    ImageDraw.Draw(mask).rounded_rectangle((0, 0, size[0] - 1, size[1] - 1), radius=radius, fill=255)
-    result = Image.new("RGBA", size)
-    result.paste(canvas, (0, 0), mask)
-    return result
-
-
-def _ease(frame: int, start: int = 8, duration: int = 16) -> float:
-    value = max(0.0, min(1.0, (frame - start) / max(1, duration)))
-    return 1 - (1 - value) ** 3
-
-
-def _wrap(draw: ImageDraw.ImageDraw, text: str, font: ImageFont.FreeTypeFont, width: int, max_lines: int = 4) -> list[str]:
-    words = text.split()
-    if not words:
-        return [""]
-    lines: list[str] = []
-    current = words[0]
-    for word in words[1:]:
-        candidate = f"{current} {word}"
-        if draw.textlength(candidate, font=font) <= width:
-            current = candidate
-        else:
-            lines.append(current)
-            current = word
-    lines.append(current)
-    if len(lines) <= max_lines:
-        return lines
-    kept = lines[: max_lines - 1]
-    remainder = " ".join(lines[max_lines - 1 :])
-    while draw.textlength(remainder + "…", font=font) > width and len(remainder) > 1:
-        remainder = remainder[:-1]
-    kept.append(remainder.rstrip() + "…")
-    return kept
-
-
-def _fit_font(draw: ImageDraw.ImageDraw, text: str, path: Path, maximum: int, minimum: int, width: int) -> ImageFont.FreeTypeFont:
-    for size in range(maximum, minimum - 1, -1):
-        font = _font(path, size)
-        if draw.textlength(text, font=font) <= width:
-            return font
-    return _font(path, minimum)
-
-
-def _draw_wrapped(draw: ImageDraw.ImageDraw, xy: tuple[int, int], text: str, font: ImageFont.FreeTypeFont, fill: str, width: int, spacing: int = 10, max_lines: int = 4) -> tuple[int, int, int, int]:
-    lines = _wrap(draw, text, font, width, max_lines=max_lines)
-    x, y = xy
-    line_height = int(font.size * 1.18)
-    for index, line in enumerate(lines):
-        draw.text((x, y + index * (line_height + spacing)), line, font=font, fill=fill)
-    return (x, y, x + width, y + len(lines) * line_height + max(0, len(lines) - 1) * spacing)
-
-
-def _scene_progress(draw: ImageDraw.ImageDraw, scene: str, local_frame: int) -> None:
-    scene_index = int(scene[1:])
-    draw.text((42, 38), f"FORMULE · SCÈNE {scene_index}/4", font=_font(FONT_BOLD, 18), fill=CREAM)
-    total_width, gap = 636, 8
-    segment = (total_width - gap * 3) // 4
-    for index in range(4):
-        x = 42 + index * (segment + gap)
-        color = ACCENT if index < scene_index - 1 else "#5B4B3C"
-        draw.rounded_rectangle((x, 86, x + segment, 94), radius=4, fill=color)
-    active_x = 42 + (scene_index - 1) * (segment + gap)
-    fraction = max(0.0, min(1.0, (local_frame + 1) / SCENE_FRAMES[scene]))
-    draw.rounded_rectangle((active_x, 86, active_x + max(4, int(segment * fraction)), 94), radius=4, fill=ACCENT)
-
-
-def render_scene_frame(source: Image.Image, scene: str, local_frame: int, payload: dict[str, str]) -> tuple[Image.Image, tuple[str, ...]]:
-    """Rend une image 720×1280. Aucune valeur métier n'est lue ailleurs que dans payload."""
-    if scene not in SCENE_FRAMES:
-        raise ValueError(f"Unknown scene {scene}")
-    local_frame = max(0, min(SCENE_FRAMES[scene] - 1, int(local_frame)))
-    copy = resolved_scene_copy(scene, payload)
-
-    small_background = _cover(source, (360, 640)).filter(ImageFilter.GaussianBlur(10))
-    background = small_background.resize((WIDTH, HEIGHT), Image.Resampling.BILINEAR)
-    background = ImageEnhance.Brightness(background).enhance(0.30).convert("RGBA")
-    warm = Image.new("RGBA", (WIDTH, HEIGHT), (54, 25, 9, 70))
-    canvas = Image.alpha_composite(background, warm)
-    draw = ImageDraw.Draw(canvas)
-    _scene_progress(draw, scene, local_frame)
-
-    hero_box = (30, 120, 690, 518)
-    draw.rounded_rectangle((24, 114, 696, 524), radius=32, fill=(0, 0, 0, 125), outline=ACCENT, width=2)
-    hero = _rounded_image(source, (660, 398), 26)
-    canvas.alpha_composite(hero, (hero_box[0], hero_box[1]))
-
-    draw = ImageDraw.Draw(canvas)
-    draw.rounded_rectangle((30, 548, 690, 1214), radius=38, fill=(15, 10, 7, 230), outline=(255, 255, 255, 28), width=2)
-    draw.rounded_rectangle((50, 570, 218, 606), radius=18, fill=RED)
-    label_font = _font(FONT_BOLD, 16)
-    label_width = draw.textlength(copy.label, font=label_font)
-    draw.text((134 - label_width / 2, 578), copy.label, font=label_font, fill="white")
-
-    reveal = _ease(local_frame)
-    text_layer = Image.new("RGBA", (WIDTH, HEIGHT), (0, 0, 0, 0))
-    text_draw = ImageDraw.Draw(text_layer)
-    shift = int((1 - reveal) * 22)
-    alpha = max(0, min(255, int(255 * reveal)))
-    cream = (255, 245, 223, alpha)
-    accent = (248, 184, 78, alpha)
-    muted = (214, 201, 182, alpha)
-
-    if scene == "S1":
-        eyebrow_font = _fit_font(text_draw, copy.eyebrow.upper(), FONT_BOLD, 25, 18, 610)
-        text_draw.text((52, 620 + shift), copy.eyebrow.upper(), font=eyebrow_font, fill=muted)
-        title_font = _fit_font(text_draw, copy.title, FONT_BOLD, 52, 30, 612)
-        _draw_wrapped(text_draw, (52, 667 + shift), copy.title, title_font, cream, 612, spacing=4, max_lines=2)
-        body_font = _font(FONT_REGULAR, 31)
-        _draw_wrapped(text_draw, (52, 836 + shift), copy.body, body_font, cream, 612, spacing=8, max_lines=4)
-        text_draw.rounded_rectangle((52, 1114 + shift, 668, 1170 + shift), radius=20, fill=(248, 184, 78, int(36 * reveal)))
-        text_draw.text((70, 1130 + shift), copy.footer, font=_font(FONT_BOLD, 17), fill=accent)
-    elif scene == "S2":
-        text_draw.text((52, 620 + shift), copy.eyebrow, font=_font(FONT_BOLD, 22), fill=accent)
-        text_draw.text((52, 660 + shift), copy.title, font=_font(FONT_BOLD, 48), fill=cream)
-        body_font = _font(FONT_BOLD, 37)
-        _draw_wrapped(text_draw, (52, 742 + shift), copy.body, body_font, cream, 612, spacing=12, max_lines=4)
-        text_draw.text((52, 1118 + shift), copy.footer, font=_font(FONT_BOLD, 16), fill=muted)
-    elif scene == "S3":
-        eyebrow_font = _fit_font(text_draw, copy.eyebrow.upper(), FONT_BOLD, 24, 17, 610)
-        text_draw.text((52, 620 + shift), copy.eyebrow.upper(), font=eyebrow_font, fill=muted)
-        price_font = _fit_font(text_draw, copy.title, FONT_BOLD, 78, 44, 610)
-        text_draw.text((52, 684 + shift), copy.title, font=price_font, fill=accent)
-        body_font = _font(FONT_REGULAR, 27)
-        _draw_wrapped(text_draw, (52, 885 + shift), copy.body, body_font, cream, 612, spacing=8, max_lines=4)
-        text_draw.text((52, 1120 + shift), copy.footer, font=_font(FONT_BOLD, 17), fill=muted)
-    else:
-        eyebrow_font = _fit_font(text_draw, copy.eyebrow.upper(), FONT_BOLD, 24, 17, 610)
-        text_draw.text((52, 620 + shift), copy.eyebrow.upper(), font=eyebrow_font, fill=muted)
-        text_draw.text((52, 680 + shift), copy.title, font=_font(FONT_BOLD, 29), fill=cream)
-        phone_font = _fit_font(text_draw, copy.body, FONT_BOLD, 57, 35, 610)
-        text_draw.text((52, 746 + shift), copy.body, font=phone_font, fill=accent)
-        text_draw.rounded_rectangle((52, 878 + shift, 668, 1028 + shift), radius=24, fill=(255, 245, 223, int(20 * reveal)), outline=(248, 184, 78, int(110 * reveal)), width=2)
-        text_draw.text((72, 900 + shift), "RETRAIT", font=_font(FONT_BOLD, 15), fill=muted)
-        pickup_font = _font(FONT_BOLD, 27)
-        _draw_wrapped(text_draw, (72, 935 + shift), copy.footer, pickup_font, cream, 570, spacing=6, max_lines=2)
-        text_draw.text((52, 1118 + shift), "COMMANDE PRÊTE À ÊTRE RETIRÉE", font=_font(FONT_BOLD, 16), fill=muted)
-
-    canvas = Image.alpha_composite(canvas, text_layer)
-    return canvas.convert("RGB"), copy.fields
-
-
-def slide_transition(previous: Image.Image, current: Image.Image, progress: float, direction: str) -> Image.Image:
+def _cover_with_motion(source: Image.Image, progress: float, mode: str) -> Image.Image:
     progress = max(0.0, min(1.0, progress))
-    eased = 1 - (1 - progress) ** 3
-    result = Image.new("RGB", (WIDTH, HEIGHT), INK)
-    if direction == "slideright":
-        shift = int(WIDTH * eased)
-        result.paste(previous, (shift, 0))
-        result.paste(current, (-WIDTH + shift, 0))
+    # Un mouvement discret dynamise même une capture stable, sans la placer dans une carte.
+    motion_progress = min(progress, 0.66) if mode == "lock" else progress
+    if mode == "pull":
+        zoom = 1.055 - 0.04 * motion_progress
+    elif mode == "lock":
+        eased = min(1.0, motion_progress / 0.66)
+        zoom = 1.025 + 0.018 * eased
     else:
-        shift = int(WIDTH * eased)
-        result.paste(previous, (-shift, 0))
-        result.paste(current, (WIDTH - shift, 0))
-    return result
+        zoom = 1.01 + 0.045 * motion_progress
+    base = cover(source)
+    crop_w = max(1, round(WIDTH / zoom))
+    crop_h = max(1, round(HEIGHT / zoom))
+    drift_x = round(10 * (motion_progress - 0.5))
+    drift_y = round(8 * (0.5 - motion_progress))
+    left = max(0, min(WIDTH - crop_w, (WIDTH - crop_w) // 2 + drift_x))
+    top = max(0, min(HEIGHT - crop_h, (HEIGHT - crop_h) // 2 + drift_y))
+    return base.crop((left, top, left + crop_w, top + crop_h)).resize((WIDTH, HEIGHT), _resample())
 
 
-def changed_pixel_count(first: Image.Image, second: Image.Image) -> tuple[int, tuple[int, int, int, int] | None]:
-    difference = ImageChops.difference(first.convert("RGB"), second.convert("RGB"))
-    histogram = difference.convert("L").histogram()
-    return sum(histogram[1:]), difference.getbbox()
+def _tokens(value: str) -> list[str]:
+    return re.findall(r"\S+", " ".join(value.split()))
 
 
-def proof_timeline(captures: dict[str, Image.Image], payload: dict[str, str]) -> dict[str, Image.Image]:
-    """Rend une image témoin par scène ; utile pour prouver l'isolation des quatre captures."""
+def _fit_lines(
+    draw: ImageDraw.ImageDraw,
+    value: str,
+    *,
+    max_width: int,
+    max_height: int,
+    preferred_size: int,
+    minimum_size: int,
+    bold: bool,
+    max_lines: int,
+) -> tuple[list[str], ImageFont.ImageFont, int]:
+    words = _tokens(value)
+    if not words:
+        words = [""]
+    fallback: tuple[list[str], ImageFont.ImageFont, int] | None = None
+    for size in range(preferred_size, minimum_size - 1, -1):
+        font = load_font(size, bold)
+        spacing = max(5, round(size * 0.2))
+        lines: list[str] = []
+        current = words[0]
+        for word in words[1:]:
+            candidate = f"{current} {word}"
+            if draw.textbbox((0, 0), candidate, font=font, stroke_width=1)[2] <= max_width:
+                current = candidate
+            else:
+                lines.append(current)
+                current = word
+        lines.append(current)
+        fallback = (lines, font, spacing)
+        bbox = draw.multiline_textbbox((0, 0), "\n".join(lines), font=font, spacing=spacing, stroke_width=1)
+        if len(lines) <= max_lines and bbox[2] <= max_width and bbox[3] <= max_height:
+            return lines, font, spacing
+    if fallback is None:
+        font = load_font(minimum_size, bold)
+        return [" ".join(words)], font, max(4, round(minimum_size * 0.18))
+    return fallback
+
+
+@lru_cache(maxsize=1)
+def _readability_gradient() -> Image.Image:
+    """Calque bord à bord mis en cache : aucun rectangle de carte."""
+    overlay = Image.new("RGBA", (WIDTH, HEIGHT), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(overlay)
+    top, bottom = 680, 1160
+    for y in range(top, bottom):
+        p = (y - top) / max(1, bottom - top - 1)
+        alpha = round(8 + 142 * (p ** 1.35))
+        draw.line((0, y, WIDTH, y), fill=(6, 5, 4, alpha), width=1)
+    return overlay
+
+
+def _gradient_overlay(base: Image.Image) -> Image.Image:
+    """Assombrit seulement le bord inférieur; aucune carte rectangulaire n'est dessinée."""
+    return Image.alpha_composite(base.convert("RGBA"), _readability_gradient()).convert("RGB")
+
+
+def _draw_exact_value(
+    frame: Image.Image,
+    value: str,
+    box: tuple[int, int, int, int],
+    *,
+    preferred_size: int,
+    minimum_size: int,
+    bold: bool,
+    accent: bool = False,
+) -> None:
+    draw = ImageDraw.Draw(frame)
+    x0, y0, x1, y1 = box
+    lines, font, spacing = _fit_lines(
+        draw,
+        value,
+        max_width=x1 - x0,
+        max_height=y1 - y0,
+        preferred_size=preferred_size,
+        minimum_size=minimum_size,
+        bold=bold,
+        max_lines=3,
+    )
+    text = "\n".join(lines)
+    bbox = draw.multiline_textbbox((0, 0), text, font=font, spacing=spacing, stroke_width=1)
+    y = y0 + max(0, (y1 - y0 - (bbox[3] - bbox[1])) // 2)
+    fill = (255, 229, 117) if accent else (255, 255, 255)
+    # Ombre/contour uniquement : il ne s'agit pas d'un texte commercial ajouté.
+    draw.multiline_text(
+        (x0 + 3, y + 4), text, font=font, fill=(0, 0, 0), spacing=spacing,
+        stroke_width=3, stroke_fill=(0, 0, 0),
+    )
+    draw.multiline_text(
+        (x0, y), text, font=font, fill=fill, spacing=spacing,
+        stroke_width=1, stroke_fill=(20, 16, 12),
+    )
+
+
+def render_scene_frame(
+    source: Image.Image,
+    scene: str,
+    local_frame: int,
+    merchant_payload: Mapping[str, str],
+    scene_frames: int | None = None,
+) -> tuple[Image.Image, tuple[str, ...]]:
+    """Rend une image plein cadre. Retourne aussi les champs effectivement brûlés."""
+    fields = SCENE_FIELDS[scene]
+    denominator = max(1, (scene_frames or 270) - 1)
+    progress = max(0.0, min(1.0, local_frame / denominator))
+    mode = "pull" if scene == "S2" else "lock" if scene == "S4" else "push"
+    frame = _cover_with_motion(source, progress, mode)
+    frame = _gradient_overlay(frame)
+    for field in fields:
+        preferred, minimum = SCENE_TEXT_STYLE[scene][field]
+        _draw_exact_value(
+            frame,
+            str(merchant_payload[field]),
+            FIELD_BOXES[scene][field],
+            preferred_size=preferred,
+            minimum_size=minimum,
+            bold=field in {"offre", "prix", "whatsapp"},
+            accent=field in {"prix", "whatsapp"},
+        )
+    return frame, fields
+
+
+def apply_transition(
+    previous_frame: Image.Image,
+    next_frame: Image.Image,
+    step: int,
+    duration_frames: int = 8,
+    direction: str = "left",
+) -> Image.Image:
+    """Raccord dish swipe / camera whip T1 sur exactement huit images."""
+    if duration_frames != 8:
+        raise ValueError("T5 V3 transitions must last exactly 8 frames")
+    if direction not in {"left", "right"}:
+        raise ValueError("direction must be left or right")
+    step = max(0, min(duration_frames - 1, step))
+    if step == 0:
+        return previous_frame.copy()
+    if step == duration_frames - 1:
+        return next_frame.copy()
+    p = step / (duration_frames - 1)
+    eased = p * p * (3.0 - 2.0 * p)
+    shift = round(WIDTH * eased)
+    canvas = Image.new("RGB", (WIDTH, HEIGHT))
+    if direction == "left":
+        canvas.paste(previous_frame, (-shift, 0))
+        canvas.paste(next_frame, (WIDTH - shift, 0))
+    else:
+        canvas.paste(previous_frame, (shift, 0))
+        canvas.paste(next_frame, (shift - WIDTH, 0))
+    # Flou horizontal maximal au milieu, simulant le whip sans masquer les rushs.
+    blur = round(5.0 * (1.0 - abs(2.0 * p - 1.0)))
+    if blur:
+        canvas = canvas.filter(ImageFilter.GaussianBlur(radius=blur))
+    return canvas
+
+
+def proof_timeline(captures: Mapping[str, Image.Image], merchant_payload: Mapping[str, str]) -> dict[str, Image.Image]:
     return {
-        slot: render_scene_frame(captures[slot], slot, SCENE_FRAMES[slot] // 2, payload)[0]
-        for slot in ("S1", "S2", "S3", "S4")
+        scene: render_scene_frame(captures[scene], scene, 120, merchant_payload)[0]
+        for scene in ("S1", "S2", "S3", "S4")
     }
+
+
+def changed_pixel_count(a: Image.Image, b: Image.Image) -> tuple[int, tuple[int, int, int, int] | None]:
+    difference = ImageChops.difference(a.convert("RGB"), b.convert("RGB"))
+    bbox = difference.getbbox()
+    if bbox is None:
+        return 0, None
+    pixels = difference.get_flattened_data() if hasattr(difference, "get_flattened_data") else difference.getdata()
+    return sum(1 for pixel in pixels if pixel != (0, 0, 0)), bbox

@@ -67,7 +67,7 @@ def main() -> int:
     job = json.loads(args.render_job.read_text(encoding="utf-8"))
     schema = json.loads((ROOT / "schemas/T5_render_job.schema.json").read_text(encoding="utf-8"))
     Draft202012Validator(schema).validate(job)
-    if job["render"]["visual_mode"] != "runtime_hybrid_render" or job["render"]["runtime_capture_manifest_required"] is not True:
+    if job["render"]["visual_mode"] != "runtime_full_frame_render" or job["render"]["runtime_capture_manifest_required"] is not True:
         raise SystemExit("RenderJob does not authorize a runtime capture manifest")
     if job["render"]["production_render_plane"] != "github_actions" or job["cloudflare_rendering_forbidden"] is not True:
         raise SystemExit("T5 must render on GitHub Actions, never on Cloudflare")
@@ -114,6 +114,8 @@ def main() -> int:
             "duration_seconds": DURATIONS[slot],
             "timeline_frames": FRAME_RANGES[slot],
             "text_fields": fields_by_scene[slot],
+            "rush_fills_entire_frame": True,
+            "visible_text_source": "merchant_payload_exact_values_only",
             "full_formula_visibility_required": True,
             "freeze_tail_seconds": 3 if slot == "S4" else 0,
         })
@@ -121,7 +123,7 @@ def main() -> int:
     manifest = {
         "schema_version": "1.0.0",
         "template_id": "RESTAURATION-T5",
-        "template_version": "2.0.0-runtime",
+        "template_version": "3.0.0-full-frame",
         "job_id": job["job_id"],
         "idempotency_key": job["idempotency_key"],
         "control_plane": job["control_plane"],
@@ -132,7 +134,10 @@ def main() -> int:
         "output_contract": {
             "width": 720, "height": 1280, "fps": 30, "frames": 900,
             "duration_seconds": 30.0, "audio_streams": 0,
-            "business_text_source": "merchant_payload",
+            "business_text_source": "merchant_payload_exact_values_only",
+            "rushes_fill_entire_frame": True,
+            "transition_frames_per_cut": 8,
+            "transition_cut_frames": [180, 420, 630],
         },
         "scenes": scenes,
     }

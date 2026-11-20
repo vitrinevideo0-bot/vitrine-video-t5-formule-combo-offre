@@ -356,7 +356,7 @@ async function downloadVideo() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'VIDEO_T5_FORMULE_RUNTIME_DYNAMIQUE_V2_A_VALIDER.mp4';
+    link.download = 'VIDEO_T5_FORMULE_PLEIN_ECRAN_V3_A_VALIDER.mp4';
     link.click();
     setTimeout(() => URL.revokeObjectURL(url), 30_000);
   } catch (error) {

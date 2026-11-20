@@ -68,7 +68,7 @@ const DURATIONS: Record<CaptureSlot, number> = { S1: 6000, S2: 8000, S3: 7000, S
 const ALLOWED_MIME = new Set(["video/mp4", "video/webm", "video/quicktime"]);
 const MAX_CAPTURE_BYTES = 250 * 1024 * 1024;
 const MAX_OUTPUT_BYTES = 500 * 1024 * 1024;
-const OUTPUT_FILE = "VIDEO_T5_FORMULE_RUNTIME_DYNAMIQUE_V2_A_VALIDER.mp4";
+const OUTPUT_FILE = "VIDEO_T5_FORMULE_PLEIN_ECRAN_V3_A_VALIDER.mp4";
 
 function json(data: unknown, status = 200): Response {
   return Response.json(data, { status, headers: { "cache-control": "no-store" } });
@@ -167,15 +167,15 @@ function buildRenderJob(state: StoredJob): Record<string, unknown> {
     job_id: state.job_id,
     idempotency_key: state.idempotency_key,
     template_id: "RESTAURATION-T5",
-    template_version: "2.0.0-runtime",
+    template_version: "3.0.0-full-frame",
     merchant_payload: state.merchant_payload,
     captures,
     render: {
-      visual_mode: "runtime_hybrid_render",
+      visual_mode: "runtime_full_frame_render",
       runtime_capture_manifest_required: true,
       render_business_text: true,
       business_text_source: "merchant_payload",
-      runtime_contract: "config/T5_RUNTIME_CONTRACT_V2_0_0.json",
+      runtime_contract: "config/T5_RUNTIME_CONTRACT_V3_0_0.json",
       transition_reference: "T1",
       width: 720,
       height: 1280,
@@ -359,7 +359,7 @@ async function validateCallbackPayload(state: StoredJob, status: string, body: R
     const job = record(state.job);
     if (!result || result.schema_version !== "1.0.0" || result.status !== "COMPLETED") return "RenderResult absent ou invalide.";
     if (result.job_id !== state.job_id || result.idempotency_key !== state.idempotency_key) return "RenderResult rattaché à un autre job.";
-    if (result.template_id !== "RESTAURATION-T5" || result.template_version !== "2.0.0-runtime" || result.profile_used !== "T5_GITHUB_ACTIONS_RUNTIME_V2") return "Profil T5 du RenderResult invalide.";
+    if (result.template_id !== "RESTAURATION-T5" || result.template_version !== "3.0.0-full-frame" || result.profile_used !== "T5_GITHUB_ACTIONS_FULL_FRAME_V3") return "Profil T5 du RenderResult invalide.";
     if (result.control_plane !== "cloudflare_worker") return "Plan de contrôle du RenderResult invalide.";
     if (!output || output.uri !== outputUri(state.job_id) || output.file !== OUTPUT_FILE || !validSha(output.sha256)) return "Sortie RenderResult invalide.";
     if (!state.output || state.output.uri !== output.uri || state.output.sha256 !== output.sha256 || state.output.bytes !== output.bytes) return "Le RenderResult ne désigne pas le MP4 vérifié dans R2.";
@@ -369,7 +369,7 @@ async function validateCallbackPayload(state: StoredJob, status: string, body: R
     if (!validSha(inputs.runtime_manifest_sha256) || !validSha(inputs.resolved_text_sha256)) return "La provenance runtime du résultat est incomplète.";
     if (JSON.stringify(result.rendered_fields) !== JSON.stringify(FIELDS)) return "Les six champs rendus ne sont pas attestés.";
     if (!Array.isArray(result.scene_capture_bindings) || result.scene_capture_bindings.length !== 4) return "Les quatre liaisons scène/capture manquent.";
-    if (!job || record(job.render)?.visual_mode !== "runtime_hybrid_render") return "Le RenderJob stocké n'autorise pas ce rendu.";
+    if (!job || record(job.render)?.visual_mode !== "runtime_full_frame_render") return "Le RenderJob stocké n'autorise pas ce rendu.";
   }
   if (status === "FAILED") {
     const error = record(body.error);
