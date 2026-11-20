@@ -4,7 +4,7 @@
   "template_name": "Formule, combo ou offre",
   "updated_on": "2026-11-18",
   "workflow": {
-    "status": "Runtime V2 implemented and locally verified; GitHub server validation pending",
+    "status": "Runtime V2 is public; full CI and the GitHub four-capture render pass; verified candidate awaits owner review",
     "completion_percent_claimed": null
   },
   "owner_decisions": {
@@ -53,14 +53,18 @@
     "repository_created": true,
     "repository_public": true,
     "repository_url": "https://github.com/vitrinevideo0-bot/vitrine-video-t5-formule-combo-offre",
-    "runtime_v2_commit": null,
-    "ci_run_id": null,
-    "ci_conclusion": "pending",
-    "render_run_id": null,
-    "render_conclusion": "pending",
-    "release_tag": null,
-    "release_url": null,
-    "runtime_render_sha256": null
+    "runtime_v2_commit": "f8450994a7ede8680a7c10c99141a87031343435",
+    "ci_run_id": 44720625596,
+    "ci_conclusion": "success",
+    "render_run_id": 44720836940,
+    "render_conclusion": "success",
+    "release_tag": "t5-runtime-v2-candidate-1",
+    "release_url": "https://github.com/vitrinevideo0-bot/vitrine-video-t5-formule-combo-offre/releases/tag/t5-runtime-v2-candidate-1",
+    "runtime_render_sha256": "95715a88801cb386c081c06268581d9f034d23e94b352e6ad5c7d4dce3250a95",
+    "runtime_render_bytes": 4582380,
+    "runtime_render_qc": "PASS_16_OF_16",
+    "artifact_and_release_checksums_verified_after_download": true,
+    "raw_rush_in_artifact_or_release": false
   },
   "rejected_history": {
     "tag": "t5-first-montage-v1-candidate-1",
@@ -70,11 +74,11 @@
   },
   "claims": {
     "runtime_v2_implemented": true,
-    "runtime_v2_github_published": false,
+    "runtime_v2_github_published": true,
     "runtime_v2_owner_approved": false,
     "audio_implemented": false,
     "cloudflare_deployed": false,
     "production_ready": false
   },
-  "next_action": "Push Runtime V2, require green CI, run render-runtime on GitHub, download and verify the released MP4 before presentation."
+  "next_action": "Owner reviews only the verified GitHub Runtime V2 MP4; production Cloudflare deployment and audio remain separate later decisions."
 }

@@ -96,6 +96,17 @@ pytest -q
 
 Sortie attendue : 30,000 s, 720 × 1280, 30 i/s, 900 images, H.264/yuv420p, aucune piste audio, trois transitions T1 et appel à l’action stable pendant les trois dernières secondes.
 
+## Publication runtime V2 vérifiée
+
+- commit d’implémentation : [`f8450994a7ede8680a7c10c99141a87031343435`](https://github.com/vitrinevideo0-bot/vitrine-video-t5-formule-combo-offre/commit/f8450994a7ede8680a7c10c99141a87031343435) ;
+- CI complète : [run `44720625596`](https://github.com/vitrinevideo0-bot/vitrine-video-t5-formule-combo-offre/actions/runs/44720625596), réussie ;
+- rendu GitHub : [run `44720836940`](https://github.com/vitrinevideo0-bot/vitrine-video-t5-formule-combo-offre/actions/runs/44720836940), réussi ;
+- pré‑Release du vrai rendu : [`t5-runtime-v2-candidate-1`](https://github.com/vitrinevideo0-bot/vitrine-video-t5-formule-combo-offre/releases/tag/t5-runtime-v2-candidate-1) ;
+- MP4 GitHub : SHA‑256 `95715a88801cb386c081c06268581d9f034d23e94b352e6ad5c7d4dce3250a95`, 4 582 380 octets ;
+- QC GitHub : **PASS 16/16**, 30,000 s, 720 × 1280, 30 i/s, 900 images, sans piste audio.
+
+Tous les fichiers de l’artefact et de la pré‑Release ont été retéléchargés puis vérifiés avec `SHA256SUMS.txt`. Le MP4 a aussi été sondé indépendamment avec FFprobe. Aucun des quatre rushs bruts n’est présent dans la livraison.
+
 ## Ancien candidat rejeté
 
 La pré‑Release `t5-first-montage-v1-candidate-1` est **rejetée et conservée uniquement comme archive d’audit**. Elle recyclait un rush café/gâteau et des libellés génériques. Son titre et ses notes GitHub portent désormais explicitement la mention « REJETÉ — ARCHIVE UNIQUEMENT ».
