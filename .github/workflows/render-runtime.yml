@@ -187,15 +187,15 @@ jobs:
           cp .tmp/t5-runtime/render-job.json release/T5_RENDER_JOB.json
           cp .tmp/t5-runtime/runtime-manifest.json release/T5_RUNTIME_CAPTURE_MANIFEST.json
           cp config/T5_RUNTIME_CONTRACT_V3_0_0.json release/
-          cp config/T5_TEXT_MOTION_V2_0_0.json release/
+          cp config/T5_TEXT_MOTION_V3_0_0.json release/
           cp schemas/T5_render_job.schema.json release/
           cp schemas/T5_render_result.schema.json release/
           cp schemas/T5_render_error.schema.json release/
-          cp schemas/T5_text_motion_v2.schema.json release/
-          cp 'assets/fonts/bodoni-moda/BodoniModa[opsz,wght].ttf' release/BodoniModa-variable-opsz-wght.ttf
-          cp assets/fonts/bodoni-moda/OFL.txt release/BODONI_MODA_OFL.txt
-          cp assets/fonts/bodoni-moda/METADATA.pb release/BODONI_MODA_METADATA.pb
-          cp approvals/APPROBATION_STYLE_EDITORIAL_BODONI_T5_2026-11-18.json release/
+          cp schemas/T5_text_motion_v3.schema.json release/
+          cp 'assets/fonts/playfair-display/PlayfairDisplay[wght].ttf' release/PlayfairDisplay-variable-wght.ttf
+          cp assets/fonts/playfair-display/OFL.txt release/PLAYFAIR_DISPLAY_OFL.txt
+          cp assets/fonts/playfair-display/METADATA.pb release/PLAYFAIR_DISPLAY_METADATA.pb
+          cp approvals/APPROBATION_CORRECTION_LISIBILITE_PLAYFAIR_T5_2026-11-18.json release/
           cp rushes/manifest.json release/T5_DEMO_SOURCE_PROVENANCE.json
           cp docs/LICENCE_RUSH_DEMO_V3.md release/
           if find release -maxdepth 1 -type f \( -name 'S[1-4]*.mp4' -o -name '*.mov' -o -name '*.webm' \) | grep -q .; then
@@ -219,11 +219,11 @@ jobs:
           cat > /tmp/t5-runtime-release-notes.md <<'EOF'
           # RESTAURATION‑T5 — candidat plein écran V3
 
-          Ce candidat remplace entièrement l’ancien runtime à cartes, conservé comme archive rejetée.
+          Ce candidat remplace entièrement l’ancien runtime à cartes, conservé comme archive rejetée. Il corrige aussi le candidat #5 : **Bodoni Moda est abandonnée** après son rejet pour manque de lisibilité sur le texte commercial long.
 
           - le formulaire distingue les **six intitulés, questions simples et exemples** approuvés ;
           - les **six réponses** viennent du `merchant_payload` du RenderJob ;
-          - la typographie éditoriale **Bodoni Moda Black** est grande, blanche et grasse ; chaque lettre monte en fondu, champ après champ, avec au maximum deux champs simultanés ;
+          - la typographie **Playfair Display ExtraBold/Black** est grande, blanche, grasse et sans contour ; le kerning natif garantit la lisibilité et chaque lettre monte en fondu doux, avec au maximum deux champs simultanés ;
           - les scènes S1, S2, S3 et S4 consomment **quatre captures distinctes**, chacune vérifiée par SHA‑256 ;
           - le manifeste visuel est construit au runtime, puis consommé par le moteur ;
           - rendu exclusivement sur **GitHub Actions** ; Cloudflare ne fait que contrôler, stocker et dispatcher ;

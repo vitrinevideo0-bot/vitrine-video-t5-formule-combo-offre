@@ -3,7 +3,7 @@
 
 Aucun titre éditorial, carte, cadre vidéo, barre de progression ou libellé de scène
 n'est produit ici. Les seuls glyphes brûlés sont des caractères des valeurs exactes
-du RenderJob, révélés selon config/T5_TEXT_MOTION_V2_0_0.json.
+du RenderJob, révélés selon config/T5_TEXT_MOTION_V3_0_0.json.
 """
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
 
 ROOT = Path(__file__).resolve().parents[1]
 WIDTH, HEIGHT = 720, 1280
-TEXT_MOTION_CONFIG_PATH = ROOT / "config/T5_TEXT_MOTION_V2_0_0.json"
+TEXT_MOTION_CONFIG_PATH = ROOT / "config/T5_TEXT_MOTION_V3_0_0.json"
 TEXT_MOTION: dict[str, Any] = json.loads(TEXT_MOTION_CONFIG_PATH.read_text(encoding="utf-8"))
 FONT_FILE = ROOT / TEXT_MOTION["font"]["file"]
 FONT_LICENSE_FILE = ROOT / TEXT_MOTION["font"]["license_file"]
@@ -50,13 +50,25 @@ def _validate_motion_contract() -> None:
     if set(SCENE_FIELDS) != set(expected_frames):
         raise RuntimeError("T5 text motion contract must define S1, S2, S3 and S4")
     if not FONT_FILE.is_file() or not FONT_LICENSE_FILE.is_file():
-        raise RuntimeError("The contract-bound Bodoni Moda font and its OFL license are required")
-    if TEXT_MOTION["font"]["family"] != "Bodoni Moda":
-        raise RuntimeError("The active T5 editorial family must be Bodoni Moda")
-    if TEXT_MOTION["render_style"]["fill"] != "#FFFFFF":
-        raise RuntimeError("The active T5 editorial text must remain white")
-    if TEXT_MOTION["animation"]["letter_motion"] != "staggered_rise_and_fade":
-        raise RuntimeError("The active T5 letters must rise and fade one by one")
+        raise RuntimeError("The contract-bound Playfair Display font and its OFL license are required")
+    if TEXT_MOTION["font"]["family"] != "Playfair Display":
+        raise RuntimeError("The active T5 readable editorial family must be Playfair Display")
+    readability = TEXT_MOTION["readability_policy"]
+    if TEXT_MOTION["render_style"]["fill"] != "#FFFFFF" or TEXT_MOTION["render_style"]["stroke_width"] != 0:
+        raise RuntimeError("The active T5 text must remain solid white without an outline")
+    if TEXT_MOTION["animation"]["letter_motion"] != "staggered_soft_rise_and_fade":
+        raise RuntimeError("The active T5 letters must use the readable soft motion")
+    if readability != {
+        "priority": "maximum",
+        "native_pair_kerning": True,
+        "neutral_tracking": True,
+        "minimum_preferred_size": 48,
+        "minimum_weight": 800,
+        "white_only": True,
+        "no_outline": True,
+        "long_copy_max_lines": 3,
+    }:
+        raise RuntimeError("The T5 maximum-readability policy must remain contract-bound")
     maximum_active = 0
     for scene, total in expected_frames.items():
         contract = TEXT_MOTION["scenes"][scene]
@@ -72,8 +84,12 @@ def _validate_motion_contract() -> None:
             x0, y0, x1, y1 = map(int, field["box"])
             if not (0 <= x0 < x1 <= WIDTH and 0 <= y0 < y1 <= HEIGHT):
                 raise RuntimeError(f"Invalid kinetic text box for {scene}.{field['id']}")
-            if int(field["weight"]) < 800 or int(field["preferred_size"]) < 52:
-                raise RuntimeError(f"Editorial text must remain large and bold for {scene}.{field['id']}")
+            if (
+                int(field["weight"]) < int(readability["minimum_weight"])
+                or int(field["preferred_size"]) < int(readability["minimum_preferred_size"])
+                or float(field["tracking"]) != 0.0
+            ):
+                raise RuntimeError(f"Editorial text must remain large, bold and naturally spaced for {scene}.{field['id']}")
         for frame in range(total):
             active = sum(
                 int(field["start_frame"]) <= frame < int(field["end_frame"])
@@ -143,9 +159,14 @@ def motion_design_evidence() -> dict[str, Any]:
         "case_transform": animation["case_transform"],
         "white_bold_editorial_style": (
             TEXT_MOTION["render_style"]["fill"] == "#FFFFFF"
-            and min(field["weight"] for scene in TEXT_MOTION["scenes"].values() for field in scene["fields"]) >= 800
-            and min(field["preferred_size"] for scene in TEXT_MOTION["scenes"].values() for field in scene["fields"]) >= 52
+            and TEXT_MOTION["render_style"]["stroke_width"] == 0
+            and min(field["weight"] for scene in TEXT_MOTION["scenes"].values() for field in scene["fields"])
+                >= TEXT_MOTION["readability_policy"]["minimum_weight"]
+            and min(field["preferred_size"] for scene in TEXT_MOTION["scenes"].values() for field in scene["fields"])
+                >= TEXT_MOTION["readability_policy"]["minimum_preferred_size"]
         ),
+        "native_pair_kerning": True,
+        "readability_policy": TEXT_MOTION["readability_policy"],
         "static_all_fields_from_first_frame": animation["static_all_fields_from_first_frame"],
         "text_background_boxes": animation["text_background_boxes"],
         "max_simultaneous_fields": animation["max_simultaneous_fields"],
@@ -216,7 +237,8 @@ def _tokens(value: str) -> list[str]:
 def _tracked_width(value: str, font: ImageFont.FreeTypeFont, tracking: float) -> float:
     if not value:
         return 0.0
-    return sum(float(font.getlength(character)) for character in value) + tracking * max(0, len(value) - 1)
+    # Mesurer la chaîne complète conserve le kerning natif des paires (AV, To, etc.).
+    return float(font.getlength(value)) + tracking * max(0, len(value) - 1)
 
 
 def _wrap_lines(value: str, font: ImageFont.FreeTypeFont, max_width: int, tracking: float) -> list[str]:
@@ -385,10 +407,17 @@ def _draw_characters(
     stagger_span = max(0.0, reveal_duration - letter_fade_frames)
     character_index = 0
     for line_index, line in enumerate(lines):
-        cursor_x = x
-        for character in line:
+        for line_character_index, character in enumerate(line):
             if character_index >= visible_characters:
                 return
+            # Position cumulative avec la paire courante afin de conserver le kerning natif.
+            shaped_prefix = line[:line_character_index + 1]
+            cursor_x = (
+                x
+                + float(font.getlength(shaped_prefix))
+                - float(font.getlength(character))
+                + tracking * line_character_index
+            )
             if state["phase"] == "type_on" and total_characters > 1 and stagger_span > 0:
                 start_offset = character_index * stagger_span / (total_characters - 1)
                 letter_progress = _smoothstep((elapsed_frames - start_offset) / max(1.0, letter_fade_frames))
@@ -412,7 +441,6 @@ def _draw_characters(
                 stroke_width=stroke_width,
                 stroke_fill=character_stroke,
             )
-            cursor_x += float(font.getlength(character)) + tracking
             character_index += 1
         if line_index < len(lines) - 1:
             # Le wrapping remplace exactement un espace de la valeur normalisée.

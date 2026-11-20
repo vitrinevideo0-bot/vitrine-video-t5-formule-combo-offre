@@ -23,12 +23,12 @@ Le moteur V3 remplace entièrement l’ancien montage à cartes :
 - aucun titre générique ni libellé technique n’est brûlé dans la publicité ;
 - les seuls textes visibles sont les valeurs exactes de `merchant_payload` ;
 - les valeurs arrivent en **motion design**, caractère par caractère et champ après champ, chaque lettre montant avec un fondu doux ;
-- la police embarquée est **Bodoni Moda Black**, une Didone éditoriale proche de Didot/Bodoni, sous licence OFL‑1.1 ;
-- les textes sont grands, blancs, gras et alignés à gauche ; une scène ne montre jamais plus de deux champs simultanément ;
+- la police active est **Playfair Display ExtraBold/Black**, une serif éditoriale proche de la référence mais nettement plus lisible à l’écran, sous licence OFL‑1.1 ;
+- les textes sont grands, blancs, gras, sans contour, avec kerning natif et alignement à gauche ; une scène ne montre jamais plus de deux champs simultanément ;
 - les raccords occupent exactement huit images aux coupes **180, 420 et 630** ;
 - la fin est stable sur les images **810 à 899**.
 
-Le contrat complet est `montage/T5_MONTAGE_COMPLET_V3_0_0.json`. Les liaisons exécutables sont dans `config/T5_RUNTIME_CONTRACT_V3_0_0.json` et la chorégraphie éditoriale active est pilotée par `config/T5_TEXT_MOTION_V2_0_0.json`.
+Le contrat complet est `montage/T5_MONTAGE_COMPLET_V3_0_0.json`. Les liaisons exécutables sont dans `config/T5_RUNTIME_CONTRACT_V3_0_0.json` et la correction de lisibilité active est pilotée par `config/T5_TEXT_MOTION_V3_0_0.json`.
 
 ```text
 formulaire Cloudflare : 6 réponses + 12 écrans de capture
@@ -41,7 +41,7 @@ GitHub Actions télécharge et revérifie les captures
         ↓
 tools/build_t5_runtime_visual_inputs.py
         ↓
-engine/render_runtime.py : plein cadre + Bodoni Moda Black animée lettre par lettre + raccords T1
+engine/render_runtime.py : plein cadre + Playfair Display lisible animée lettre par lettre + raccords T1
         ↓
 MP4 30 s + QC 21/21 + RenderResult, ou RenderError
 ```
@@ -77,12 +77,12 @@ Les URL, dimensions, durées, tailles et SHA‑256 sont dans `rushes/manifest.js
 - `form/questions_T5.json` — les six questions ;
 - `capture-guide/consignes_T5.json` — les instructions des quatre captures ;
 - `config/T5_CAPTURE_FLOW_V1_0_0.json` — les douze écrans A/B/C ;
-- `config/T5_TEXT_MOTION_V2_0_0.json` — composition Didone surdimensionnée et planning lettre par lettre ;
-- `assets/fonts/bodoni-moda/` — police Bodoni Moda variable embarquée, métadonnées et licence OFL‑1.1 ;
+- `config/T5_TEXT_MOTION_V3_0_0.json` — priorité de lisibilité, kerning natif et planning lettre par lettre ;
+- `assets/fonts/playfair-display/` — police Playfair Display variable embarquée, métadonnées et licence OFL‑1.1 ;
 - `montage/T5_MONTAGE_COMPLET_V3_0_0.json` — JSON complet de montage ;
 - `adapter/t5_adapter.py` — six réponses + quatre captures → RenderJob ;
 - `schemas/T5_render_job.schema.json` — contrat d’entrée ;
-- `schemas/T5_text_motion_v2.schema.json` — schéma strict de la chorégraphie éditoriale active ;
+- `schemas/T5_text_motion_v3.schema.json` — schéma strict de la correction typographique lisible active ;
 - `tools/build_t5_runtime_visual_inputs.py` — vérification SHA‑256 et manifeste runtime ;
 - `engine/runtime_visual.py` — plein cadre, valeurs dynamiques et raccords ;
 - `engine/render_runtime.py` — rendu des 900 images ;
@@ -121,8 +121,8 @@ python tools/validate_runtime_render.py \
 pytest -q
 ```
 
-Sortie attendue : **30,000 s**, 720 × 1280, 30 i/s, 900 images, H.264/yuv420p, aucune piste audio et QC **21/21**, avec typographie Bodoni Moda Black grande, blanche et grasse animée depuis le JSON, plus un dégradé continu jusqu’au dernier pixel du cadre.
+Sortie attendue : **30,000 s**, 720 × 1280, 30 i/s, 900 images, H.264/yuv420p, aucune piste audio et QC **21/21**, avec Playfair Display grande, blanche et grasse, sans contour, espacée par le kerning natif et animée depuis le JSON.
 
 ## Archives rejetées
 
-Les pré‑Releases `t5-runtime-v2-candidate-1` et `t5-first-montage-v1-candidate-1` sont **rejetées et conservées uniquement pour audit**. Elles ne constituent ni la direction créative ni le moteur de rendu courant.
+Les pré‑Releases `t5-full-frame-v3-candidate-5`, `t5-runtime-v2-candidate-1` et `t5-first-montage-v1-candidate-1` sont **rejetées et conservées uniquement pour audit**. Le candidat #5 est rejeté spécifiquement pour l’illisibilité de Bodoni Moda sur les textes longs.

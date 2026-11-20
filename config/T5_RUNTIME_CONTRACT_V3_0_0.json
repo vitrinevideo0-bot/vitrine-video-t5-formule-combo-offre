@@ -3,7 +3,7 @@
   "template_id": "RESTAURATION-T5",
   "template_version": "3.0.0-full-frame",
   "montage_contract": "montage/T5_MONTAGE_COMPLET_V3_0_0.json",
-  "text_motion_contract": "config/T5_TEXT_MOTION_V2_0_0.json",
+  "text_motion_contract": "config/T5_TEXT_MOTION_V3_0_0.json",
   "runtime_order": [
     {
       "id": "MERCHANT_INPUT",
@@ -162,17 +162,21 @@
     "technical_labels": false,
     "horizontal_color_seams": false,
     "readability_gradient_reaches_frame_bottom": true,
-    "text_motion": "editorial_character_staggered_rise_and_fade",
+    "text_motion": "readable_editorial_character_staggered_soft_rise_and_fade",
     "text_alignment": "left",
-    "font_family": "Bodoni Moda",
+    "font_family": "Playfair Display",
     "static_text_stack": false,
     "max_simultaneous_text_fields": 2,
     "final_stable_start_frame": 810,
     "audio_streams": 0,
-    "font_classification": "Didone editorial serif",
+    "font_classification": "readable editorial display serif",
     "text_color": "#FFFFFF",
     "minimum_font_weight": 800,
-    "oversized_editorial_composition": true
+    "large_readable_editorial_composition": true,
+    "native_pair_kerning": true,
+    "neutral_tracking": true,
+    "text_outline": false,
+    "readability_priority": "maximum"
   },
   "transition_contract": {
     "reference": "T1",

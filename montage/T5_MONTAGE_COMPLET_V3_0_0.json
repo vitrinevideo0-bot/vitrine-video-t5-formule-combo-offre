@@ -3,7 +3,7 @@
   "template_id": "RESTAURATION-T5",
   "version": "3.0.0-full-frame",
   "title": "Formule, combo ou offre — montage complet plein écran",
-  "status": "owner_editorial_bodoni_motion_requested_pending_github_render",
+  "status": "owner_readability_correction_pending_github_render",
   "approved_sources": {
     "questions": {
       "path": "form/questions_T5.json",
@@ -19,25 +19,28 @@
       "stable_screens": 12
     },
     "text_motion": {
-      "path": "config/T5_TEXT_MOTION_V2_0_0.json",
-      "sha256": "735827f40b01237f6c75bfe207d77385a615c1aefef07e5e51787b6e9fe4d434",
+      "path": "config/T5_TEXT_MOTION_V3_0_0.json",
+      "sha256": "d0a87de1efdcb04bd7db7f32581af22b3fb02d4fede19243c5d485d48c577b4f",
       "reveal_unit": "character",
-      "letter_motion": "staggered_rise_and_fade",
-      "font_family": "Bodoni Moda",
-      "font_classification": "Didone editorial serif",
+      "letter_motion": "staggered_soft_rise_and_fade",
+      "font_family": "Playfair Display",
+      "font_classification": "readable editorial display serif",
       "text_color": "#FFFFFF",
-      "minimum_weight": 800
+      "minimum_weight": 800,
+      "native_pair_kerning": true
     },
     "motion_font": {
-      "path": "assets/fonts/bodoni-moda/BodoniModa[opsz,wght].ttf",
-      "sha256": "550f5e34ee0a828d7941b1fe9bc58b34e5260d3f33a61532e6d0a0114e79a5cf",
+      "path": "assets/fonts/playfair-display/PlayfairDisplay[wght].ttf",
+      "sha256": "c40f2293766a503bc70cce9e512ef844a4ccb7cbcde792fe2ea31d191917d8d6",
       "license": "OFL-1.1",
-      "selected_style": "Black",
-      "optical_size": 11
+      "selected_weights": [
+        800,
+        900
+      ]
     },
     "motion_typography_approval": {
-      "path": "approvals/APPROBATION_STYLE_EDITORIAL_BODONI_T5_2026-11-18.json",
-      "sha256": "184a7c620ef988be1a69e5cf503cfba3626343fa15483c45769bdd29ee29fcf2"
+      "path": "approvals/APPROBATION_CORRECTION_LISIBILITE_PLAYFAIR_T5_2026-11-18.json",
+      "sha256": "b23f58c082962bfe972e557f217c078a9cc7f93707644967b4e02121bfc7dfeb"
     },
     "creative_approval": {
       "path": "approvals/APPROBATION_DIRECTION_CREATIVE_T5_2026-11-18.json",
@@ -95,7 +98,7 @@
         "offre",
         "contenu"
       ],
-      "text_motion": "config/T5_TEXT_MOTION_V2_0_0.json#/scenes/S1",
+      "text_motion": "config/T5_TEXT_MOTION_V3_0_0.json#/scenes/S1",
       "framing": "full_screen_formula_hero",
       "camera_motion": "slow_push_in"
     },
@@ -115,7 +118,7 @@
       "visible_fields": [
         "contenu"
       ],
-      "text_motion": "config/T5_TEXT_MOTION_V2_0_0.json#/scenes/S2",
+      "text_motion": "config/T5_TEXT_MOTION_V3_0_0.json#/scenes/S2",
       "framing": "full_screen_formula_details",
       "camera_motion": "gentle_pull_back"
     },
@@ -137,7 +140,7 @@
         "contenu",
         "prix"
       ],
-      "text_motion": "config/T5_TEXT_MOTION_V2_0_0.json#/scenes/S3",
+      "text_motion": "config/T5_TEXT_MOTION_V3_0_0.json#/scenes/S3",
       "framing": "full_screen_formula_price_hero",
       "camera_motion": "subtle_push_in"
     },
@@ -159,7 +162,7 @@
         "whatsapp",
         "quartier"
       ],
-      "text_motion": "config/T5_TEXT_MOTION_V2_0_0.json#/scenes/S4",
+      "text_motion": "config/T5_TEXT_MOTION_V3_0_0.json#/scenes/S4",
       "framing": "full_screen_formula_order_hero",
       "camera_motion": "slow_push_then_lock",
       "stable_tail_frames": [
@@ -231,20 +234,31 @@
     "static_text_stack_forbidden": true,
     "character_by_character_reveal_required": true,
     "text_alignment": "left",
-    "font_family": "Bodoni Moda",
+    "font_family": "Playfair Display",
     "max_simultaneous_text_fields": 2,
     "allowed_overlays": [
       "exact merchant_payload characters",
       "soft text shadow",
       "edge-to-edge readability gradient"
     ],
-    "font_classification": "Didone editorial serif",
-    "font_style": "Black",
+    "font_classification": "readable editorial display serif",
+    "font_style": "ExtraBold/Black",
     "text_color": "#FFFFFF",
     "minimum_font_weight": 800,
-    "oversized_editorial_composition": true,
-    "per_character_rise_and_fade_required": true
+    "large_readable_editorial_composition": true,
+    "soft_per_character_rise_and_fade_required": true,
+    "native_pair_kerning_required": true,
+    "neutral_tracking_required": true,
+    "text_outline_forbidden": true,
+    "readability_priority": "maximum"
   },
   "render_plane": "github_actions",
-  "cloudflare_video_rendering_forbidden": true
+  "cloudflare_video_rendering_forbidden": true,
+  "rejected_revisions": [
+    {
+      "revision": "T5_TYPOGRAPHIE_EDITORIALE_BODONI_2026-11-18",
+      "release": "t5-full-frame-v3-candidate-5",
+      "reason": "Bodoni Moda appliquée au texte long est illisible ; ne pas réutiliser cette variante."
+    }
+  ]
 }

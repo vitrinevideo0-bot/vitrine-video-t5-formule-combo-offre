@@ -10,7 +10,14 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from adapter.t5_adapter import build_render_job, captures_from_demo_manifest
-from engine.runtime_visual import HEIGHT, motion_design_evidence, readability_gradient_evidence, text_motion_state
+from engine.runtime_visual import (
+    HEIGHT,
+    _tracked_width,
+    load_font,
+    motion_design_evidence,
+    readability_gradient_evidence,
+    text_motion_state,
+)
 
 
 def load(path: str) -> dict:
@@ -64,13 +71,17 @@ def test_every_answer_and_capture_has_an_explicit_runtime_target() -> None:
         "captures.S1", "captures.S2", "captures.S3", "captures.S4"
     ]
     assert [item["duration_ms"] for item in contract["scene_bindings"]] == [6000, 8000, 7000, 9000]
-    assert contract["text_motion_contract"] == "config/T5_TEXT_MOTION_V2_0_0.json"
-    assert contract["visual_contract"]["text_motion"] == "editorial_character_staggered_rise_and_fade"
-    assert contract["visual_contract"]["font_family"] == "Bodoni Moda"
-    assert contract["visual_contract"]["font_classification"] == "Didone editorial serif"
+    assert contract["text_motion_contract"] == "config/T5_TEXT_MOTION_V3_0_0.json"
+    assert contract["visual_contract"]["text_motion"] == "readable_editorial_character_staggered_soft_rise_and_fade"
+    assert contract["visual_contract"]["font_family"] == "Playfair Display"
+    assert contract["visual_contract"]["font_classification"] == "readable editorial display serif"
     assert contract["visual_contract"]["text_color"] == "#FFFFFF"
     assert contract["visual_contract"]["minimum_font_weight"] == 800
-    assert contract["visual_contract"]["oversized_editorial_composition"] is True
+    assert contract["visual_contract"]["large_readable_editorial_composition"] is True
+    assert contract["visual_contract"]["native_pair_kerning"] is True
+    assert contract["visual_contract"]["neutral_tracking"] is True
+    assert contract["visual_contract"]["text_outline"] is False
+    assert contract["visual_contract"]["readability_priority"] == "maximum"
     assert contract["visual_contract"]["static_text_stack"] is False
     assert contract["runtime_order"][3]["render_plane"] == "github_actions"
 
@@ -86,12 +97,21 @@ def test_v3_montage_is_full_frame_and_uses_three_exact_eight_frame_transitions()
     assert montage["visual_policy"]["readability_gradient_must_reach_frame_bottom"] is True
     assert montage["visual_policy"]["static_text_stack_forbidden"] is True
     assert montage["visual_policy"]["character_by_character_reveal_required"] is True
-    assert montage["visual_policy"]["font_family"] == "Bodoni Moda"
-    assert montage["visual_policy"]["font_classification"] == "Didone editorial serif"
+    assert montage["visual_policy"]["font_family"] == "Playfair Display"
+    assert montage["visual_policy"]["font_classification"] == "readable editorial display serif"
     assert montage["visual_policy"]["text_color"] == "#FFFFFF"
     assert montage["visual_policy"]["minimum_font_weight"] == 800
-    assert montage["visual_policy"]["oversized_editorial_composition"] is True
+    assert montage["visual_policy"]["large_readable_editorial_composition"] is True
+    assert montage["visual_policy"]["native_pair_kerning_required"] is True
+    assert montage["visual_policy"]["neutral_tracking_required"] is True
+    assert montage["visual_policy"]["text_outline_forbidden"] is True
+    assert montage["visual_policy"]["readability_priority"] == "maximum"
     assert montage["visual_policy"]["max_simultaneous_text_fields"] == 2
+    assert montage["rejected_revisions"] == [{
+        "revision": "T5_TYPOGRAPHIE_EDITORIALE_BODONI_2026-11-18",
+        "release": "t5-full-frame-v3-candidate-5",
+        "reason": "Bodoni Moda appliquée au texte long est illisible ; ne pas réutiliser cette variante.",
+    }]
     assert montage["merchant_payload"]["ordered_fields"] == [
         "nom", "offre", "contenu", "prix", "whatsapp", "quartier"
     ]
@@ -114,10 +134,10 @@ def test_readability_gradient_is_continuous_through_the_last_pixel() -> None:
 
 def test_motion_design_is_character_staggered_left_aligned_and_font_bound() -> None:
     evidence = motion_design_evidence()
-    assert evidence["font"]["family"] == "Bodoni Moda"
-    assert evidence["font"]["classification"] == "Didone editorial serif"
-    assert evidence["font"]["style_reference"] == "Didot/Bodoni high-contrast display"
-    assert evidence["font"]["variation_axes"]["opsz"]["render_value"] == 11
+    assert evidence["font"]["family"] == "Playfair Display"
+    assert evidence["font"]["classification"] == "readable editorial display serif"
+    assert evidence["font"]["style_reference"] == "Didot-inspired editorial serif optimized for screen readability"
+    assert evidence["font"]["variation_axes"]["wght"]["maximum"] == 900
     assert evidence["font"]["license"] == "OFL-1.1"
     assert evidence["font"]["sha256"] == hashlib.sha256(
         (ROOT / evidence["font"]["file"]).read_bytes()
@@ -125,10 +145,21 @@ def test_motion_design_is_character_staggered_left_aligned_and_font_bound() -> N
     assert evidence["reveal_unit"] == "character"
     assert evidence["sequence"] == "staggered_one_field_after_another"
     assert evidence["alignment"] == "left"
-    assert evidence["letter_motion"] == "staggered_rise_and_fade"
-    assert evidence["composition"] == "oversized_editorial_didone"
+    assert evidence["letter_motion"] == "staggered_soft_rise_and_fade"
+    assert evidence["composition"] == "large_readable_editorial_serif"
     assert evidence["case_transform"] == "none"
     assert evidence["white_bold_editorial_style"] is True
+    assert evidence["native_pair_kerning"] is True
+    assert evidence["readability_policy"] == {
+        "priority": "maximum",
+        "native_pair_kerning": True,
+        "neutral_tracking": True,
+        "minimum_preferred_size": 48,
+        "minimum_weight": 800,
+        "white_only": True,
+        "no_outline": True,
+        "long_copy_max_lines": 3,
+    }
     assert evidence["static_all_fields_from_first_frame"] is False
     assert evidence["text_background_boxes"] is False
     assert evidence["max_simultaneous_fields"] == 2
@@ -142,6 +173,14 @@ def test_motion_design_is_character_staggered_left_aligned_and_font_bound() -> N
     for source_name in ("text_motion", "motion_font", "motion_typography_approval"):
         source = montage["approved_sources"][source_name]
         assert hashlib.sha256((ROOT / source["path"]).read_bytes()).hexdigest() == source["sha256"]
+
+
+def test_readable_editorial_layout_preserves_native_pair_kerning() -> None:
+    font = load_font(64, 900)
+    full_pair_width = float(font.getlength("AV"))
+    unkerned_width = sum(float(font.getlength(character)) for character in "AV")
+    assert _tracked_width("AV", font, 0.0) == full_pair_width
+    assert full_pair_width < unkerned_width
 
 
 def test_motion_state_reveals_characters_and_never_restores_the_three_field_stack() -> None:

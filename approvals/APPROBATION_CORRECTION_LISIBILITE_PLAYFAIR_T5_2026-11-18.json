@@ -1,0 +1,62 @@
+{
+  "schema_version": "1.0.0",
+  "template_id": "RESTAURATION-T5",
+  "decision_id": "T5_CORRECTION_LISIBILITE_PLAYFAIR_2026-11-18",
+  "status": "owner_required_immediate_correction",
+  "date_local": "2026-11-18",
+  "timezone": "Africa/Lagos",
+  "decision_channel": "arena_direct_instruction",
+  "rejected_revision": {
+    "revision": "T5_TYPOGRAPHIE_EDITORIALE_BODONI_2026-11-18",
+    "release": "t5-full-frame-v3-candidate-5",
+    "reason": "La Bodoni Moda ExtraBold appliquée aux minuscules et aux textes longs est illisible à l’écran."
+  },
+  "reference_evidence": [
+    {
+      "file": "image-32.png",
+      "committed": false,
+      "sha256": "ecf9ab17592511629ee2527a69e7db71610cc0d0e43092efb928b22c28507a7b",
+      "finding": "La direction recherchée reste celle d’une grande serif éditoriale blanche et grasse."
+    },
+    {
+      "file": "image-33.png",
+      "committed": false,
+      "sha256": "f60dabc307003ee091d345a9f1d4a4718d0f9bfbaa7049117c983c128ba0a0a4",
+      "finding": "Le texte long en Bodoni Moda présente des formes trop contrastées et une lecture insuffisante ; cette variante est rejetée."
+    }
+  ],
+  "font_correction": {
+    "rejected_family": "Bodoni Moda",
+    "selected_family": "Playfair Display",
+    "selected_weights": [800, 900],
+    "classification": "readable editorial display serif",
+    "reason": "Playfair conserve le style éditorial de la référence tout en rendant les minuscules, chiffres et textes longs immédiatement lisibles."
+  },
+  "requirements": {
+    "maximum_readability": true,
+    "large_white_bold_text": true,
+    "native_pair_kerning": true,
+    "neutral_tracking": true,
+    "no_text_outline": true,
+    "character_by_character_motion": true,
+    "soft_per_character_rise_and_fade": true,
+    "preserve_exact_merchant_payload_values": true,
+    "max_simultaneous_text_fields": 2,
+    "preserve_t1_transitions": true,
+    "publish_to_github": true,
+    "run_new_github_render": true
+  },
+  "implementation": {
+    "motion_contract": {
+      "source": "config/T5_TEXT_MOTION_V3_0_0.json",
+      "sha256": "d0a87de1efdcb04bd7db7f32581af22b3fb02d4fede19243c5d485d48c577b4f"
+    },
+    "font": {
+      "family": "Playfair Display",
+      "source": "assets/fonts/playfair-display/PlayfairDisplay[wght].ttf",
+      "sha256": "c40f2293766a503bc70cce9e512ef844a4ccb7cbcde792fe2ea31d191917d8d6",
+      "license": "OFL-1.1"
+    }
+  },
+  "publication_authorized": true
+}

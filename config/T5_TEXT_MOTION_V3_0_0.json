@@ -1,0 +1,342 @@
+{
+  "schema_version": "3.0.0",
+  "contract_id": "t5_text_motion_v3_0_0",
+  "template_id": "RESTAURATION-T5",
+  "status": "owner_readability_correction",
+  "revision": "T5_TYPOGRAPHIE_LISIBLE_PLAYFAIR_2026-11-18",
+  "design_intent": "Corriger immédiatement l’illisibilité constatée sur la référence image-33.png : conserver une présence éditoriale proche de « APRÈS », mais avec une serif d’écran beaucoup plus lisible, de grands corps blancs, un espacement naturel et un motion design discret lettre par lettre.",
+  "font": {
+    "family": "Playfair Display",
+    "classification": "readable editorial display serif",
+    "style_reference": "Didot-inspired editorial serif optimized for screen readability",
+    "source": "Google Fonts",
+    "license": "OFL-1.1",
+    "file": "assets/fonts/playfair-display/PlayfairDisplay[wght].ttf",
+    "license_file": "assets/fonts/playfair-display/OFL.txt",
+    "metadata_file": "assets/fonts/playfair-display/METADATA.pb",
+    "variation_axes": {
+      "wght": {
+        "minimum": 400,
+        "default": 400,
+        "maximum": 900
+      }
+    },
+    "weights": {
+      "bold": 700,
+      "extrabold": 800,
+      "black": 900
+    }
+  },
+  "animation": {
+    "reveal_unit": "character",
+    "sequence": "staggered_one_field_after_another",
+    "alignment": "left",
+    "entry": "readable_editorial_type_on_with_soft_rise",
+    "exit": "soft_fade_up",
+    "entry_rise_pixels": 8,
+    "exit_rise_pixels": 10,
+    "entry_fade_frames": 5,
+    "exit_fade_frames": 8,
+    "max_simultaneous_fields": 2,
+    "static_all_fields_from_first_frame": false,
+    "text_background_boxes": false,
+    "preserve_exact_merchant_value": true,
+    "frame_intervals": "start_inclusive_end_exclusive",
+    "letter_motion": "staggered_soft_rise_and_fade",
+    "letter_rise_pixels": 14,
+    "letter_fade_frames": 4,
+    "case_transform": "none",
+    "composition": "large_readable_editorial_serif"
+  },
+  "render_style": {
+    "fill": "#FFFFFF",
+    "accent_fill": "#FFFFFF",
+    "shadow": "#000000",
+    "shadow_alpha": 200,
+    "shadow_blur_radius": 5,
+    "shadow_offset": [
+      0,
+      3
+    ],
+    "stroke_width": 0,
+    "stroke_alpha": 0
+  },
+  "field_pixel_proofs": {
+    "nom": {
+      "scene": "S1",
+      "frame": 42
+    },
+    "offre": {
+      "scene": "S1",
+      "frame": 94
+    },
+    "contenu": {
+      "scene": "S2",
+      "frame": 120
+    },
+    "prix": {
+      "scene": "S3",
+      "frame": 180
+    },
+    "whatsapp": {
+      "scene": "S4",
+      "frame": 112
+    },
+    "quartier": {
+      "scene": "S4",
+      "frame": 172
+    }
+  },
+  "scenes": {
+    "S1": {
+      "scene_frames": 180,
+      "fields": [
+        {
+          "id": "nom",
+          "start_frame": 10,
+          "type_on_end_frame": 36,
+          "hold_end_frame": 48,
+          "end_frame": 56,
+          "box": [
+            48,
+            790,
+            672,
+            945
+          ],
+          "preferred_size": 52,
+          "minimum_size": 42,
+          "weight": 800,
+          "max_lines": 1,
+          "tracking": 0.0,
+          "line_spacing": 10,
+          "accent": false
+        },
+        {
+          "id": "offre",
+          "start_frame": 58,
+          "type_on_end_frame": 88,
+          "hold_end_frame": 100,
+          "end_frame": 108,
+          "box": [
+            48,
+            770,
+            672,
+            990
+          ],
+          "preferred_size": 64,
+          "minimum_size": 48,
+          "weight": 900,
+          "max_lines": 2,
+          "tracking": 0.0,
+          "line_spacing": 10,
+          "accent": false
+        },
+        {
+          "id": "contenu",
+          "start_frame": 110,
+          "type_on_end_frame": 160,
+          "hold_end_frame": 180,
+          "end_frame": 180,
+          "box": [
+            48,
+            750,
+            672,
+            1090
+          ],
+          "preferred_size": 52,
+          "minimum_size": 42,
+          "weight": 800,
+          "max_lines": 3,
+          "tracking": 0.0,
+          "line_spacing": 12,
+          "accent": false
+        }
+      ]
+    },
+    "S2": {
+      "scene_frames": 240,
+      "fields": [
+        {
+          "id": "contenu",
+          "start_frame": 16,
+          "type_on_end_frame": 82,
+          "hold_end_frame": 240,
+          "end_frame": 240,
+          "box": [
+            48,
+            750,
+            672,
+            1100
+          ],
+          "preferred_size": 52,
+          "minimum_size": 42,
+          "weight": 800,
+          "max_lines": 3,
+          "tracking": 0.0,
+          "line_spacing": 12,
+          "accent": false
+        }
+      ]
+    },
+    "S3": {
+      "scene_frames": 210,
+      "fields": [
+        {
+          "id": "offre",
+          "start_frame": 10,
+          "type_on_end_frame": 40,
+          "hold_end_frame": 52,
+          "end_frame": 60,
+          "box": [
+            48,
+            770,
+            672,
+            990
+          ],
+          "preferred_size": 62,
+          "minimum_size": 48,
+          "weight": 900,
+          "max_lines": 2,
+          "tracking": 0.0,
+          "line_spacing": 10,
+          "accent": false
+        },
+        {
+          "id": "contenu",
+          "start_frame": 62,
+          "type_on_end_frame": 122,
+          "hold_end_frame": 132,
+          "end_frame": 140,
+          "box": [
+            48,
+            750,
+            672,
+            1090
+          ],
+          "preferred_size": 50,
+          "minimum_size": 40,
+          "weight": 800,
+          "max_lines": 3,
+          "tracking": 0.0,
+          "line_spacing": 12,
+          "accent": false
+        },
+        {
+          "id": "prix",
+          "start_frame": 142,
+          "type_on_end_frame": 170,
+          "hold_end_frame": 210,
+          "end_frame": 210,
+          "box": [
+            48,
+            770,
+            672,
+            990
+          ],
+          "preferred_size": 84,
+          "minimum_size": 64,
+          "weight": 900,
+          "max_lines": 1,
+          "tracking": 0.0,
+          "line_spacing": 10,
+          "accent": false
+        }
+      ]
+    },
+    "S4": {
+      "scene_frames": 270,
+      "fields": [
+        {
+          "id": "nom",
+          "start_frame": 12,
+          "type_on_end_frame": 40,
+          "hold_end_frame": 54,
+          "end_frame": 62,
+          "box": [
+            48,
+            780,
+            672,
+            935
+          ],
+          "preferred_size": 52,
+          "minimum_size": 42,
+          "weight": 800,
+          "max_lines": 1,
+          "tracking": 0.0,
+          "line_spacing": 10,
+          "accent": false
+        },
+        {
+          "id": "whatsapp",
+          "start_frame": 64,
+          "type_on_end_frame": 104,
+          "hold_end_frame": 270,
+          "end_frame": 270,
+          "box": [
+            48,
+            800,
+            672,
+            960
+          ],
+          "preferred_size": 60,
+          "minimum_size": 48,
+          "weight": 900,
+          "max_lines": 1,
+          "tracking": 0.0,
+          "line_spacing": 10,
+          "accent": false
+        },
+        {
+          "id": "quartier",
+          "start_frame": 122,
+          "type_on_end_frame": 166,
+          "hold_end_frame": 270,
+          "end_frame": 270,
+          "box": [
+            48,
+            945,
+            672,
+            1110
+          ],
+          "preferred_size": 48,
+          "minimum_size": 40,
+          "weight": 800,
+          "max_lines": 2,
+          "tracking": 0.0,
+          "line_spacing": 10,
+          "accent": false
+        }
+      ],
+      "stable_tail": {
+        "start_frame": 180,
+        "end_frame": 269,
+        "visible_fields": [
+          "whatsapp",
+          "quartier"
+        ]
+      }
+    }
+  },
+  "approval": {
+    "date": "2026-11-18",
+    "timezone": "Africa/Lagos",
+    "decision_channel": "arena_direct_instruction",
+    "reference_images": [
+      "image-32.png",
+      "image-33.png"
+    ],
+    "font_identification": "La direction reste une serif éditoriale proche Didot ; Playfair Display ExtraBold/Black est retenue pour rendre les minuscules et les textes longs nettement lisibles à l’écran.",
+    "decision": "Rejeter Bodoni Moda pour les textes commerciaux longs, rétablir une lecture immédiate avec Playfair Display et publier directement un nouveau rendu GitHub.",
+    "publication_target": "github_main_and_new_server_render"
+  },
+  "readability_policy": {
+    "priority": "maximum",
+    "native_pair_kerning": true,
+    "neutral_tracking": true,
+    "minimum_preferred_size": 48,
+    "minimum_weight": 800,
+    "white_only": true,
+    "no_outline": true,
+    "long_copy_max_lines": 3
+  }
+}

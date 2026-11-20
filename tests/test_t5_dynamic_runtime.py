@@ -138,8 +138,8 @@ def test_runtime_manifest_is_built_from_the_four_verified_job_captures(tmp_path:
     assert [scene["scene"] for scene in manifest["scenes"]] == ["S1", "S2", "S3", "S4"]
     assert [scene["sha256"] for scene in manifest["scenes"]] == [captures[slot]["sha256"] for slot in durations]
     assert [scene["duration_seconds"] for scene in manifest["scenes"]] == [6, 8, 7, 9]
-    assert manifest["text_motion_contract"] == "config/T5_TEXT_MOTION_V2_0_0.json"
-    assert manifest["font_file"] == "assets/fonts/bodoni-moda/BodoniModa[opsz,wght].ttf"
+    assert manifest["text_motion_contract"] == "config/T5_TEXT_MOTION_V3_0_0.json"
+    assert manifest["font_file"] == "assets/fonts/playfair-display/PlayfairDisplay[wght].ttf"
     assert [scene["text_fields"] for scene in manifest["scenes"]] == [
         ["nom", "offre", "contenu"], ["contenu"], ["offre", "contenu", "prix"], ["nom", "whatsapp", "quartier"]
     ]

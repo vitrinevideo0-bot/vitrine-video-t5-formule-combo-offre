@@ -122,9 +122,13 @@ def main() -> int:
         and visual_policy.get("kinetic_text_motion") is True
         and visual_policy.get("static_text_stack") is False
         and visual_policy.get("max_simultaneous_text_fields") == 2
-        and visual_policy.get("font_family") == "Bodoni Moda"
-        and visual_policy.get("font_classification") == "Didone editorial serif"
-        and visual_policy.get("oversized_white_bold_text") is True
+        and visual_policy.get("font_family") == "Playfair Display"
+        and visual_policy.get("font_classification") == "readable editorial display serif"
+        and visual_policy.get("large_white_bold_text") is True
+        and visual_policy.get("native_pair_kerning") is True
+        and visual_policy.get("neutral_tracking") is True
+        and visual_policy.get("text_outline") is False
+        and visual_policy.get("readability_priority") == "maximum"
     )
     gradient = render_report.get("readability_gradient_evidence", {})
     gradient_is_continuous = (
@@ -144,18 +148,29 @@ def main() -> int:
         and motion_font_path.is_file()
         and motion_contract.get("sha256") == sha256(motion_contract_path)
         and motion_font.get("sha256") == sha256(motion_font_path)
-        and motion_font.get("family") == "Bodoni Moda"
-        and motion_font.get("classification") == "Didone editorial serif"
-        and motion_font.get("style_reference") == "Didot/Bodoni high-contrast display"
+        and motion_font.get("family") == "Playfair Display"
+        and motion_font.get("classification") == "readable editorial display serif"
+        and motion_font.get("style_reference") == "Didot-inspired editorial serif optimized for screen readability"
         and motion_font.get("license") == "OFL-1.1"
-        and motion_font.get("variation_axes", {}).get("opsz", {}).get("render_value") == 11
+        and motion_font.get("variation_axes", {}).get("wght", {}).get("maximum") == 900
         and motion.get("reveal_unit") == "character"
         and motion.get("sequence") == "staggered_one_field_after_another"
         and motion.get("alignment") == "left"
-        and motion.get("letter_motion") == "staggered_rise_and_fade"
-        and motion.get("composition") == "oversized_editorial_didone"
+        and motion.get("letter_motion") == "staggered_soft_rise_and_fade"
+        and motion.get("composition") == "large_readable_editorial_serif"
         and motion.get("case_transform") == "none"
         and motion.get("white_bold_editorial_style") is True
+        and motion.get("native_pair_kerning") is True
+        and motion.get("readability_policy") == {
+            "priority": "maximum",
+            "native_pair_kerning": True,
+            "neutral_tracking": True,
+            "minimum_preferred_size": 48,
+            "minimum_weight": 800,
+            "white_only": True,
+            "no_outline": True,
+            "long_copy_max_lines": 3,
+        }
         and motion.get("static_all_fields_from_first_frame") is False
         and motion.get("text_background_boxes") is False
         and motion.get("max_simultaneous_fields") == 2
@@ -172,11 +187,11 @@ def main() -> int:
         visual_policy.get("visible_text_source") == "merchant_payload_exact_values_only"
         and resolved.get("values") == job["merchant_payload"]
         and resolved.get("static_business_copy") == []
-        and resolved.get("text_motion_contract") == "config/T5_TEXT_MOTION_V2_0_0.json"
-        and resolved.get("font_family") == "Bodoni Moda"
-        and resolved.get("font_style") == "Didot/Bodoni high-contrast display"
+        and resolved.get("text_motion_contract") == "config/T5_TEXT_MOTION_V3_0_0.json"
+        and resolved.get("font_family") == "Playfair Display"
+        and resolved.get("font_style") == "Didot-inspired editorial serif optimized for screen readability"
         and resolved.get("reveal_unit") == "character"
-        and resolved.get("letter_motion") == "staggered_rise_and_fade"
+        and resolved.get("letter_motion") == "staggered_soft_rise_and_fade"
     )
     transitions = render_report.get("transition_evidence", [])
     transitions_are_exact = (
