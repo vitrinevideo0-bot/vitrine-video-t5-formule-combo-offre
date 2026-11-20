@@ -3,27 +3,144 @@
   "template_id": "RESTAURATION-T5",
   "template_version": "3.0.0-full-frame",
   "montage_contract": "montage/T5_MONTAGE_COMPLET_V3_0_0.json",
-  "text_motion_contract": "config/T5_TEXT_MOTION_V1_0_0.json",
+  "text_motion_contract": "config/T5_TEXT_MOTION_V2_0_0.json",
   "runtime_order": [
-    {"id": "MERCHANT_INPUT", "source": "form/questions_T5.json", "required_fields": 6},
-    {"id": "GUIDED_CAPTURE", "source": "config/T5_CAPTURE_FLOW_V1_0_0.json", "stable_screens": 12},
-    {"id": "VERIFIED_CAPTURE_MANIFEST", "capture_slots": ["S1", "S2", "S3", "S4"], "integrity": "sha256"},
-    {"id": "GITHUB_FULL_FRAME_RENDER", "render_plane": "github_actions", "cloudflare_rendering": false},
-    {"id": "RENDER_RESULT_OR_ERROR", "success_contract": "schemas/T5_render_result.schema.json", "error_contract": "schemas/T5_render_error.schema.json"}
+    {
+      "id": "MERCHANT_INPUT",
+      "source": "form/questions_T5.json",
+      "required_fields": 6
+    },
+    {
+      "id": "GUIDED_CAPTURE",
+      "source": "config/T5_CAPTURE_FLOW_V1_0_0.json",
+      "stable_screens": 12
+    },
+    {
+      "id": "VERIFIED_CAPTURE_MANIFEST",
+      "capture_slots": [
+        "S1",
+        "S2",
+        "S3",
+        "S4"
+      ],
+      "integrity": "sha256"
+    },
+    {
+      "id": "GITHUB_FULL_FRAME_RENDER",
+      "render_plane": "github_actions",
+      "cloudflare_rendering": false
+    },
+    {
+      "id": "RENDER_RESULT_OR_ERROR",
+      "success_contract": "schemas/T5_render_result.schema.json",
+      "error_contract": "schemas/T5_render_error.schema.json"
+    }
   ],
   "scene_bindings": [
-    {"scene": "S1", "timeline_start_ms": 0, "duration_ms": 6000, "capture": "captures.S1", "capture_screens": [1, 2, 3], "text_fields": ["nom", "offre", "contenu"]},
-    {"scene": "S2", "timeline_start_ms": 6000, "duration_ms": 8000, "capture": "captures.S2", "capture_screens": [4, 5, 6], "text_fields": ["contenu"]},
-    {"scene": "S3", "timeline_start_ms": 14000, "duration_ms": 7000, "capture": "captures.S3", "capture_screens": [7, 8, 9], "text_fields": ["offre", "contenu", "prix"]},
-    {"scene": "S4", "timeline_start_ms": 21000, "duration_ms": 9000, "capture": "captures.S4", "capture_screens": [10, 11, 12], "text_fields": ["nom", "whatsapp", "quartier"]}
+    {
+      "scene": "S1",
+      "timeline_start_ms": 0,
+      "duration_ms": 6000,
+      "capture": "captures.S1",
+      "capture_screens": [
+        1,
+        2,
+        3
+      ],
+      "text_fields": [
+        "nom",
+        "offre",
+        "contenu"
+      ]
+    },
+    {
+      "scene": "S2",
+      "timeline_start_ms": 6000,
+      "duration_ms": 8000,
+      "capture": "captures.S2",
+      "capture_screens": [
+        4,
+        5,
+        6
+      ],
+      "text_fields": [
+        "contenu"
+      ]
+    },
+    {
+      "scene": "S3",
+      "timeline_start_ms": 14000,
+      "duration_ms": 7000,
+      "capture": "captures.S3",
+      "capture_screens": [
+        7,
+        8,
+        9
+      ],
+      "text_fields": [
+        "offre",
+        "contenu",
+        "prix"
+      ]
+    },
+    {
+      "scene": "S4",
+      "timeline_start_ms": 21000,
+      "duration_ms": 9000,
+      "capture": "captures.S4",
+      "capture_screens": [
+        10,
+        11,
+        12
+      ],
+      "text_fields": [
+        "nom",
+        "whatsapp",
+        "quartier"
+      ]
+    }
   ],
   "merchant_bindings": [
-    {"source": "merchant_payload.nom", "targets": ["S1.nom", "S4.nom"]},
-    {"source": "merchant_payload.offre", "targets": ["S1.offre", "S3.offre"]},
-    {"source": "merchant_payload.contenu", "targets": ["S1.contenu", "S2.contenu", "S3.contenu"]},
-    {"source": "merchant_payload.prix", "targets": ["S3.prix"]},
-    {"source": "merchant_payload.whatsapp", "targets": ["S4.whatsapp"]},
-    {"source": "merchant_payload.quartier", "targets": ["S4.quartier"]}
+    {
+      "source": "merchant_payload.nom",
+      "targets": [
+        "S1.nom",
+        "S4.nom"
+      ]
+    },
+    {
+      "source": "merchant_payload.offre",
+      "targets": [
+        "S1.offre",
+        "S3.offre"
+      ]
+    },
+    {
+      "source": "merchant_payload.contenu",
+      "targets": [
+        "S1.contenu",
+        "S2.contenu",
+        "S3.contenu"
+      ]
+    },
+    {
+      "source": "merchant_payload.prix",
+      "targets": [
+        "S3.prix"
+      ]
+    },
+    {
+      "source": "merchant_payload.whatsapp",
+      "targets": [
+        "S4.whatsapp"
+      ]
+    },
+    {
+      "source": "merchant_payload.quartier",
+      "targets": [
+        "S4.quartier"
+      ]
+    }
   ],
   "visual_contract": {
     "width": 720,
@@ -31,7 +148,12 @@
     "fps": 30,
     "frames": 900,
     "duration_ms": 30000,
-    "scene_durations_ms": [6000, 8000, 7000, 9000],
+    "scene_durations_ms": [
+      6000,
+      8000,
+      7000,
+      9000
+    ],
     "rushes_fill_entire_frame": true,
     "text_source": "merchant_payload_exact_values_only",
     "permanent_cards": false,
@@ -40,21 +162,46 @@
     "technical_labels": false,
     "horizontal_color_seams": false,
     "readability_gradient_reaches_frame_bottom": true,
-    "text_motion": "character_by_character_staggered",
+    "text_motion": "editorial_character_staggered_rise_and_fade",
     "text_alignment": "left",
-    "font_family": "Manrope",
+    "font_family": "Bodoni Moda",
     "static_text_stack": false,
     "max_simultaneous_text_fields": 2,
     "final_stable_start_frame": 810,
-    "audio_streams": 0
+    "audio_streams": 0,
+    "font_classification": "Didone editorial serif",
+    "text_color": "#FFFFFF",
+    "minimum_font_weight": 800,
+    "oversized_editorial_composition": true
   },
   "transition_contract": {
     "reference": "T1",
     "family": "dish_swipe_camera_whip",
     "duration_frames": 8,
-    "cut_frames": [180, 420, 630],
-    "windows": [[176, 183], [416, 423], [626, 633]],
-    "directions": ["left", "right", "left"],
+    "cut_frames": [
+      180,
+      420,
+      630
+    ],
+    "windows": [
+      [
+        176,
+        183
+      ],
+      [
+        416,
+        423
+      ],
+      [
+        626,
+        633
+      ]
+    ],
+    "directions": [
+      "left",
+      "right",
+      "left"
+    ],
     "full_frame_only": true
   },
   "forbidden_shortcuts": [

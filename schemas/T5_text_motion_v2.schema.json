@@ -1,0 +1,763 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/vitrinevideo0-bot/vitrine-video-t5-formule-combo-offre/raw/main/schemas/T5_text_motion_v2.schema.json",
+  "title": "RESTAURATION-T5 oversized editorial kinetic typography contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "contract_id",
+    "template_id",
+    "status",
+    "revision",
+    "design_intent",
+    "font",
+    "animation",
+    "render_style",
+    "field_pixel_proofs",
+    "scenes",
+    "approval"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "2.0.0"
+    },
+    "contract_id": {
+      "const": "t5_text_motion_v2_0_0"
+    },
+    "template_id": {
+      "const": "RESTAURATION-T5"
+    },
+    "status": {
+      "const": "owner_requested_editorial_motion_design"
+    },
+    "revision": {
+      "const": "T5_TYPOGRAPHIE_EDITORIALE_BODONI_2026-11-18"
+    },
+    "design_intent": {
+      "type": "string",
+      "minLength": 1
+    },
+    "font": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "family",
+        "classification",
+        "style_reference",
+        "source",
+        "license",
+        "file",
+        "license_file",
+        "metadata_file",
+        "variation_axes",
+        "weights"
+      ],
+      "properties": {
+        "family": {
+          "const": "Bodoni Moda"
+        },
+        "classification": {
+          "const": "Didone editorial serif"
+        },
+        "style_reference": {
+          "const": "Didot/Bodoni high-contrast display"
+        },
+        "source": {
+          "const": "Google Fonts"
+        },
+        "license": {
+          "const": "OFL-1.1"
+        },
+        "file": {
+          "const": "assets/fonts/bodoni-moda/BodoniModa[opsz,wght].ttf"
+        },
+        "license_file": {
+          "const": "assets/fonts/bodoni-moda/OFL.txt"
+        },
+        "metadata_file": {
+          "const": "assets/fonts/bodoni-moda/METADATA.pb"
+        },
+        "variation_axes": {
+          "const": {
+            "wght": {
+              "minimum": 400,
+              "default": 400,
+              "maximum": 900
+            },
+            "opsz": {
+              "minimum": 6,
+              "default": 11,
+              "maximum": 96,
+              "render_value": 11
+            }
+          }
+        },
+        "weights": {
+          "const": {
+            "bold": 700,
+            "extrabold": 800,
+            "black": 900
+          }
+        }
+      }
+    },
+    "animation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reveal_unit",
+        "sequence",
+        "alignment",
+        "entry",
+        "exit",
+        "entry_rise_pixels",
+        "exit_rise_pixels",
+        "entry_fade_frames",
+        "exit_fade_frames",
+        "max_simultaneous_fields",
+        "static_all_fields_from_first_frame",
+        "text_background_boxes",
+        "preserve_exact_merchant_value",
+        "frame_intervals",
+        "letter_motion",
+        "letter_rise_pixels",
+        "letter_fade_frames",
+        "case_transform",
+        "composition"
+      ],
+      "properties": {
+        "reveal_unit": {
+          "const": "character"
+        },
+        "sequence": {
+          "const": "staggered_one_field_after_another"
+        },
+        "alignment": {
+          "const": "left"
+        },
+        "entry": {
+          "const": "editorial_type_on_with_soft_rise"
+        },
+        "exit": {
+          "const": "soft_fade_up"
+        },
+        "entry_rise_pixels": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 40
+        },
+        "exit_rise_pixels": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 30
+        },
+        "entry_fade_frames": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 15
+        },
+        "exit_fade_frames": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 15
+        },
+        "max_simultaneous_fields": {
+          "const": 2
+        },
+        "static_all_fields_from_first_frame": {
+          "const": false
+        },
+        "text_background_boxes": {
+          "const": false
+        },
+        "preserve_exact_merchant_value": {
+          "const": true
+        },
+        "frame_intervals": {
+          "const": "start_inclusive_end_exclusive"
+        },
+        "letter_motion": {
+          "const": "staggered_rise_and_fade"
+        },
+        "letter_rise_pixels": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 40
+        },
+        "letter_fade_frames": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 12
+        },
+        "case_transform": {
+          "const": "none"
+        },
+        "composition": {
+          "const": "oversized_editorial_didone"
+        }
+      }
+    },
+    "render_style": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "fill",
+        "accent_fill",
+        "shadow",
+        "shadow_alpha",
+        "shadow_blur_radius",
+        "shadow_offset",
+        "stroke_width",
+        "stroke_alpha"
+      ],
+      "properties": {
+        "fill": {
+          "const": "#FFFFFF"
+        },
+        "accent_fill": {
+          "const": "#FFFFFF"
+        },
+        "shadow": {
+          "const": "#000000"
+        },
+        "shadow_alpha": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 255
+        },
+        "shadow_blur_radius": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 12
+        },
+        "shadow_offset": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "integer"
+            }
+          ],
+          "items": false,
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "stroke_width": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2
+        },
+        "stroke_alpha": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 255
+        }
+      }
+    },
+    "field_pixel_proofs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "nom",
+        "offre",
+        "contenu",
+        "prix",
+        "whatsapp",
+        "quartier"
+      ],
+      "properties": {
+        "nom": {
+          "$ref": "#/$defs/proof"
+        },
+        "offre": {
+          "$ref": "#/$defs/proof"
+        },
+        "contenu": {
+          "$ref": "#/$defs/proof"
+        },
+        "prix": {
+          "$ref": "#/$defs/proof"
+        },
+        "whatsapp": {
+          "$ref": "#/$defs/proof"
+        },
+        "quartier": {
+          "$ref": "#/$defs/proof"
+        }
+      }
+    },
+    "scenes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "S1",
+        "S2",
+        "S3",
+        "S4"
+      ],
+      "properties": {
+        "S1": {
+          "$ref": "#/$defs/scene_s1"
+        },
+        "S2": {
+          "$ref": "#/$defs/scene_s2"
+        },
+        "S3": {
+          "$ref": "#/$defs/scene_s3"
+        },
+        "S4": {
+          "$ref": "#/$defs/scene_s4"
+        }
+      }
+    },
+    "approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "date",
+        "timezone",
+        "decision_channel",
+        "reference_images",
+        "font_identification",
+        "decision",
+        "publication_target"
+      ],
+      "properties": {
+        "date": {
+          "const": "2026-11-18"
+        },
+        "timezone": {
+          "const": "Africa/Lagos"
+        },
+        "decision_channel": {
+          "const": "arena_direct_instruction"
+        },
+        "reference_images": {
+          "const": [
+            "image-31.png",
+            "image-32.png"
+          ]
+        },
+        "font_identification": {
+          "type": "string",
+          "minLength": 1
+        },
+        "decision": {
+          "type": "string",
+          "minLength": 1
+        },
+        "publication_target": {
+          "const": "github_main_and_new_server_render"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "proof": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scene",
+        "frame"
+      ],
+      "properties": {
+        "scene": {
+          "enum": [
+            "S1",
+            "S2",
+            "S3",
+            "S4"
+          ]
+        },
+        "frame": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 269
+        }
+      }
+    },
+    "field": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "start_frame",
+        "type_on_end_frame",
+        "hold_end_frame",
+        "end_frame",
+        "box",
+        "preferred_size",
+        "minimum_size",
+        "weight",
+        "max_lines",
+        "tracking",
+        "line_spacing",
+        "accent"
+      ],
+      "properties": {
+        "id": {
+          "enum": [
+            "nom",
+            "offre",
+            "contenu",
+            "prix",
+            "whatsapp",
+            "quartier"
+          ]
+        },
+        "start_frame": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 269
+        },
+        "type_on_end_frame": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 270
+        },
+        "hold_end_frame": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 270
+        },
+        "end_frame": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 270
+        },
+        "box": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 719
+            },
+            {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 1279
+            },
+            {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 720
+            },
+            {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1280
+            }
+          ],
+          "items": false,
+          "minItems": 4,
+          "maxItems": 4
+        },
+        "preferred_size": {
+          "type": "integer",
+          "minimum": 24,
+          "maximum": 96
+        },
+        "minimum_size": {
+          "type": "integer",
+          "minimum": 24,
+          "maximum": 80
+        },
+        "weight": {
+          "enum": [
+            800,
+            900
+          ]
+        },
+        "max_lines": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3
+        },
+        "tracking": {
+          "type": "number",
+          "minimum": -1,
+          "maximum": 2
+        },
+        "line_spacing": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 24
+        },
+        "accent": {
+          "type": "boolean"
+        }
+      }
+    },
+    "scene_base": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scene_frames",
+        "fields"
+      ],
+      "properties": {
+        "scene_frames": {
+          "type": "integer"
+        },
+        "fields": {
+          "type": "array"
+        }
+      }
+    },
+    "scene_s1": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/scene_base"
+        },
+        {
+          "properties": {
+            "scene_frames": {
+              "const": 180
+            },
+            "fields": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "allOf": [
+                    {
+                      "$ref": "#/$defs/field"
+                    },
+                    {
+                      "properties": {
+                        "id": {
+                          "const": "nom"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "allOf": [
+                    {
+                      "$ref": "#/$defs/field"
+                    },
+                    {
+                      "properties": {
+                        "id": {
+                          "const": "offre"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "allOf": [
+                    {
+                      "$ref": "#/$defs/field"
+                    },
+                    {
+                      "properties": {
+                        "id": {
+                          "const": "contenu"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ],
+              "items": false,
+              "minItems": 3,
+              "maxItems": 3
+            }
+          }
+        }
+      ]
+    },
+    "scene_s2": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/scene_base"
+        },
+        {
+          "properties": {
+            "scene_frames": {
+              "const": 240
+            },
+            "fields": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "allOf": [
+                    {
+                      "$ref": "#/$defs/field"
+                    },
+                    {
+                      "properties": {
+                        "id": {
+                          "const": "contenu"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ],
+              "items": false,
+              "minItems": 1,
+              "maxItems": 1
+            }
+          }
+        }
+      ]
+    },
+    "scene_s3": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/scene_base"
+        },
+        {
+          "properties": {
+            "scene_frames": {
+              "const": 210
+            },
+            "fields": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "allOf": [
+                    {
+                      "$ref": "#/$defs/field"
+                    },
+                    {
+                      "properties": {
+                        "id": {
+                          "const": "offre"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "allOf": [
+                    {
+                      "$ref": "#/$defs/field"
+                    },
+                    {
+                      "properties": {
+                        "id": {
+                          "const": "contenu"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "allOf": [
+                    {
+                      "$ref": "#/$defs/field"
+                    },
+                    {
+                      "properties": {
+                        "id": {
+                          "const": "prix"
+                        }
+                      }
+                    }
+                  ]
+                }
+              ],
+              "items": false,
+              "minItems": 3,
+              "maxItems": 3
+            }
+          }
+        }
+      ]
+    },
+    "scene_s4": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scene_frames",
+        "fields",
+        "stable_tail"
+      ],
+      "properties": {
+        "scene_frames": {
+          "const": 270
+        },
+        "fields": {
+          "type": "array",
+          "prefixItems": [
+            {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/field"
+                },
+                {
+                  "properties": {
+                    "id": {
+                      "const": "nom"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/field"
+                },
+                {
+                  "properties": {
+                    "id": {
+                      "const": "whatsapp"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/field"
+                },
+                {
+                  "properties": {
+                    "id": {
+                      "const": "quartier"
+                    }
+                  }
+                }
+              ]
+            }
+          ],
+          "items": false,
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "stable_tail": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "start_frame",
+            "end_frame",
+            "visible_fields"
+          ],
+          "properties": {
+            "start_frame": {
+              "const": 180
+            },
+            "end_frame": {
+              "const": 269
+            },
+            "visible_fields": {
+              "const": [
+                "whatsapp",
+                "quartier"
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

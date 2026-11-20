@@ -3,14 +3,13 @@
 
 Aucun titre éditorial, carte, cadre vidéo, barre de progression ou libellé de scène
 n'est produit ici. Les seuls glyphes brûlés sont des caractères des valeurs exactes
-du RenderJob, révélés selon config/T5_TEXT_MOTION_V1_0_0.json.
+du RenderJob, révélés selon config/T5_TEXT_MOTION_V2_0_0.json.
 """
 from __future__ import annotations
 
 from functools import lru_cache
 import hashlib
 import json
-import math
 from pathlib import Path
 from typing import Any, Mapping
 import re
@@ -19,7 +18,7 @@ from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
 
 ROOT = Path(__file__).resolve().parents[1]
 WIDTH, HEIGHT = 720, 1280
-TEXT_MOTION_CONFIG_PATH = ROOT / "config/T5_TEXT_MOTION_V1_0_0.json"
+TEXT_MOTION_CONFIG_PATH = ROOT / "config/T5_TEXT_MOTION_V2_0_0.json"
 TEXT_MOTION: dict[str, Any] = json.loads(TEXT_MOTION_CONFIG_PATH.read_text(encoding="utf-8"))
 FONT_FILE = ROOT / TEXT_MOTION["font"]["file"]
 FONT_LICENSE_FILE = ROOT / TEXT_MOTION["font"]["license_file"]
@@ -51,7 +50,13 @@ def _validate_motion_contract() -> None:
     if set(SCENE_FIELDS) != set(expected_frames):
         raise RuntimeError("T5 text motion contract must define S1, S2, S3 and S4")
     if not FONT_FILE.is_file() or not FONT_LICENSE_FILE.is_file():
-        raise RuntimeError("The contract-bound Manrope font and its OFL license are required")
+        raise RuntimeError("The contract-bound Bodoni Moda font and its OFL license are required")
+    if TEXT_MOTION["font"]["family"] != "Bodoni Moda":
+        raise RuntimeError("The active T5 editorial family must be Bodoni Moda")
+    if TEXT_MOTION["render_style"]["fill"] != "#FFFFFF":
+        raise RuntimeError("The active T5 editorial text must remain white")
+    if TEXT_MOTION["animation"]["letter_motion"] != "staggered_rise_and_fade":
+        raise RuntimeError("The active T5 letters must rise and fade one by one")
     maximum_active = 0
     for scene, total in expected_frames.items():
         contract = TEXT_MOTION["scenes"][scene]
@@ -67,6 +72,8 @@ def _validate_motion_contract() -> None:
             x0, y0, x1, y1 = map(int, field["box"])
             if not (0 <= x0 < x1 <= WIDTH and 0 <= y0 < y1 <= HEIGHT):
                 raise RuntimeError(f"Invalid kinetic text box for {scene}.{field['id']}")
+            if int(field["weight"]) < 800 or int(field["preferred_size"]) < 52:
+                raise RuntimeError(f"Editorial text must remain large and bold for {scene}.{field['id']}")
         for frame in range(total):
             active = sum(
                 int(field["start_frame"]) <= frame < int(field["end_frame"])
@@ -120,14 +127,25 @@ def motion_design_evidence() -> dict[str, Any]:
         },
         "font": {
             "family": TEXT_MOTION["font"]["family"],
+            "classification": TEXT_MOTION["font"]["classification"],
+            "style_reference": TEXT_MOTION["font"]["style_reference"],
             "file": TEXT_MOTION["font"]["file"],
             "sha256": _sha256(FONT_FILE),
             "license": TEXT_MOTION["font"]["license"],
             "license_file": TEXT_MOTION["font"]["license_file"],
+            "variation_axes": TEXT_MOTION["font"]["variation_axes"],
         },
         "reveal_unit": animation["reveal_unit"],
         "sequence": animation["sequence"],
         "alignment": animation["alignment"],
+        "letter_motion": animation["letter_motion"],
+        "composition": animation["composition"],
+        "case_transform": animation["case_transform"],
+        "white_bold_editorial_style": (
+            TEXT_MOTION["render_style"]["fill"] == "#FFFFFF"
+            and min(field["weight"] for scene in TEXT_MOTION["scenes"].values() for field in scene["fields"]) >= 800
+            and min(field["preferred_size"] for scene in TEXT_MOTION["scenes"].values() for field in scene["fields"]) >= 52
+        ),
         "static_all_fields_from_first_frame": animation["static_all_fields_from_first_frame"],
         "text_background_boxes": animation["text_background_boxes"],
         "max_simultaneous_fields": animation["max_simultaneous_fields"],
@@ -142,10 +160,17 @@ def _resample() -> int:
 
 
 @lru_cache(maxsize=128)
-def load_font(size: int, weight: int = 400) -> ImageFont.FreeTypeFont:
+def load_font(size: int, weight: int = 900) -> ImageFont.FreeTypeFont:
     font = ImageFont.truetype(str(FONT_FILE), size)
-    if hasattr(font, "set_variation_by_axes"):
-        font.set_variation_by_axes([int(weight)])
+    variation_axes = TEXT_MOTION["font"].get("variation_axes", {})
+    if variation_axes and hasattr(font, "set_variation_by_axes"):
+        axis_values: list[int] = []
+        for tag, axis in variation_axes.items():
+            if tag == "wght":
+                axis_values.append(int(weight))
+            else:
+                axis_values.append(int(axis.get("render_value", axis["default"])))
+        font.set_variation_by_axes(axis_values)
     return font
 
 
@@ -286,17 +311,28 @@ def text_motion_state(scene: str, field: str, local_frame: int, value: str) -> d
     hold_end = int(spec["hold_end_frame"])
     end = int(spec["end_frame"])
     total_characters = len(_normalize(value))
+    reveal_duration = max(1, type_end - start)
     if local_frame < start or local_frame >= end or total_characters == 0:
         return {
             "phase": "hidden",
             "visible_characters": 0,
             "total_characters": total_characters,
+            "elapsed_frames": 0,
+            "reveal_duration": reveal_duration,
             "alpha": 0,
             "y_offset": 0,
         }
-    reveal_duration = max(1, type_end - start)
-    reveal_progress = min(1.0, (local_frame - start + 1) / reveal_duration)
-    visible_characters = min(total_characters, max(1, math.ceil(total_characters * reveal_progress)))
+    elapsed_frames = local_frame - start + 1
+    letter_fade_frames = int(TEXT_MOTION["animation"]["letter_fade_frames"])
+    stagger_span = max(0.0, float(reveal_duration - letter_fade_frames))
+    if total_characters <= 1 or stagger_span == 0:
+        visible_characters = total_characters
+    else:
+        visible_characters = sum(
+            elapsed_frames > character_index * stagger_span / (total_characters - 1)
+            for character_index in range(total_characters)
+        )
+    visible_characters = min(total_characters, max(1, visible_characters))
     entry_frames = int(TEXT_MOTION["animation"]["entry_fade_frames"])
     entry_progress = min(1.0, (local_frame - start + 1) / max(1, entry_frames))
     entry_eased = _smoothstep(entry_progress)
@@ -313,6 +349,8 @@ def text_motion_state(scene: str, field: str, local_frame: int, value: str) -> d
         "phase": phase,
         "visible_characters": visible_characters,
         "total_characters": total_characters,
+        "elapsed_frames": elapsed_frames,
+        "reveal_duration": reveal_duration,
         "alpha": max(0, min(255, round(255 * alpha_factor))),
         "y_offset": round(y_offset, 3),
     }
@@ -327,7 +365,7 @@ def _draw_characters(
     draw: ImageDraw.ImageDraw,
     lines: tuple[str, ...],
     *,
-    visible_characters: int,
+    state: Mapping[str, Any],
     font: ImageFont.FreeTypeFont,
     x: float,
     y: float,
@@ -338,24 +376,47 @@ def _draw_characters(
     stroke_width: int = 0,
     stroke_fill: tuple[int, int, int, int] | None = None,
 ) -> None:
-    remaining = visible_characters
+    visible_characters = int(state["visible_characters"])
+    total_characters = int(state["total_characters"])
+    elapsed_frames = float(state["elapsed_frames"])
+    reveal_duration = float(state["reveal_duration"])
+    letter_fade_frames = float(TEXT_MOTION["animation"]["letter_fade_frames"])
+    letter_rise_pixels = float(TEXT_MOTION["animation"]["letter_rise_pixels"])
+    stagger_span = max(0.0, reveal_duration - letter_fade_frames)
+    character_index = 0
     for line_index, line in enumerate(lines):
-        if remaining <= 0:
-            break
         cursor_x = x
-        visible_line = line[:remaining]
-        for character in visible_line:
+        for character in line:
+            if character_index >= visible_characters:
+                return
+            if state["phase"] == "type_on" and total_characters > 1 and stagger_span > 0:
+                start_offset = character_index * stagger_span / (total_characters - 1)
+                letter_progress = _smoothstep((elapsed_frames - start_offset) / max(1.0, letter_fade_frames))
+            else:
+                letter_progress = 1.0
+            character_fill = (*fill[:3], round(fill[3] * letter_progress))
+            character_stroke = None
+            if stroke_fill is not None:
+                character_stroke = (*stroke_fill[:3], round(stroke_fill[3] * letter_progress))
+            character_y = (
+                y
+                + line_index * (line_height + line_spacing)
+                + letter_rise_pixels * (1.0 - letter_progress)
+            )
             draw.text(
-                (cursor_x, y + line_index * (line_height + line_spacing)),
+                (cursor_x, character_y),
                 character,
                 font=font,
                 anchor="lt",
-                fill=fill,
+                fill=character_fill,
                 stroke_width=stroke_width,
-                stroke_fill=stroke_fill,
+                stroke_fill=character_stroke,
             )
             cursor_x += float(font.getlength(character)) + tracking
-        remaining -= len(line)
+            character_index += 1
+        if line_index < len(lines) - 1:
+            # Le wrapping remplace exactement un espace de la valeur normalisée.
+            character_index += 1
 
 
 def _draw_kinetic_value(
@@ -398,7 +459,7 @@ def _draw_kinetic_value(
     _draw_characters(
         shadow_draw,
         lines,
-        visible_characters=int(state["visible_characters"]),
+        state=state,
         font=font,
         x=text_x + shadow_offset_x,
         y=text_y + shadow_offset_y,
@@ -416,7 +477,7 @@ def _draw_kinetic_value(
     _draw_characters(
         text_draw,
         lines,
-        visible_characters=int(state["visible_characters"]),
+        state=state,
         font=font,
         x=text_x,
         y=text_y,

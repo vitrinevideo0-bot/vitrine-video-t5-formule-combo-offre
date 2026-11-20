@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 CASES = [
     ("schemas/T5_questions.schema.json", "form/questions_T5.json"),
     ("schemas/T5_text_motion.schema.json", "config/T5_TEXT_MOTION_V1_0_0.json"),
+    ("schemas/T5_text_motion_v2.schema.json", "config/T5_TEXT_MOTION_V2_0_0.json"),
     ("schemas/T5_capture_flow.schema.json", "config/T5_CAPTURE_FLOW_V1_0_0.json"),
     ("schemas/T5_rush_manifest.schema.json", "rushes/manifest.json"),
     ("schemas/T5_render_job.schema.json", "demo/render_job_runtime_demo.json"),
@@ -44,10 +45,15 @@ def test_schemas_reject_static_or_incomplete_variants() -> None:
     with pytest.raises(jsonschema.ValidationError):
         jsonschema.validate(altered_copy, load("schemas/T5_questions.schema.json"))
 
-    static_motion = load("config/T5_TEXT_MOTION_V1_0_0.json")
+    static_motion = load("config/T5_TEXT_MOTION_V2_0_0.json")
     static_motion["animation"]["static_all_fields_from_first_frame"] = True
     with pytest.raises(jsonschema.ValidationError):
-        jsonschema.validate(static_motion, load("schemas/T5_text_motion.schema.json"))
+        jsonschema.validate(static_motion, load("schemas/T5_text_motion_v2.schema.json"))
+
+    small_sans_motion = load("config/T5_TEXT_MOTION_V2_0_0.json")
+    small_sans_motion["font"]["family"] = "Manrope"
+    with pytest.raises(jsonschema.ValidationError):
+        jsonschema.validate(small_sans_motion, load("schemas/T5_text_motion_v2.schema.json"))
 
     job = load("demo/render_job_runtime_demo.json")
     job["render"]["visual_mode"] = "approved_master_stream_copy"

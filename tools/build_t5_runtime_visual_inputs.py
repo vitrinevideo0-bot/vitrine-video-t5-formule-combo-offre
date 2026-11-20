@@ -77,6 +77,12 @@ def main() -> int:
     motion_contract = json.loads(motion_contract_path.read_text(encoding="utf-8"))
     if motion_contract["animation"]["reveal_unit"] != "character":
         raise SystemExit("T5 text motion must reveal merchant values character by character")
+    if motion_contract["animation"].get("letter_motion") != "staggered_rise_and_fade":
+        raise SystemExit("T5 editorial letters must rise and fade one by one")
+    if motion_contract["font"].get("family") != "Bodoni Moda":
+        raise SystemExit("T5 editorial typography must use the contract-bound Bodoni Moda font")
+    if motion_contract["render_style"].get("fill") != "#FFFFFF":
+        raise SystemExit("T5 editorial typography must remain white")
     fields_by_scene = {item["scene"]: item["text_fields"] for item in contract["scene_bindings"]}
     scenes: list[dict[str, Any]] = []
     for slot in SLOTS:

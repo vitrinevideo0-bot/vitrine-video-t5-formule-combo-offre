@@ -64,9 +64,13 @@ def test_every_answer_and_capture_has_an_explicit_runtime_target() -> None:
         "captures.S1", "captures.S2", "captures.S3", "captures.S4"
     ]
     assert [item["duration_ms"] for item in contract["scene_bindings"]] == [6000, 8000, 7000, 9000]
-    assert contract["text_motion_contract"] == "config/T5_TEXT_MOTION_V1_0_0.json"
-    assert contract["visual_contract"]["text_motion"] == "character_by_character_staggered"
-    assert contract["visual_contract"]["font_family"] == "Manrope"
+    assert contract["text_motion_contract"] == "config/T5_TEXT_MOTION_V2_0_0.json"
+    assert contract["visual_contract"]["text_motion"] == "editorial_character_staggered_rise_and_fade"
+    assert contract["visual_contract"]["font_family"] == "Bodoni Moda"
+    assert contract["visual_contract"]["font_classification"] == "Didone editorial serif"
+    assert contract["visual_contract"]["text_color"] == "#FFFFFF"
+    assert contract["visual_contract"]["minimum_font_weight"] == 800
+    assert contract["visual_contract"]["oversized_editorial_composition"] is True
     assert contract["visual_contract"]["static_text_stack"] is False
     assert contract["runtime_order"][3]["render_plane"] == "github_actions"
 
@@ -82,7 +86,11 @@ def test_v3_montage_is_full_frame_and_uses_three_exact_eight_frame_transitions()
     assert montage["visual_policy"]["readability_gradient_must_reach_frame_bottom"] is True
     assert montage["visual_policy"]["static_text_stack_forbidden"] is True
     assert montage["visual_policy"]["character_by_character_reveal_required"] is True
-    assert montage["visual_policy"]["font_family"] == "Manrope"
+    assert montage["visual_policy"]["font_family"] == "Bodoni Moda"
+    assert montage["visual_policy"]["font_classification"] == "Didone editorial serif"
+    assert montage["visual_policy"]["text_color"] == "#FFFFFF"
+    assert montage["visual_policy"]["minimum_font_weight"] == 800
+    assert montage["visual_policy"]["oversized_editorial_composition"] is True
     assert montage["visual_policy"]["max_simultaneous_text_fields"] == 2
     assert montage["merchant_payload"]["ordered_fields"] == [
         "nom", "offre", "contenu", "prix", "whatsapp", "quartier"
@@ -106,7 +114,10 @@ def test_readability_gradient_is_continuous_through_the_last_pixel() -> None:
 
 def test_motion_design_is_character_staggered_left_aligned_and_font_bound() -> None:
     evidence = motion_design_evidence()
-    assert evidence["font"]["family"] == "Manrope"
+    assert evidence["font"]["family"] == "Bodoni Moda"
+    assert evidence["font"]["classification"] == "Didone editorial serif"
+    assert evidence["font"]["style_reference"] == "Didot/Bodoni high-contrast display"
+    assert evidence["font"]["variation_axes"]["opsz"]["render_value"] == 11
     assert evidence["font"]["license"] == "OFL-1.1"
     assert evidence["font"]["sha256"] == hashlib.sha256(
         (ROOT / evidence["font"]["file"]).read_bytes()
@@ -114,6 +125,10 @@ def test_motion_design_is_character_staggered_left_aligned_and_font_bound() -> N
     assert evidence["reveal_unit"] == "character"
     assert evidence["sequence"] == "staggered_one_field_after_another"
     assert evidence["alignment"] == "left"
+    assert evidence["letter_motion"] == "staggered_rise_and_fade"
+    assert evidence["composition"] == "oversized_editorial_didone"
+    assert evidence["case_transform"] == "none"
+    assert evidence["white_bold_editorial_style"] is True
     assert evidence["static_all_fields_from_first_frame"] is False
     assert evidence["text_background_boxes"] is False
     assert evidence["max_simultaneous_fields"] == 2

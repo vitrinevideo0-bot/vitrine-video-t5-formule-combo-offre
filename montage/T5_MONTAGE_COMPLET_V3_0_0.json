@@ -3,7 +3,7 @@
   "template_id": "RESTAURATION-T5",
   "version": "3.0.0-full-frame",
   "title": "Formule, combo ou offre — montage complet plein écran",
-  "status": "owner_motion_typography_requested_pending_github_render",
+  "status": "owner_editorial_bodoni_motion_requested_pending_github_render",
   "approved_sources": {
     "questions": {
       "path": "form/questions_T5.json",
@@ -19,19 +19,25 @@
       "stable_screens": 12
     },
     "text_motion": {
-      "path": "config/T5_TEXT_MOTION_V1_0_0.json",
-      "sha256": "cda93599fe51b14dce33382bdcd112285944017f950c12ed91a32229082bc89e",
+      "path": "config/T5_TEXT_MOTION_V2_0_0.json",
+      "sha256": "735827f40b01237f6c75bfe207d77385a615c1aefef07e5e51787b6e9fe4d434",
       "reveal_unit": "character",
-      "font_family": "Manrope"
+      "letter_motion": "staggered_rise_and_fade",
+      "font_family": "Bodoni Moda",
+      "font_classification": "Didone editorial serif",
+      "text_color": "#FFFFFF",
+      "minimum_weight": 800
     },
     "motion_font": {
-      "path": "assets/fonts/manrope/Manrope[wght].ttf",
-      "sha256": "3ae11c49db0455a3cc33e37d380f20fdb8c7f8b41dc07625c177e3d87a9d6ae6",
-      "license": "OFL-1.1"
+      "path": "assets/fonts/bodoni-moda/BodoniModa[opsz,wght].ttf",
+      "sha256": "550f5e34ee0a828d7941b1fe9bc58b34e5260d3f33a61532e6d0a0114e79a5cf",
+      "license": "OFL-1.1",
+      "selected_style": "Black",
+      "optical_size": 11
     },
     "motion_typography_approval": {
-      "path": "approvals/APPROBATION_TYPOGRAPHIE_MOTION_T5_2026-11-18.json",
-      "sha256": "a4969c940ab9ed432c8b0d24bf79e170c4e660652418f864eadd432019d53d70"
+      "path": "approvals/APPROBATION_STYLE_EDITORIAL_BODONI_T5_2026-11-18.json",
+      "sha256": "184a7c620ef988be1a69e5cf503cfba3626343fa15483c45769bdd29ee29fcf2"
     },
     "creative_approval": {
       "path": "approvals/APPROBATION_DIRECTION_CREATIVE_T5_2026-11-18.json",
@@ -60,7 +66,12 @@
     "fps": 30,
     "frames": 900,
     "duration_seconds": 30.0,
-    "scene_durations_seconds": [6, 8, 7, 9],
+    "scene_durations_seconds": [
+      6,
+      8,
+      7,
+      9
+    ],
     "video_codec": "h264",
     "pixel_format": "yuv420p",
     "audio_mode": "silent_no_audio_stream"
@@ -68,7 +79,10 @@
   "scenes": [
     {
       "scene": "S1",
-      "timeline_frames": [0, 179],
+      "timeline_frames": [
+        0,
+        179
+      ],
       "capture_slot": "captures.S1",
       "capture_screens": [
         "T5_CAPTURE_S1_A_GUIDE",
@@ -76,14 +90,21 @@
         "T5_CAPTURE_S1_C_REVIEW"
       ],
       "instruction_source": "capture-guide/consignes_T5.json#/scenes/0",
-      "visible_fields": ["nom", "offre", "contenu"],
-      "text_motion": "config/T5_TEXT_MOTION_V1_0_0.json#/scenes/S1",
+      "visible_fields": [
+        "nom",
+        "offre",
+        "contenu"
+      ],
+      "text_motion": "config/T5_TEXT_MOTION_V2_0_0.json#/scenes/S1",
       "framing": "full_screen_formula_hero",
       "camera_motion": "slow_push_in"
     },
     {
       "scene": "S2",
-      "timeline_frames": [180, 419],
+      "timeline_frames": [
+        180,
+        419
+      ],
       "capture_slot": "captures.S2",
       "capture_screens": [
         "T5_CAPTURE_S2_A_GUIDE",
@@ -91,14 +112,19 @@
         "T5_CAPTURE_S2_C_REVIEW"
       ],
       "instruction_source": "capture-guide/consignes_T5.json#/scenes/1",
-      "visible_fields": ["contenu"],
-      "text_motion": "config/T5_TEXT_MOTION_V1_0_0.json#/scenes/S2",
+      "visible_fields": [
+        "contenu"
+      ],
+      "text_motion": "config/T5_TEXT_MOTION_V2_0_0.json#/scenes/S2",
       "framing": "full_screen_formula_details",
       "camera_motion": "gentle_pull_back"
     },
     {
       "scene": "S3",
-      "timeline_frames": [420, 629],
+      "timeline_frames": [
+        420,
+        629
+      ],
       "capture_slot": "captures.S3",
       "capture_screens": [
         "T5_CAPTURE_S3_A_GUIDE",
@@ -106,14 +132,21 @@
         "T5_CAPTURE_S3_C_REVIEW"
       ],
       "instruction_source": "capture-guide/consignes_T5.json#/scenes/2",
-      "visible_fields": ["offre", "contenu", "prix"],
-      "text_motion": "config/T5_TEXT_MOTION_V1_0_0.json#/scenes/S3",
+      "visible_fields": [
+        "offre",
+        "contenu",
+        "prix"
+      ],
+      "text_motion": "config/T5_TEXT_MOTION_V2_0_0.json#/scenes/S3",
       "framing": "full_screen_formula_price_hero",
       "camera_motion": "subtle_push_in"
     },
     {
       "scene": "S4",
-      "timeline_frames": [630, 899],
+      "timeline_frames": [
+        630,
+        899
+      ],
       "capture_slot": "captures.S4",
       "capture_screens": [
         "T5_CAPTURE_S4_A_GUIDE",
@@ -121,11 +154,18 @@
         "T5_CAPTURE_S4_C_REVIEW"
       ],
       "instruction_source": "capture-guide/consignes_T5.json#/scenes/3",
-      "visible_fields": ["nom", "whatsapp", "quartier"],
-      "text_motion": "config/T5_TEXT_MOTION_V1_0_0.json#/scenes/S4",
+      "visible_fields": [
+        "nom",
+        "whatsapp",
+        "quartier"
+      ],
+      "text_motion": "config/T5_TEXT_MOTION_V2_0_0.json#/scenes/S4",
       "framing": "full_screen_formula_order_hero",
       "camera_motion": "slow_push_then_lock",
-      "stable_tail_frames": [810, 899]
+      "stable_tail_frames": [
+        810,
+        899
+      ]
     }
   ],
   "transitions": [
@@ -134,7 +174,10 @@
       "reference": "T1",
       "cut": "S1_TO_S2",
       "cut_frame": 180,
-      "frames": [176, 183],
+      "frames": [
+        176,
+        183
+      ],
       "duration_frames": 8,
       "family": "dish_swipe_camera_whip",
       "direction": "left",
@@ -146,7 +189,10 @@
       "reference": "T1",
       "cut": "S2_TO_S3",
       "cut_frame": 420,
-      "frames": [416, 423],
+      "frames": [
+        416,
+        423
+      ],
       "duration_frames": 8,
       "family": "dish_swipe_camera_whip",
       "direction": "right",
@@ -158,7 +204,10 @@
       "reference": "T1",
       "cut": "S3_TO_S4",
       "cut_frame": 630,
-      "frames": [626, 633],
+      "frames": [
+        626,
+        633
+      ],
       "duration_frames": 8,
       "family": "dish_swipe_camera_whip",
       "direction": "left",
@@ -182,13 +231,19 @@
     "static_text_stack_forbidden": true,
     "character_by_character_reveal_required": true,
     "text_alignment": "left",
-    "font_family": "Manrope",
+    "font_family": "Bodoni Moda",
     "max_simultaneous_text_fields": 2,
     "allowed_overlays": [
       "exact merchant_payload characters",
       "soft text shadow",
       "edge-to-edge readability gradient"
-    ]
+    ],
+    "font_classification": "Didone editorial serif",
+    "font_style": "Black",
+    "text_color": "#FFFFFF",
+    "minimum_font_weight": 800,
+    "oversized_editorial_composition": true,
+    "per_character_rise_and_fade_required": true
   },
   "render_plane": "github_actions",
   "cloudflare_video_rendering_forbidden": true
